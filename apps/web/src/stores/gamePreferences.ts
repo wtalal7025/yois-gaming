@@ -5,19 +5,19 @@
 
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { GameType } from '@stake-games/shared'
+import type { GameType } from '@yois-games/shared'
 
 interface GamePreferences {
   // Favorite games
   favoriteGames: GameType[]
-  
+
   // Recently played games with timestamps
   recentGames: Array<{
     gameId: GameType
     lastPlayed: string
     sessionCount: number
   }>
-  
+
   // Game settings
   preferences: {
     soundEnabled: boolean
@@ -25,7 +25,7 @@ interface GamePreferences {
     autoPlay: boolean
     showDemoMode: boolean
   }
-  
+
   // Search history
   searchHistory: string[]
 }
@@ -34,18 +34,18 @@ interface GamePreferencesActions {
   // Favorite games actions
   toggleFavoriteGame: (gameId: GameType) => void
   isFavoriteGame: (gameId: GameType) => boolean
-  
+
   // Recent games actions
   addRecentGame: (gameId: GameType) => void
   clearRecentGames: () => void
-  
+
   // Search actions
   addSearchQuery: (query: string) => void
   clearSearchHistory: () => void
-  
+
   // Settings actions
   updatePreferences: (preferences: Partial<GamePreferences['preferences']>) => void
-  
+
   // Utility actions
   reset: () => void
 }
@@ -68,7 +68,7 @@ export const useGamePreferencesStore = create<GamePreferencesStore>()(
   persist(
     (set, get) => ({
       ...initialState,
-      
+
       // Favorite games actions
       toggleFavoriteGame: (gameId: GameType) => {
         set((state) => ({
@@ -77,19 +77,19 @@ export const useGamePreferencesStore = create<GamePreferencesStore>()(
             : [...state.favoriteGames, gameId]
         }))
       },
-      
+
       isFavoriteGame: (gameId: GameType) => {
         return get().favoriteGames.includes(gameId)
       },
-      
+
       // Recent games actions
       addRecentGame: (gameId: GameType) => {
         set((state) => {
           const now = new Date().toISOString()
           const existingIndex = state.recentGames.findIndex(game => game.gameId === gameId)
-          
+
           let newRecentGames
-          
+
           if (existingIndex >= 0) {
             // Update existing game
             newRecentGames = [...state.recentGames]
@@ -108,36 +108,36 @@ export const useGamePreferencesStore = create<GamePreferencesStore>()(
               ...state.recentGames
             ]
           }
-          
+
           // Keep only the last 10 recent games
           return {
             recentGames: newRecentGames.slice(0, 10)
           }
         })
       },
-      
+
       clearRecentGames: () => {
         set({ recentGames: [] })
       },
-      
+
       // Search actions
       addSearchQuery: (query: string) => {
         if (!query.trim()) return
-        
+
         set((state) => {
           const trimmedQuery = query.trim().toLowerCase()
           const filteredHistory = state.searchHistory.filter(q => q !== trimmedQuery)
-          
+
           return {
             searchHistory: [trimmedQuery, ...filteredHistory].slice(0, 5) // Keep last 5 searches
           }
         })
       },
-      
+
       clearSearchHistory: () => {
         set({ searchHistory: [] })
       },
-      
+
       // Settings actions
       updatePreferences: (newPreferences) => {
         set((state) => ({
@@ -147,7 +147,7 @@ export const useGamePreferencesStore = create<GamePreferencesStore>()(
           }
         }))
       },
-      
+
       // Utility actions
       reset: () => {
         set(initialState)

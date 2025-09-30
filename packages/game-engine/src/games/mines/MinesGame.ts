@@ -5,7 +5,7 @@
 
 import { BaseGame } from '../../base';
 import { ProvablyFairRandom } from '../../random';
-import { generateId } from '@stake-games/shared';
+import { generateId } from '@yois-games/shared';
 import type {
   BaseGameResult,
   GameResultStatus,
@@ -16,7 +16,7 @@ import type {
   MinesMove,
   MinesProvablyFair,
   MinesValidation
-} from '@stake-games/shared';
+} from '@yois-games/shared';
 
 // Import constants as values
 const MINES_BOARD_SIZE = 25;
@@ -51,22 +51,22 @@ export class MinesGame extends BaseGame {
     // Generate game ID and initialize state
     const gameId = generateId(16);
     const playerId = 'system'; // Would be provided by caller in real implementation
-    
+
     // Generate provably fair mine positions
     const minePositions = this.generateMinePositions(seed, 'client-seed', nonce, gameConfig.mineCount);
-    
+
     // Initialize game state
     const gameState = this.initializeGameState(gameId, playerId, betAmount, gameConfig, minePositions, seed, nonce);
-    
+
     // For basic implementation, simulate a simple game
     // In real implementation, this would be managed by game session
     const moves: MinesMove[] = [];
     let currentState = { ...gameState };
-    
+
     // Auto-play demonstration: reveal a few safe tiles
     const safeTiles = this.getSafeTiles(minePositions);
     const tilesToReveal = Math.min(3, safeTiles.length); // Reveal up to 3 safe tiles
-    
+
     for (let i = 0; i < tilesToReveal; i++) {
       const tileId = safeTiles[i];
       // Reason: Ensure tileId is a valid number before creating MinesMove
@@ -76,7 +76,7 @@ export class MinesGame extends BaseGame {
           tileId: tileId,
           timestamp: new Date()
         };
-        
+
         currentState = this.processMove(currentState, move);
         moves.push(move);
       }
@@ -147,26 +147,26 @@ export class MinesGame extends BaseGame {
   generateMinePositions(serverSeed: string, clientSeed: string, nonce: number, mineCount: number): number[] {
     const positions: number[] = [];
     const usedPositions = new Set<number>();
-    
+
     // Generate unique mine positions using provably fair random
     for (let i = 0; i < mineCount; i++) {
       let position: number;
       let attempts = 0;
-      
+
       do {
         // Use incremented nonce for each mine to ensure uniqueness
         position = ProvablyFairRandom.generateInteger(serverSeed, clientSeed, nonce + i + attempts, 0, 24);
         attempts++;
       } while (usedPositions.has(position) && attempts < 100); // Prevent infinite loop
-      
+
       if (attempts >= 100) {
         throw new Error('Failed to generate unique mine positions');
       }
-      
+
       positions.push(position);
       usedPositions.add(position);
     }
-    
+
     return positions.sort((a, b) => a - b);
   }
 
@@ -177,24 +177,24 @@ export class MinesGame extends BaseGame {
     // Reason: Standard Mines multiplier formula with house edge consideration
     const totalTiles = 25;
     const safeTiles = totalTiles - mineCount;
-    
+
     if (revealedSafeTiles <= 0 || revealedSafeTiles >= safeTiles) {
       return 1;
     }
-    
+
     // Progressive multiplier calculation
     // Each revealed tile increases risk and reward
     let multiplier = 1;
-    
+
     for (let i = 1; i <= revealedSafeTiles; i++) {
       const remainingSafeTiles = safeTiles - i + 1;
       const remainingTiles = totalTiles - i + 1;
       const probability = remainingSafeTiles / remainingTiles;
-      
+
       // Apply multiplier increase with slight house edge (97% RTP)
       multiplier *= (0.97 / probability);
     }
-    
+
     return Math.round(multiplier * 10000) / 10000; // Round to 4 decimal places
   }
 
@@ -202,21 +202,21 @@ export class MinesGame extends BaseGame {
    * Initialize game state
    */
   private initializeGameState(
-    gameId: string, 
-    playerId: string, 
-    betAmount: number, 
-    config: MinesConfig, 
-    minePositions: number[], 
-    seed: string, 
+    gameId: string,
+    playerId: string,
+    betAmount: number,
+    config: MinesConfig,
+    minePositions: number[],
+    seed: string,
     nonce: number
   ): MinesGameState {
     const tiles: MinesTile[] = [];
-    
+
     // Create all 25 tiles for 5x5 grid
     for (let i = 0; i < 25; i++) {
       const row = Math.floor(i / 5);
       const col = i % 5;
-      
+
       tiles.push({
         id: i,
         row,
@@ -251,27 +251,27 @@ export class MinesGame extends BaseGame {
    */
   processMove(gameState: MinesGameState, move: MinesMove): MinesGameState {
     let newState = { ...gameState };
-    
+
     switch (move.type) {
       case 'reveal':
         if (move.tileId !== undefined) {
           newState = this.revealTile(newState, move.tileId);
         }
         break;
-        
+
       case 'flag':
         if (move.tileId !== undefined) {
           newState = this.flagTile(newState, move.tileId);
         }
         break;
-        
+
       case 'cashout':
         newState.gameStatus = 'won';
         newState.endTime = new Date();
         newState.canCashOut = false;
         break;
     }
-    
+
     return newState;
   }
 
@@ -281,14 +281,14 @@ export class MinesGame extends BaseGame {
   private revealTile(gameState: MinesGameState, tileId: number): MinesGameState {
     const newState = { ...gameState };
     const tile = newState.tiles.find(t => t.id === tileId);
-    
+
     if (!tile || tile.isRevealed || tile.isFlagged) {
       return newState; // Invalid move
     }
-    
+
     tile.isRevealed = true;
     tile.state = 'revealed';
-    
+
     if (tile.hasMine) {
       // Hit mine - game over
       newState.gameStatus = 'lost';
@@ -298,19 +298,19 @@ export class MinesGame extends BaseGame {
       // Safe tile revealed
       newState.revealedTiles.push(tileId);
       const revealedCount = newState.revealedTiles.length;
-      
+
       // Calculate new multiplier and potential payout
       newState.currentMultiplier = this.calculateMultiplier(revealedCount, newState.mineCount);
       newState.potentialPayout = newState.betAmount * newState.currentMultiplier;
-      
+
       // Set multiplier on tile
       tile.multiplier = newState.currentMultiplier;
-      
+
       // Enable cash out after first safe tile
       if (revealedCount >= 1) {
         newState.canCashOut = true;
       }
-      
+
       // Check if all safe tiles revealed (maximum win)
       const totalSafeTiles = 25 - newState.mineCount;
       if (revealedCount >= totalSafeTiles) {
@@ -321,7 +321,7 @@ export class MinesGame extends BaseGame {
         newState.gameStatus = 'playing';
       }
     }
-    
+
     return newState;
   }
 
@@ -331,14 +331,14 @@ export class MinesGame extends BaseGame {
   private flagTile(gameState: MinesGameState, tileId: number): MinesGameState {
     const newState = { ...gameState };
     const tile = newState.tiles.find(t => t.id === tileId);
-    
+
     if (!tile || tile.isRevealed) {
       return newState; // Invalid move
     }
-    
+
     tile.isFlagged = !tile.isFlagged;
     tile.state = tile.isFlagged ? 'flagged' : 'hidden';
-    
+
     return newState;
   }
 
@@ -360,15 +360,15 @@ export class MinesGame extends BaseGame {
    */
   private validateConfig(config: MinesConfig): MinesValidation {
     const errors: string[] = [];
-    
+
     if (config.mineCount < MINES_MIN_COUNT || config.mineCount > MINES_MAX_COUNT) {
       errors.push(`Mine count must be between ${MINES_MIN_COUNT} and ${MINES_MAX_COUNT}`);
     }
-    
+
     if (config.autoCashout?.enabled && config.autoCashout.multiplier <= 1) {
       errors.push('Auto cashout multiplier must be greater than 1');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors

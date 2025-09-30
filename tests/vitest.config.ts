@@ -22,10 +22,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@stake-games/shared': resolve(__dirname, '../packages/shared/src'),
-      '@stake-games/game-engine': resolve(__dirname, '../packages/game-engine/src'),
-      '@stake-games/frontend': resolve(__dirname, '../packages/frontend/src'),
-      '@stake-games/backend': resolve(__dirname, '../packages/backend/src'),
+      '@yois-games/shared': resolve(__dirname, '../packages/shared/src'),
+      '@yois-games/game-engine': resolve(__dirname, '../packages/game-engine/src'),
+      '@yois-games/frontend': resolve(__dirname, '../packages/frontend/src'),
+      '@yois-games/backend': resolve(__dirname, '../packages/backend/src'),
     }
   }
 })

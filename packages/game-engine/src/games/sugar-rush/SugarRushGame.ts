@@ -5,7 +5,7 @@
 
 import { BaseGame } from '../../base';
 import { ProvablyFairRandom } from '../../random';
-import { generateId } from '@stake-games/shared';
+import { generateId } from '@yois-games/shared';
 import type {
   BaseGameResult,
   GameResultStatus,
@@ -19,7 +19,7 @@ import type {
   SugarRushSymbol,
   SugarRushValidation,
   SugarRushProvablyFair
-} from '@stake-games/shared';
+} from '@yois-games/shared';
 
 // Game constants
 const GRID_SIZE = 49; // 7x7
@@ -79,17 +79,17 @@ export class SugarRushGame extends BaseGame {
     // Generate game ID and initialize state
     const gameId = generateId(16);
     const playerId = 'system'; // Would be provided by caller in real implementation
-    
+
     // Initialize game state
     const gameState = this.initializeGameState(gameId, playerId, betAmount, gameConfig, seed, nonce);
-    
+
     // Generate initial grid using provably fair random
     const initialGrid = this.generateInitialGrid(seed, 'client-seed', nonce);
     gameState.grid = initialGrid;
-    
+
     // Process all cascades starting from initial spin
     const spinResult = await this.processSpinWithCascades(gameState, seed, nonce);
-    
+
     // Calculate final results
     const totalPayout = spinResult.totalPayout;
     const finalMultiplier = spinResult.finalMultiplier;
@@ -162,12 +162,12 @@ export class SugarRushGame extends BaseGame {
    */
   private generateInitialGrid(serverSeed: string, clientSeed: string, nonce: number): SugarRushCell[] {
     const grid: SugarRushCell[] = [];
-    
+
     for (let i = 0; i < GRID_SIZE; i++) {
       const row = Math.floor(i / GRID_WIDTH);
       const col = i % GRID_WIDTH;
       const symbol = this.generateRandomSymbol(serverSeed, clientSeed, nonce + i);
-      
+
       grid.push({
         id: i,
         row,
@@ -177,7 +177,7 @@ export class SugarRushGame extends BaseGame {
         isMatched: false
       });
     }
-    
+
     return grid;
   }
 
@@ -187,7 +187,7 @@ export class SugarRushGame extends BaseGame {
   private generateRandomSymbol(serverSeed: string, clientSeed: string, nonce: number): SugarRushSymbol {
     const totalWeight = Object.values(this.symbolWeights).reduce((sum, weight) => sum + weight, 0);
     const randomValue = ProvablyFairRandom.generateInteger(serverSeed, clientSeed, nonce, 0, totalWeight - 1);
-    
+
     let currentWeight = 0;
     for (const [symbol, weight] of Object.entries(this.symbolWeights)) {
       currentWeight += weight;
@@ -195,7 +195,7 @@ export class SugarRushGame extends BaseGame {
         return symbol as SugarRushSymbol;
       }
     }
-    
+
     return 'pink-candy'; // Fallback
   }
 
@@ -203,8 +203,8 @@ export class SugarRushGame extends BaseGame {
    * Process spin with all cascades until no more clusters found
    */
   private async processSpinWithCascades(
-    gameState: SugarRushGameState, 
-    seed: string, 
+    gameState: SugarRushGameState,
+    seed: string,
     baseNonce: number
   ): Promise<SugarRushSpinResult> {
     const cascades: SugarRushCascade[] = [];
@@ -213,19 +213,19 @@ export class SugarRushGame extends BaseGame {
     let cascadeLevel = 0;
     let totalPayout = 0;
     let finalMultiplier = 1;
-    
+
     // Continue cascading until no more clusters found
     while (true) {
       // Find clusters in current grid
       const clusters = this.findClusters(currentGrid);
-      
+
       if (clusters.length === 0) {
         break; // No more clusters, stop cascading
       }
-      
+
       cascadeLevel++;
       const cascadeMultiplier = this.calculateCascadeMultiplier(cascadeLevel);
-      
+
       // Calculate payout for this cascade level
       let cascadePayout = 0;
       for (const cluster of clusters) {
@@ -233,38 +233,38 @@ export class SugarRushGame extends BaseGame {
         cluster.payout = clusterPayout * cascadeMultiplier;
         cascadePayout += cluster.payout;
       }
-      
+
       totalPayout += cascadePayout;
       finalMultiplier = Math.max(finalMultiplier, cascadeMultiplier);
-      
+
       // Mark matched symbols
       this.markMatchedSymbols(currentGrid, clusters);
-      
+
       // Apply cascade: remove matched symbols and drop remaining ones
       const newGrid = this.applyCascade(currentGrid, seed, baseNonce + cascadeLevel * 100);
-      
+
       // Record this cascade
       const cascade: SugarRushCascade = {
         level: cascadeLevel,
         clustersFound: clusters,
         totalPayout: cascadePayout,
         multiplier: cascadeMultiplier,
-        newSymbols: newGrid.filter(cell => 
-          !currentGrid.some(oldCell => 
+        newSymbols: newGrid.filter(cell =>
+          !currentGrid.some(oldCell =>
             oldCell.id === cell.id && oldCell.symbol === cell.symbol
           )
         )
       };
-      
+
       cascades.push(cascade);
       currentGrid = newGrid;
-      
+
       // Safety limit to prevent infinite cascades
       if (cascadeLevel >= 10) {
         break;
       }
     }
-    
+
     return {
       initialGrid,
       cascades,
@@ -282,10 +282,10 @@ export class SugarRushGame extends BaseGame {
     const visited = new Set<number>();
     const clusters: SugarRushCluster[] = [];
     let clusterId = 0;
-    
+
     for (const cell of grid) {
       if (visited.has(cell.id) || cell.symbol === 'wild') continue;
-      
+
       const cluster = this.findConnectedCluster(grid, cell, visited);
       if (cluster.length >= MIN_CLUSTER_SIZE) {
         clusters.push({
@@ -298,7 +298,7 @@ export class SugarRushGame extends BaseGame {
         });
       }
     }
-    
+
     return clusters;
   }
 
@@ -309,20 +309,20 @@ export class SugarRushGame extends BaseGame {
     const cluster: number[] = [];
     const queue: number[] = [startCell.id];
     visited.add(startCell.id);
-    
+
     while (queue.length > 0) {
       const cellId = queue.shift()!;
       cluster.push(cellId);
-      
+
       // Check adjacent cells (up, down, left, right)
       const adjacentIds = this.getAdjacentCellIds(cellId);
-      
+
       for (const adjId of adjacentIds) {
         if (visited.has(adjId)) continue;
-        
+
         const adjCell = grid.find(c => c.id === adjId);
         if (!adjCell) continue;
-        
+
         // Check if symbols match or if adjacent cell is wild
         if (adjCell.symbol === startCell.symbol || adjCell.symbol === 'wild') {
           visited.add(adjId);
@@ -330,7 +330,7 @@ export class SugarRushGame extends BaseGame {
         }
       }
     }
-    
+
     return cluster;
   }
 
@@ -341,7 +341,7 @@ export class SugarRushGame extends BaseGame {
     const row = Math.floor(cellId / GRID_WIDTH);
     const col = cellId % GRID_WIDTH;
     const adjacent: number[] = [];
-    
+
     // Up
     if (row > 0) adjacent.push((row - 1) * GRID_WIDTH + col);
     // Down  
@@ -350,7 +350,7 @@ export class SugarRushGame extends BaseGame {
     if (col > 0) adjacent.push(row * GRID_WIDTH + (col - 1));
     // Right
     if (col < GRID_WIDTH - 1) adjacent.push(row * GRID_WIDTH + (col + 1));
-    
+
     return adjacent;
   }
 
@@ -404,12 +404,12 @@ export class SugarRushGame extends BaseGame {
    */
   private applyCascade(grid: SugarRushCell[], seed: string, nonce: number): SugarRushCell[] {
     const newGrid = [...grid];
-    
+
     // Remove matched symbols and apply gravity column by column
     for (let col = 0; col < GRID_WIDTH; col++) {
       const columnCells = newGrid.filter(cell => cell.col === col).sort((a, b) => a.row - b.row);
       const survivingCells = columnCells.filter(cell => !cell.isMatched);
-      
+
       // Move surviving cells to bottom positions
       for (let i = 0; i < survivingCells.length; i++) {
         const cell = survivingCells[i];
@@ -423,14 +423,14 @@ export class SugarRushGame extends BaseGame {
           delete cell.clusterId;
         }
       }
-      
+
       // Generate new symbols for empty positions at top
       const emptyPositions = GRID_HEIGHT - survivingCells.length;
       for (let i = 0; i < emptyPositions; i++) {
         const row = i;
         const cellId = row * GRID_WIDTH + col;
         const symbol = this.generateRandomSymbol(seed, 'client-seed', nonce + cellId);
-        
+
         survivingCells.unshift({
           id: cellId,
           row,
@@ -440,7 +440,7 @@ export class SugarRushGame extends BaseGame {
           isMatched: false
         });
       }
-      
+
       // Update grid with column changes
       newGrid.forEach((cell, index) => {
         if (cell.col === col) {
@@ -451,7 +451,7 @@ export class SugarRushGame extends BaseGame {
         }
       });
     }
-    
+
     return newGrid.sort((a, b) => a.id - b.id);
   }
 
@@ -488,10 +488,10 @@ export class SugarRushGame extends BaseGame {
    */
   private validateConfig(config: SugarRushConfig): SugarRushValidation {
     const errors: string[] = [];
-    
+
     // No specific validation needed for current config options
     // Future expansion could add validation for multiplier zones, etc.
-    
+
     return {
       isValid: errors.length === 0,
       errors

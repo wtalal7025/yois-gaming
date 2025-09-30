@@ -10,7 +10,7 @@ import { DragonTowerGame } from './games/dragon-tower/DragonTowerGame';
 import { CrashGame } from './games/crash/CrashGame';
 import { BarsGame } from './games/bars/BarsGame';
 import { LimboGame } from './games/limbo/LimboGame';
-import type { GameType } from '@stake-games/shared';
+import type { GameType } from '@yois-games/shared';
 
 /**
  * Game registry

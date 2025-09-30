@@ -24,23 +24,26 @@ export class SupabaseUserRepository {
         return null
       }
 
+      // Reason: Type assertion to ensure TypeScript recognizes the user object structure
+      const typedUser = user as any
+
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatar_url || undefined,
-        balance: Number(user.balance),
-        level: user.level,
-        experiencePoints: user.experience_points,
-        totalWagered: Number(user.total_wagered),
-        totalWon: Number(user.total_won),
-        gamesPlayed: user.games_played,
-        isActive: user.is_active,
-        isVerified: user.is_verified,
-        lastLoginAt: user.last_login_at?.toISOString(),
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-        passwordHash: user.password_hash
+        id: typedUser.id,
+        username: typedUser.username,
+        email: typedUser.email,
+        avatarUrl: typedUser.avatar_url || undefined,
+        balance: Number(typedUser.balance),
+        level: typedUser.level,
+        experiencePoints: typedUser.experience_points,
+        totalWagered: Number(typedUser.total_wagered),
+        totalWon: Number(typedUser.total_won),
+        gamesPlayed: typedUser.games_played,
+        isActive: typedUser.is_active,
+        isVerified: typedUser.is_verified,
+        lastLoginAt: typedUser.last_login_at?.toISOString(),
+        createdAt: typedUser.created_at,
+        updatedAt: typedUser.updated_at,
+        passwordHash: typedUser.password_hash
       }
     } catch (error) {
       console.error('Error finding user by ID:', error)
@@ -61,23 +64,26 @@ export class SupabaseUserRepository {
         return null
       }
 
+      // Reason: Type assertion to ensure TypeScript recognizes the user object structure
+      const typedUser = user as any
+
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatar_url || undefined,
-        balance: Number(user.balance),
-        level: user.level,
-        experiencePoints: user.experience_points,
-        totalWagered: Number(user.total_wagered),
-        totalWon: Number(user.total_won),
-        gamesPlayed: user.games_played,
-        isActive: user.is_active,
-        isVerified: user.is_verified,
-        lastLoginAt: user.last_login_at?.toISOString(),
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-        passwordHash: user.password_hash
+        id: typedUser.id,
+        username: typedUser.username,
+        email: typedUser.email,
+        avatarUrl: typedUser.avatar_url || undefined,
+        balance: Number(typedUser.balance),
+        level: typedUser.level,
+        experiencePoints: typedUser.experience_points,
+        totalWagered: Number(typedUser.total_wagered),
+        totalWon: Number(typedUser.total_won),
+        gamesPlayed: typedUser.games_played,
+        isActive: typedUser.is_active,
+        isVerified: typedUser.is_verified,
+        lastLoginAt: typedUser.last_login_at?.toISOString(),
+        createdAt: typedUser.created_at,
+        updatedAt: typedUser.updated_at,
+        passwordHash: typedUser.password_hash
       }
     } catch (error) {
       console.error('Error finding user by email:', error)
@@ -98,23 +104,26 @@ export class SupabaseUserRepository {
         return null
       }
 
+      // Reason: Type assertion to ensure TypeScript recognizes the user object structure
+      const typedUser = user as any
+
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatar_url || undefined,
-        balance: Number(user.balance),
-        level: user.level,
-        experiencePoints: user.experience_points,
-        totalWagered: Number(user.total_wagered),
-        totalWon: Number(user.total_won),
-        gamesPlayed: user.games_played,
-        isActive: user.is_active,
-        isVerified: user.is_verified,
-        lastLoginAt: user.last_login_at?.toISOString(),
-        createdAt: user.created_at,
-        updatedAt: user.updated_at,
-        passwordHash: user.password_hash
+        id: typedUser.id,
+        username: typedUser.username,
+        email: typedUser.email,
+        avatarUrl: typedUser.avatar_url || undefined,
+        balance: Number(typedUser.balance),
+        level: typedUser.level,
+        experiencePoints: typedUser.experience_points,
+        totalWagered: Number(typedUser.total_wagered),
+        totalWon: Number(typedUser.total_won),
+        gamesPlayed: typedUser.games_played,
+        isActive: typedUser.is_active,
+        isVerified: typedUser.is_verified,
+        lastLoginAt: typedUser.last_login_at?.toISOString(),
+        createdAt: typedUser.created_at,
+        updatedAt: typedUser.updated_at,
+        passwordHash: typedUser.password_hash
       }
     } catch (error) {
       console.error('Error finding user by username:', error)
@@ -124,7 +133,7 @@ export class SupabaseUserRepository {
 
   async create(userData: UserWithPassword): Promise<User> {
     try {
-      const { data: user, error } = await supabaseService
+      const { data: user, error } = await (supabaseService as any)
         .from('users')
         .insert({
           username: userData.username,
@@ -160,22 +169,25 @@ export class SupabaseUserRepository {
         throw new Error('User creation returned no data')
       }
 
+      // Reason: Type assertion to ensure TypeScript recognizes the user object structure
+      const typedUser = user as any
+
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatar_url || undefined,
-        balance: Number(user.balance),
-        level: user.level,
-        experiencePoints: user.experience_points,
-        totalWagered: Number(user.total_wagered),
-        totalWon: Number(user.total_won),
-        gamesPlayed: user.games_played,
-        isActive: user.is_active,
-        isVerified: user.is_verified,
-        lastLoginAt: user.last_login_at?.toISOString(),
-        createdAt: user.created_at,
-        updatedAt: user.updated_at
+        id: typedUser.id,
+        username: typedUser.username,
+        email: typedUser.email,
+        avatarUrl: typedUser.avatar_url || undefined,
+        balance: Number(typedUser.balance),
+        level: typedUser.level,
+        experiencePoints: typedUser.experience_points,
+        totalWagered: Number(typedUser.total_wagered),
+        totalWon: Number(typedUser.total_won),
+        gamesPlayed: typedUser.games_played,
+        isActive: typedUser.is_active,
+        isVerified: typedUser.is_verified,
+        lastLoginAt: typedUser.last_login_at?.toISOString(),
+        createdAt: typedUser.created_at,
+        updatedAt: typedUser.updated_at
       }
     } catch (error) {
       console.error('Error creating user:', error)
@@ -201,7 +213,7 @@ export class SupabaseUserRepository {
       if (updates.lastLoginAt !== undefined) updateData.last_login_at = updates.lastLoginAt
       if ((updates as any).passwordHash !== undefined) updateData.password_hash = (updates as any).passwordHash
 
-      const { data: user, error } = await supabaseService
+      const { data: user, error } = await (supabaseService as any)
         .from('users')
         .update(updateData)
         .eq('id', id)
@@ -213,22 +225,25 @@ export class SupabaseUserRepository {
         return null
       }
 
+      // Reason: Type assertion to ensure TypeScript recognizes the user object structure
+      const typedUser = user as any
+
       return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatar_url || undefined,
-        balance: Number(user.balance),
-        level: user.level,
-        experiencePoints: user.experience_points,
-        totalWagered: Number(user.total_wagered),
-        totalWon: Number(user.total_won),
-        gamesPlayed: user.games_played,
-        isActive: user.is_active,
-        isVerified: user.is_verified,
-        lastLoginAt: user.last_login_at?.toISOString(),
-        createdAt: user.created_at,
-        updatedAt: user.updated_at
+        id: typedUser.id,
+        username: typedUser.username,
+        email: typedUser.email,
+        avatarUrl: typedUser.avatar_url || undefined,
+        balance: Number(typedUser.balance),
+        level: typedUser.level,
+        experiencePoints: typedUser.experience_points,
+        totalWagered: Number(typedUser.total_wagered),
+        totalWon: Number(typedUser.total_won),
+        gamesPlayed: typedUser.games_played,
+        isActive: typedUser.is_active,
+        isVerified: typedUser.is_verified,
+        lastLoginAt: typedUser.last_login_at?.toISOString(),
+        createdAt: typedUser.created_at,
+        updatedAt: typedUser.updated_at
       }
     } catch (error) {
       console.error('Error updating user:', error)
@@ -252,7 +267,7 @@ export class SupabaseUserRepository {
 
   async updateLastLogin(id: string): Promise<void> {
     try {
-      await supabaseService
+      await (supabaseService as any)
         .from('users')
         .update({ last_login_at: new Date().toISOString() })
         .eq('id', id)

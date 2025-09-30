@@ -5,7 +5,7 @@
 
 import { BaseGame } from '../../base';
 import { ProvablyFairRandom } from '../../random';
-import { generateId } from '@stake-games/shared';
+import { generateId } from '@yois-games/shared';
 import type {
   BaseGameResult,
   GameResultStatus,
@@ -17,15 +17,15 @@ import type {
   CrashValidation,
   MultiplierPoint,
   CrashPointParams
-} from '@stake-games/shared';
-import { CRASH_CONSTANTS } from '@stake-games/shared';
+} from '@yois-games/shared';
+import { CRASH_CONSTANTS } from '@yois-games/shared';
 
 /**
  * Crash game implementation extending BaseGame
  */
 export class CrashGame extends BaseGame {
   private roundCounter: number = 1;
-  
+
   constructor() {
     super('crash');
   }
@@ -68,7 +68,7 @@ export class CrashGame extends BaseGame {
 
     // Initialize game state
     const gameState = this.initializeGameState(gameId, playerId, betAmount, gameConfig, crashPoint, seed, nonce, clientSeed);
-    
+
     // Simulate game progression and determine outcome
     const { finalState, multiplierCurve, playerCashedOut, cashOutMultiplier } = this.simulateGameRound(gameState, crashPoint, gameConfig);
 
@@ -149,17 +149,17 @@ export class CrashGame extends BaseGame {
     // Reason: Standard Crash game provably fair algorithm
     // Uses (2^32 / (2^32 - hash)) with house edge adjustment
     const hash = this.calculateHash(params.serverSeed, params.clientSeed, params.nonce);
-    
+
     // Convert hash to crash multiplier
     const maxValue = Math.pow(2, 32);
     const rawCrash = maxValue / (maxValue - hash);
-    
+
     // Apply house edge (typically 1%)
     const adjustedCrash = rawCrash * (1 - params.houseEdge);
-    
+
     // Ensure minimum crash point and round to 2 decimal places
     const finalCrash = Math.max(params.minCrash, adjustedCrash);
-    
+
     return Math.min(Math.round(finalCrash * 100) / 100, params.maxCrash);
   }
 
@@ -169,14 +169,14 @@ export class CrashGame extends BaseGame {
   calculateMultiplierAtTime(elapsedTime: number, crashPoint: number, targetDuration?: number): number {
     // Reason: Exponential growth to reach crash point at target time
     const duration = targetDuration || this.calculateRoundDuration(crashPoint);
-    
+
     if (elapsedTime <= 0) return 1.00;
     if (elapsedTime >= duration) return crashPoint;
-    
+
     // Exponential growth: multiplier = e^(k*t) where k = ln(crashPoint) / duration
     const growthRate = Math.log(crashPoint) / duration;
     const multiplier = Math.exp(growthRate * elapsedTime);
-    
+
     return Math.min(Math.round(multiplier * 100) / 100, crashPoint);
   }
 
@@ -187,20 +187,20 @@ export class CrashGame extends BaseGame {
     const duration = this.calculateRoundDuration(crashPoint);
     const points: MultiplierPoint[] = [];
     const interval = 1 / updateFrequency; // Time between updates
-    
+
     for (let time = 0; time <= duration; time += interval) {
       const multiplier = this.calculateMultiplierAtTime(time, crashPoint, duration);
-      
+
       points.push({
         time: Math.round(time * 1000), // Convert to milliseconds
         multiplier,
         elapsedSeconds: Math.round(time * 10) / 10 // Round to 1 decimal
       });
-      
+
       // Stop if we've reached crash point
       if (multiplier >= crashPoint) break;
     }
-    
+
     return points;
   }
 
@@ -209,7 +209,7 @@ export class CrashGame extends BaseGame {
    */
   processAction(gameState: CrashGameState, action: CrashAction): CrashGameState {
     let newState = { ...gameState };
-    
+
     switch (action.type) {
       case 'bet':
         if (newState.phase === 'waiting' && action.amount) {
@@ -218,7 +218,7 @@ export class CrashGame extends BaseGame {
           newState.potentialPayout = action.amount;
         }
         break;
-        
+
       case 'cash-out':
         if (newState.phase === 'flying' && newState.playerStatus === 'active') {
           newState.playerStatus = 'cashed-out';
@@ -227,14 +227,14 @@ export class CrashGame extends BaseGame {
           newState.potentialPayout = newState.betAmount ? newState.betAmount * newState.currentMultiplier : 0;
         }
         break;
-        
+
       case 'auto-cashout':
         if (action.autoCashoutTarget) {
           newState.autoCashoutEnabled = true;
           newState.autoCashoutTarget = action.autoCashoutTarget;
         }
         break;
-        
+
       case 'cancel-bet':
         if (newState.phase === 'waiting') {
           delete (newState as any).betAmount;
@@ -243,7 +243,7 @@ export class CrashGame extends BaseGame {
         }
         break;
     }
-    
+
     return newState;
   }
 
@@ -309,7 +309,7 @@ export class CrashGame extends BaseGame {
     const curve = this.generateMultiplierCurve(crashPoint);
     let playerCashedOut = false;
     let cashOutMultiplier: number | undefined;
-    
+
     // Simulate auto-cashout if enabled
     if (gameState.autoCashoutEnabled && gameState.autoCashoutTarget) {
       const targetIndex = curve.findIndex(point => point.multiplier >= gameState.autoCashoutTarget!);
@@ -318,7 +318,7 @@ export class CrashGame extends BaseGame {
         cashOutMultiplier = curve[targetIndex].multiplier;
       }
     }
-    
+
     // Update final state
     const finalState: CrashGameState = {
       ...gameState,
@@ -341,7 +341,7 @@ export class CrashGame extends BaseGame {
     if (playerCashedOut) {
       finalState.cashOutTime = new Date();
     }
-    
+
     const result: {
       finalState: CrashGameState;
       multiplierCurve: MultiplierPoint[];
@@ -369,7 +369,7 @@ export class CrashGame extends BaseGame {
     const minDuration = 3; // 3 seconds minimum
     const maxDuration = 30; // 30 seconds maximum
     const scaleFactor = 8; // Tuning parameter
-    
+
     const duration = minDuration + (Math.log(crashPoint) * scaleFactor);
     return Math.min(Math.max(duration, minDuration), maxDuration);
   }
@@ -381,13 +381,13 @@ export class CrashGame extends BaseGame {
     // Simplified hash - would use proper HMAC-SHA256 in production
     const combined = `${serverSeed}:${clientSeed}:${nonce}`;
     let hash = 0;
-    
+
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = Math.abs(hash) & 0x7FFFFFFF; // Ensure positive 32-bit integer
     }
-    
+
     return hash;
   }
 
@@ -396,27 +396,27 @@ export class CrashGame extends BaseGame {
    */
   private validateConfig(config: CrashConfig): CrashValidation {
     const errors: string[] = [];
-    
+
     if (config.minCrashPoint < CRASH_CONSTANTS.MIN_CRASH_POINT) {
       errors.push(`Minimum crash point must be at least ${CRASH_CONSTANTS.MIN_CRASH_POINT}`);
     }
-    
+
     if (config.maxCrashPoint > CRASH_CONSTANTS.MAX_CRASH_POINT) {
       errors.push(`Maximum crash point cannot exceed ${CRASH_CONSTANTS.MAX_CRASH_POINT}`);
     }
-    
+
     if (config.houseEdge < 0 || config.houseEdge > 0.1) {
       errors.push('House edge must be between 0% and 10%');
     }
-    
+
     if (config.autoCashout?.enabled && config.autoCashout.target < CRASH_CONSTANTS.MIN_AUTO_CASHOUT) {
       errors.push(`Auto cashout target must be at least ${CRASH_CONSTANTS.MIN_AUTO_CASHOUT}`);
     }
-    
+
     if (config.bettingWindow < 5 || config.bettingWindow > 30) {
       errors.push('Betting window must be between 5 and 30 seconds');
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors

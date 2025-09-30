@@ -19,7 +19,7 @@ export default defineConfig({
           setupFiles: ['./tests/utils/browser-setup.ts']
         },
         {
-          browser: 'firefox', 
+          browser: 'firefox',
           setupFiles: ['./tests/utils/browser-setup.ts']
         },
         {
@@ -27,22 +27,22 @@ export default defineConfig({
           setupFiles: ['./tests/utils/browser-setup.ts']
         }
       ],
-      
+
       // Browser API configuration
       api: {
         port: 63315,
         host: 'localhost'
       },
-      
+
       // UI configuration
       ui: !process.env.CI,
-      
+
       // Viewport settings
       viewport: {
         width: 1280,
         height: 720
       },
-      
+
       // Screenshot configuration
       screenshotFailures: true,
       screenshotDirectory: '__screenshots__'
@@ -63,7 +63,7 @@ export default defineConfig({
     globals: true,
     environment: 'happy-dom',
     setupFiles: ['./tests/setup.ts'],
-    
+
     // Coverage configuration
     coverage: {
       reporter: ['text', 'json', 'html'],
@@ -88,7 +88,7 @@ export default defineConfig({
     // Performance settings
     testTimeout: 30000,
     hookTimeout: 10000,
-    
+
     // Reporting
     reporters: process.env.CI ? ['verbose', 'junit'] : ['verbose'],
     outputFile: {
@@ -98,17 +98,17 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@stake-games/shared': resolve(__dirname, '../../packages/shared/src'),
-      '@stake-games/game-engine': resolve(__dirname, '../../packages/game-engine/src'),
-      '@stake-games/frontend': resolve(__dirname, '../../packages/frontend/src'),
-      '@stake-games/backend': resolve(__dirname, '../../packages/backend/src'),
+      '@yois-games/shared': resolve(__dirname, '../../packages/shared/src'),
+      '@yois-games/game-engine': resolve(__dirname, '../../packages/game-engine/src'),
+      '@yois-games/frontend': resolve(__dirname, '../../packages/frontend/src'),
+      '@yois-games/backend': resolve(__dirname, '../../packages/backend/src'),
       '@': resolve(__dirname, '../../')
     }
   },
 
   // Plugin configuration
   plugins: [],
-  
+
   // Optimize dependencies
   optimizeDeps: {
     include: ['@testing-library/dom', '@testing-library/user-event']

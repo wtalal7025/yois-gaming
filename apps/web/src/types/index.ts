@@ -5,11 +5,11 @@
  */
 
 // Re-export all shared types
-export * from '@stake-games/shared'
+export * from '@yois-games/shared'
 
 // Additional web-specific types that extend the shared types
 import type { ComponentType, ReactNode } from 'react'
-import type { GameType, User } from '@stake-games/shared'
+import type { GameType, User } from '@yois-games/shared'
 
 // Platform Navigation Types (Web-specific)
 export interface NavItem {
@@ -101,8 +101,8 @@ export interface FormState<T = any> {
 
 // Utility Types
 export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>
-export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = 
-  Pick<T, Exclude<keyof T, Keys>> & 
+export type RequireAtLeastOne<T, Keys extends keyof T = keyof T> =
+  Pick<T, Exclude<keyof T, Keys>> &
   { [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>> }[Keys]
 
 // Re-export commonly used React types
@@ -129,12 +129,12 @@ export interface SocketEvents {
   'game:leave': { sessionId: string }
   'game:action': { sessionId: string; action: any }
   'game:update': { sessionId: string; state: any }
-  
+
   // Platform events
   'user:online': { userId: string }
   'user:offline': { userId: string }
   'stats:update': any
-  
+
   // Chat events (if implemented)
   'chat:message': { userId: string; message: string; timestamp: string }
   'chat:join': { roomId: string }

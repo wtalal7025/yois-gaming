@@ -5,15 +5,15 @@
 
 import { create } from 'zustand'
 import { persist, subscribeWithSelector } from 'zustand/middleware'
-import type { 
-  Transaction, 
-  TransactionType, 
+import type {
+  Transaction,
+  TransactionType,
   Balance,
   DepositRequest,
   WithdrawalRequest,
   WalletState,
   WalletApiResponse
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 // Extended wallet store interface
 interface ExtendedWalletState extends WalletState {
@@ -21,7 +21,7 @@ interface ExtendedWalletState extends WalletState {
   isDepositing: boolean
   isWithdrawing: boolean
   isBetting: boolean
-  
+
   // Pagination for transactions
   transactionsPagination: {
     page: number
@@ -30,7 +30,7 @@ interface ExtendedWalletState extends WalletState {
     hasNext: boolean
     hasPrevious: boolean
   }
-  
+
   // Actions
   fetchBalance: () => Promise<void>
   deposit: (amount: number, description?: string) => Promise<{ success: boolean; error?: string }>
@@ -38,15 +38,15 @@ interface ExtendedWalletState extends WalletState {
   bet: (amount: number, gameType: string, metadata?: Record<string, any>) => Promise<{ success: boolean; transactionId?: string; error?: string }>
   win: (amount: number, gameSessionId: string, metadata?: Record<string, any>) => Promise<{ success: boolean; transactionId?: string; error?: string }>
   fetchTransactions: (page?: number) => Promise<void>
-  
+
   // Real-time updates
   updateBalance: (balance: number) => void
   addTransaction: (transaction: Transaction) => void
-  
+
   // Validation helpers
   canAfford: (amount: number) => boolean
   formatCurrency: (amount: number) => string
-  
+
   // Utility actions
   clearError: () => void
   reset: () => void
@@ -76,7 +76,7 @@ export const useWalletStore = create<ExtendedWalletState>()(
         stats: null,
         limits: null,
         preferences: null,
-        
+
         // Extended state
         isDepositing: false,
         isWithdrawing: false,
@@ -92,10 +92,10 @@ export const useWalletStore = create<ExtendedWalletState>()(
         // Initialize with demo balance for development
         fetchBalance: async () => {
           set({ isLoading: true, error: null })
-          
+
           try {
             await mockApiDelay()
-            
+
             // Mock balance for demo purposes
             const demoBalance: Balance = {
               userId: 'demo-user',
@@ -105,16 +105,16 @@ export const useWalletStore = create<ExtendedWalletState>()(
               currency: 'USD',
               lastUpdated: new Date().toISOString()
             }
-            
-            set({ 
+
+            set({
               balance: demoBalance,
               isLoading: false,
               lastUpdate: new Date().toISOString()
             })
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Failed to fetch balance',
-              isLoading: false 
+              isLoading: false
             })
           }
         },
@@ -122,15 +122,15 @@ export const useWalletStore = create<ExtendedWalletState>()(
         // Demo deposit function
         deposit: async (amount: number, description = 'Demo deposit') => {
           set({ isDepositing: true, error: null })
-          
+
           try {
             await mockApiDelay()
-            
+
             const currentBalance = get().balance
             if (!currentBalance) {
               throw new Error('Balance not initialized')
             }
-            
+
             const newBalance = currentBalance.current + amount
             const transaction: Transaction = {
               id: generateTransactionId(),
@@ -144,27 +144,27 @@ export const useWalletStore = create<ExtendedWalletState>()(
               processedAt: new Date().toISOString(),
               createdAt: new Date().toISOString()
             }
-            
+
             const updatedBalance: Balance = {
               ...currentBalance,
               current: newBalance,
               available: newBalance,
               lastUpdated: new Date().toISOString()
             }
-            
+
             set(state => ({
               balance: updatedBalance,
               transactions: [transaction, ...state.transactions],
               isDepositing: false,
               lastUpdate: new Date().toISOString()
             }))
-            
+
             return { success: true }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Deposit failed'
-            set({ 
+            set({
               error: errorMessage,
-              isDepositing: false 
+              isDepositing: false
             })
             return { success: false, error: errorMessage }
           }
@@ -178,18 +178,18 @@ export const useWalletStore = create<ExtendedWalletState>()(
             set({ error })
             return { success: false, error }
           }
-          
+
           if (amount > currentBalance.available) {
             const error = 'Insufficient balance'
             set({ error })
             return { success: false, error }
           }
-          
+
           set({ isWithdrawing: true, error: null })
-          
+
           try {
             await mockApiDelay()
-            
+
             const newBalance = currentBalance.current - amount
             const transaction: Transaction = {
               id: generateTransactionId(),
@@ -203,27 +203,27 @@ export const useWalletStore = create<ExtendedWalletState>()(
               processedAt: new Date().toISOString(),
               createdAt: new Date().toISOString()
             }
-            
+
             const updatedBalance: Balance = {
               ...currentBalance,
               current: newBalance,
               available: newBalance,
               lastUpdated: new Date().toISOString()
             }
-            
+
             set(state => ({
               balance: updatedBalance,
               transactions: [transaction, ...state.transactions],
               isWithdrawing: false,
               lastUpdate: new Date().toISOString()
             }))
-            
+
             return { success: true }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Withdrawal failed'
-            set({ 
+            set({
               error: errorMessage,
-              isWithdrawing: false 
+              isWithdrawing: false
             })
             return { success: false, error: errorMessage }
           }
@@ -237,24 +237,24 @@ export const useWalletStore = create<ExtendedWalletState>()(
             set({ error })
             return { success: false, error }
           }
-          
+
           if (amount <= 0) {
             const error = 'Invalid bet amount'
             set({ error })
             return { success: false, error }
           }
-          
+
           if (amount > currentBalance.available) {
             const error = 'Insufficient balance for this bet'
             set({ error })
             return { success: false, error }
           }
-          
+
           set({ isBetting: true, error: null })
-          
+
           try {
             await mockApiDelay()
-            
+
             const newBalance = currentBalance.current - amount
             const transactionId = generateTransactionId()
             const transaction: Transaction = {
@@ -271,27 +271,27 @@ export const useWalletStore = create<ExtendedWalletState>()(
               processedAt: new Date().toISOString(),
               createdAt: new Date().toISOString()
             }
-            
+
             const updatedBalance: Balance = {
               ...currentBalance,
               current: newBalance,
               available: newBalance,
               lastUpdated: new Date().toISOString()
             }
-            
+
             set(state => ({
               balance: updatedBalance,
               transactions: [transaction, ...state.transactions],
               isBetting: false,
               lastUpdate: new Date().toISOString()
             }))
-            
+
             return { success: true, transactionId }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to place bet'
-            set({ 
+            set({
               error: errorMessage,
-              isBetting: false 
+              isBetting: false
             })
             return { success: false, error: errorMessage }
           }
@@ -305,7 +305,7 @@ export const useWalletStore = create<ExtendedWalletState>()(
             set({ error })
             return { success: false, error }
           }
-          
+
           try {
             const newBalance = currentBalance.current + amount
             const transactionId = generateTransactionId()
@@ -323,20 +323,20 @@ export const useWalletStore = create<ExtendedWalletState>()(
               processedAt: new Date().toISOString(),
               createdAt: new Date().toISOString()
             }
-            
+
             const updatedBalance: Balance = {
               ...currentBalance,
               current: newBalance,
               available: newBalance,
               lastUpdated: new Date().toISOString()
             }
-            
+
             set(state => ({
               balance: updatedBalance,
               transactions: [transaction, ...state.transactions],
               lastUpdate: new Date().toISOString()
             }))
-            
+
             return { success: true, transactionId }
           } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Failed to record win'
@@ -348,10 +348,10 @@ export const useWalletStore = create<ExtendedWalletState>()(
         // Fetch transaction history (mock)
         fetchTransactions: async (page = 1) => {
           set({ isLoading: true, error: null })
-          
+
           try {
             await mockApiDelay()
-            
+
             // For demo, just update pagination
             set(state => ({
               transactionsPagination: {
@@ -362,9 +362,9 @@ export const useWalletStore = create<ExtendedWalletState>()(
               isLoading: false
             }))
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Failed to fetch transactions',
-              isLoading: false 
+              isLoading: false
             })
           }
         },

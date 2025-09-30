@@ -3,7 +3,7 @@
  * Central configuration and metadata for all games in the platform
  */
 
-import type { GameType } from '@stake-games/shared'
+import type { GameType } from '@yois-games/shared'
 
 /**
  * Game category definitions
@@ -153,7 +153,7 @@ export const GAMES_INFO: Record<GameType, GameInfo> = {
  */
 export function getGamesByCategory(): Record<GameCategory | 'all' | 'popular' | 'new', GameInfo[]> {
   const allGames = Object.values(GAMES_INFO)
-  
+
   return {
     all: allGames,
     popular: allGames.filter(game => game.isPopular),
@@ -193,7 +193,7 @@ export function getNewGames(): GameInfo[] {
  */
 export function searchGames(query: string): GameInfo[] {
   const lowercaseQuery = query.toLowerCase()
-  return Object.values(GAMES_INFO).filter(game => 
+  return Object.values(GAMES_INFO).filter(game =>
     game.title.toLowerCase().includes(lowercaseQuery) ||
     game.description.toLowerCase().includes(lowercaseQuery) ||
     game.features.some(feature => feature.toLowerCase().includes(lowercaseQuery))
@@ -209,7 +209,7 @@ export function getCategoryDisplayName(category: string): string {
     popular: 'Popular',
     new: 'New Games',
     slots: 'Slots',
-    skill: 'Skill Games', 
+    skill: 'Skill Games',
     crash: 'Crash Games',
     other: 'Other Games'
   }

@@ -5,7 +5,7 @@
 
 import { BaseGame } from '../../base';
 import { ProvablyFairRandom } from '../../random';
-import { generateId } from '@stake-games/shared';
+import { generateId } from '@yois-games/shared';
 import type {
   BaseGameResult,
   GameResultStatus,
@@ -23,7 +23,7 @@ import type {
   BarsProvablyFair,
   BarsValidation,
   BarsReelWeights
-} from '@stake-games/shared';
+} from '@yois-games/shared';
 
 // Import constants as values
 const BARS_BOARD_SIZE = 9;
@@ -66,16 +66,16 @@ export class BarsGame extends BaseGame {
     // Generate game ID and initialize state
     const gameId = generateId(16);
     const playerId = 'system'; // Would be provided by caller in real implementation
-    
+
     // Generate provably fair reel results
     const reelResults = this.generateReelResults(seed, 'client-seed', nonce);
-    
+
     // Initialize game state
     const gameState = this.initializeGameState(gameId, playerId, gameConfig, reelResults, seed, nonce);
-    
+
     // Evaluate spin results
     const spinResult = this.evaluateSpinResult(gameState);
-    
+
     // Update final game state
     const finalState = this.updateStateWithResults(gameState, spinResult);
 
@@ -203,19 +203,19 @@ export class BarsGame extends BaseGame {
    */
   generateReelResults(serverSeed: string, clientSeed: string, nonce: number): BarsSymbol[] {
     const results: BarsSymbol[] = [];
-    
+
     // Generate symbol for each of the 9 positions (3x3 grid)
     for (let position = 0; position < 9; position++) {
       const reelIndex = position % 3; // 0, 1, or 2 for reel 1, 2, or 3
       const symbol = this.generateReelSymbol(
-        serverSeed, 
-        clientSeed, 
-        nonce + position, 
+        serverSeed,
+        clientSeed,
+        nonce + position,
         reelIndex
       );
       results.push(symbol);
     }
-    
+
     return results;
   }
 
@@ -223,21 +223,21 @@ export class BarsGame extends BaseGame {
    * Generate a single symbol for a specific reel using weighted randomization
    */
   private generateReelSymbol(
-    serverSeed: string, 
-    clientSeed: string, 
-    nonce: number, 
+    serverSeed: string,
+    clientSeed: string,
+    nonce: number,
     reelIndex: number
   ): BarsSymbol {
     const reelWeights = reelIndex === 0 ? this.reelWeights.reel1 :
-                      reelIndex === 1 ? this.reelWeights.reel2 : 
-                      this.reelWeights.reel3;
+      reelIndex === 1 ? this.reelWeights.reel2 :
+        this.reelWeights.reel3;
 
     // Calculate total weight
     const totalWeight = Object.values(reelWeights).reduce((sum: number, weight: number) => sum + weight, 0);
-    
+
     // Generate random value
     const randomValue = ProvablyFairRandom.generateInteger(serverSeed, clientSeed, nonce, 1, totalWeight);
-    
+
     // Find symbol based on weighted randomization
     let currentWeight = 0;
     for (const [symbol, weight] of Object.entries(reelWeights)) {
@@ -246,7 +246,7 @@ export class BarsGame extends BaseGame {
         return symbol as BarsSymbol;
       }
     }
-    
+
     // Fallback (should not reach here)
     return 'grape';
   }
@@ -270,11 +270,11 @@ export class BarsGame extends BaseGame {
       const row = Math.floor(i / 3);
       const col = i % 3;
       const symbol = reelResults[i];
-      
+
       if (!symbol) {
         throw new Error(`Invalid reel result at position ${i}`);
       }
-      
+
       reels.push({
         id: i,
         row,
@@ -292,7 +292,7 @@ export class BarsGame extends BaseGame {
       if (!paylineConfig) {
         throw new Error(`Invalid payline configuration at index ${i}`);
       }
-      
+
       paylines.push({
         id: paylineConfig.id,
         name: paylineConfig.name,
@@ -367,7 +367,7 @@ export class BarsGame extends BaseGame {
       }
       return reel.symbol;
     });
-    
+
     // Check for winning combinations
     return this.checkSymbolCombination(symbols, payline);
   }
@@ -382,7 +382,7 @@ export class BarsGame extends BaseGame {
       if (!symbol) {
         return null;
       }
-      
+
       const payout = this.symbolPayouts[symbol];
       if (payout) {
         return {
@@ -440,7 +440,7 @@ export class BarsGame extends BaseGame {
    */
   private updateStateWithResults(gameState: BarsGameState, spinResult: BarsSpinResult): BarsGameState {
     const newState = { ...gameState };
-    
+
     newState.winningPaylines = spinResult.winningPaylines;
     newState.totalPayout = spinResult.totalPayout;
     newState.totalMultiplier = spinResult.totalMultiplier;
@@ -475,11 +475,11 @@ export class BarsGame extends BaseGame {
    */
   private getSymbolCombinations(reelResults: BarsSymbol[]): { [symbol: string]: number } {
     const combinations: { [symbol: string]: number } = {};
-    
+
     reelResults.forEach(symbol => {
       combinations[symbol] = (combinations[symbol] || 0) + 1;
     });
-    
+
     return combinations;
   }
 
@@ -492,18 +492,18 @@ export class BarsGame extends BaseGame {
       'triple-bar', 'double-bar', 'single-bar', 'seven', 'bell',
       'cherry', 'lemon', 'orange', 'plum', 'grape'
     ];
-    
+
     const weights: { [s in BarsSymbol]: number } = {} as any;
-    
+
     symbols.forEach(symbol => {
       const avgWeight = Math.round(
-        (this.reelWeights.reel1[symbol] + 
-         this.reelWeights.reel2[symbol] + 
-         this.reelWeights.reel3[symbol]) / 3
+        (this.reelWeights.reel1[symbol] +
+          this.reelWeights.reel2[symbol] +
+          this.reelWeights.reel3[symbol]) / 3
       );
       weights[symbol] = avgWeight;
     });
-    
+
     return weights;
   }
 
@@ -512,21 +512,21 @@ export class BarsGame extends BaseGame {
    */
   private validateConfig(config: BarsConfig): BarsValidation {
     const errors: string[] = [];
-    
+
     if (config.activePaylines < BARS_MIN_PAYLINES || config.activePaylines > BARS_MAX_PAYLINES) {
       errors.push(`Active paylines must be between ${BARS_MIN_PAYLINES} and ${BARS_MAX_PAYLINES}`);
     }
-    
+
     if (config.betPerLine <= 0) {
       errors.push('Bet per line must be greater than 0');
     }
-    
+
     const totalBet = config.activePaylines * config.betPerLine;
     const gameConfig = this.getConfig();
     if (totalBet < gameConfig.minBet || totalBet > gameConfig.maxBet) {
       errors.push(`Total bet must be between ${gameConfig.minBet} and ${gameConfig.maxBet}`);
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors

@@ -5,7 +5,7 @@
 
 import { BaseGame } from '../../base';
 import { ProvablyFairRandom } from '../../random';
-import { generateId } from '@stake-games/shared';
+import { generateId } from '@yois-games/shared';
 import type {
   BaseGameResult,
   GameResultStatus,
@@ -17,15 +17,15 @@ import type {
   LimboValidation,
   LimboMultiplierParams,
   MultiplierValidation
-} from '@stake-games/shared';
-import { LIMBO_CONSTANTS } from '@stake-games/shared';
+} from '@yois-games/shared';
+import { LIMBO_CONSTANTS } from '@yois-games/shared';
 
 /**
  * Limbo game implementation extending BaseGame
  */
 export class LimboGame extends BaseGame {
   private roundCounter: number = 1;
-  
+
   constructor() {
     super('limbo');
   }
@@ -34,9 +34,9 @@ export class LimboGame extends BaseGame {
    * Play a complete Limbo game round
    */
   async play(
-    betAmount: number, 
-    seed: string, 
-    nonce: number, 
+    betAmount: number,
+    seed: string,
+    nonce: number,
     targetMultiplier: number = 2.00,
     config?: LimboConfig
   ): Promise<LimboResult> {
@@ -78,17 +78,17 @@ export class LimboGame extends BaseGame {
 
     // Initialize game state
     const gameState = this.initializeGameState(
-      gameId, 
-      playerId, 
-      betAmount, 
+      gameId,
+      playerId,
+      betAmount,
       targetMultiplier,
       generatedMultiplier,
-      gameConfig, 
-      seed, 
-      nonce, 
+      gameConfig,
+      seed,
+      nonce,
       clientSeed
     );
-    
+
     // Determine win/loss outcome
     const isWin = generatedMultiplier >= targetMultiplier;
     const payout = isWin ? betAmount * targetMultiplier : 0;
@@ -173,26 +173,26 @@ export class LimboGame extends BaseGame {
     // Reason: Limbo uses inverted probability distribution for multiplier generation
     // Higher multipliers are exponentially rarer, maintaining house edge
     const hash = this.calculateHash(params.serverSeed, params.clientSeed, params.nonce);
-    
+
     // Convert hash to multiplier using inverse probability
     const maxValue = Math.pow(2, 32);
     const normalizedHash = hash / maxValue; // 0-1 range
-    
+
     // Apply house edge adjusted probability
     // Formula: multiplier = (99 / (normalizedHash * 99 + 1)) * (1 - houseEdge)
-    const rawMultiplier = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR / 
-                         (normalizedHash * LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR + 1);
-    
+    const rawMultiplier = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR /
+      (normalizedHash * LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR + 1);
+
     // Apply house edge reduction
     const adjustedMultiplier = rawMultiplier * (1 - params.houseEdge);
-    
+
     // Ensure minimum multiplier and apply precision
     const finalMultiplier = Math.max(params.minMultiplier, adjustedMultiplier);
-    
+
     // Round to specified precision and ensure within bounds
-    const rounded = Math.round(finalMultiplier * Math.pow(10, LIMBO_CONSTANTS.MULTIPLIER_PRECISION)) / 
-                   Math.pow(10, LIMBO_CONSTANTS.MULTIPLIER_PRECISION);
-    
+    const rounded = Math.round(finalMultiplier * Math.pow(10, LIMBO_CONSTANTS.MULTIPLIER_PRECISION)) /
+      Math.pow(10, LIMBO_CONSTANTS.MULTIPLIER_PRECISION);
+
     return Math.min(rounded, params.maxMultiplier);
   }
 
@@ -203,7 +203,7 @@ export class LimboGame extends BaseGame {
     // Reason: Win probability = (99/target) * (1-houseEdge) for fair calculation
     const baseProbability = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR / targetMultiplier;
     const adjustedProbability = baseProbability * (1 - houseEdge);
-    
+
     // Return as percentage, rounded to 2 decimal places
     return Math.round(adjustedProbability * 10000) / 100;
   }
@@ -219,21 +219,21 @@ export class LimboGame extends BaseGame {
    * Validate target multiplier input
    */
   validateTargetMultiplier(
-    targetMultiplier: number, 
-    betAmount: number, 
+    targetMultiplier: number,
+    betAmount: number,
     config: LimboConfig
   ): MultiplierValidation {
     const errors: string[] = [];
-    
+
     // Check multiplier bounds
     if (targetMultiplier < config.minTargetMultiplier) {
       errors.push(`Target multiplier must be at least ${config.minTargetMultiplier}`);
     }
-    
+
     if (targetMultiplier > config.maxTargetMultiplier) {
       errors.push(`Target multiplier cannot exceed ${config.maxTargetMultiplier}`);
     }
-    
+
     // Check precision
     const decimalPlaces = (targetMultiplier.toString().split('.')[1] || '').length;
     if (decimalPlaces > config.multiplierPrecision) {
@@ -252,7 +252,7 @@ export class LimboGame extends BaseGame {
 
     const winProbability = this.calculateWinProbability(targetMultiplier, config.houseEdge);
     const potentialPayout = this.calculatePotentialPayout(betAmount, targetMultiplier);
-    
+
     // Add warnings for extreme multipliers
     let warning: string | undefined;
     if (targetMultiplier > 100) {
@@ -267,11 +267,11 @@ export class LimboGame extends BaseGame {
       winProbability,
       potentialPayout
     };
-    
+
     if (warning) {
       result.warning = warning;
     }
-    
+
     return result;
   }
 
@@ -280,7 +280,7 @@ export class LimboGame extends BaseGame {
    */
   processAction(gameState: LimboGameSessionState, action: LimboAction): LimboGameSessionState {
     let newState = { ...gameState };
-    
+
     switch (action.type) {
       case 'set-target-multiplier':
         if (newState.state === 'setup' && action.targetMultiplier) {
@@ -291,7 +291,7 @@ export class LimboGame extends BaseGame {
           }
         }
         break;
-        
+
       case 'place-bet':
         if (newState.state === 'setup' && action.betAmount && newState.targetMultiplier) {
           newState.betAmount = action.betAmount;
@@ -300,14 +300,14 @@ export class LimboGame extends BaseGame {
           newState.roundStartTime = new Date();
         }
         break;
-        
+
       case 'roll':
         if (newState.state === 'rolling') {
           newState.state = 'result';
           // Multiplier would be generated here in real implementation
         }
         break;
-        
+
       case 'start-auto-betting':
         if (newState.state === 'setup') {
           newState.isAutoBetting = true;
@@ -316,12 +316,12 @@ export class LimboGame extends BaseGame {
           }
         }
         break;
-        
+
       case 'stop-auto-betting':
         newState.isAutoBetting = false;
         delete (newState as any).autoBetRemaining;
         break;
-        
+
       case 'reset-game':
         newState = {
           gameId: newState.gameId,
@@ -336,7 +336,7 @@ export class LimboGame extends BaseGame {
         };
         break;
     }
-    
+
     return newState;
   }
 
@@ -380,13 +380,13 @@ export class LimboGame extends BaseGame {
     // Simplified hash - would use proper HMAC-SHA256 in production
     const combined = `${serverSeed}:${clientSeed}:${nonce}`;
     let hash = 0;
-    
+
     for (let i = 0; i < combined.length; i++) {
       const char = combined.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
       hash = Math.abs(hash) & 0x7FFFFFFF; // Ensure positive 32-bit integer
     }
-    
+
     return hash;
   }
 
@@ -395,40 +395,40 @@ export class LimboGame extends BaseGame {
    */
   private validateConfig(config: LimboConfig): LimboValidation {
     const errors: string[] = [];
-    
+
     if (config.minTargetMultiplier < LIMBO_CONSTANTS.MIN_TARGET_MULTIPLIER) {
       errors.push(`Minimum target multiplier must be at least ${LIMBO_CONSTANTS.MIN_TARGET_MULTIPLIER}`);
     }
-    
+
     if (config.maxTargetMultiplier > LIMBO_CONSTANTS.MAX_TARGET_MULTIPLIER) {
       errors.push(`Maximum target multiplier cannot exceed ${LIMBO_CONSTANTS.MAX_TARGET_MULTIPLIER}`);
     }
-    
+
     if (config.houseEdge < 0 || config.houseEdge > 0.1) {
       errors.push('House edge must be between 0% and 10%');
     }
-    
+
     if (config.multiplierPrecision < 0 || config.multiplierPrecision > 6) {
       errors.push('Multiplier precision must be between 0 and 6 decimal places');
     }
-    
+
     if (config.autoBetting?.enabled) {
       const autoBetting = config.autoBetting;
-      
+
       if (autoBetting.numberOfBets && (autoBetting.numberOfBets < 1 || autoBetting.numberOfBets > 1000)) {
         errors.push('Auto-betting number of bets must be between 1 and 1000');
       }
-      
+
       if (autoBetting.speed && (autoBetting.speed < 500 || autoBetting.speed > 5000)) {
         errors.push('Auto-betting speed must be between 500ms and 5000ms');
       }
-      
-      if (autoBetting.increasePercentage && 
-          (autoBetting.increasePercentage < 0 || autoBetting.increasePercentage > 100)) {
+
+      if (autoBetting.increasePercentage &&
+        (autoBetting.increasePercentage < 0 || autoBetting.increasePercentage > 100)) {
         errors.push('Auto-betting increase percentage must be between 0% and 100%');
       }
     }
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -446,10 +446,10 @@ export class LimboGame extends BaseGame {
   /**
    * Get quick preset multipliers with calculated probabilities
    */
-  getQuickPresets(config?: LimboConfig): Array<{multiplier: number, probability: number}> {
+  getQuickPresets(config?: LimboConfig): Array<{ multiplier: number, probability: number }> {
     const presets = config?.quickPresets || LIMBO_CONSTANTS.QUICK_PRESETS;
     const houseEdge = config?.houseEdge || LIMBO_CONSTANTS.DEFAULT_HOUSE_EDGE;
-    
+
     return presets.map(multiplier => ({
       multiplier,
       probability: this.calculateWinProbability(multiplier, houseEdge)

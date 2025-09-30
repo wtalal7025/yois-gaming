@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest'
-import { SugarRushGame } from '@stake-games/game-engine/games/sugar-rush/SugarRushGame'
-import type { SugarRushConfig } from '@stake-games/shared'
+import { SugarRushGame } from '@yois-games/game-engine/games/sugar-rush/SugarRushGame'
+import type { SugarRushConfig } from '@yois-games/shared'
 
 describe('SugarRushGame', () => {
   let game: SugarRushGame
@@ -19,7 +19,7 @@ describe('SugarRushGame', () => {
   describe('Game Configuration', () => {
     it('should have correct default configuration', () => {
       const config = game.getConfig()
-      
+
       expect(config.minBet).toBe(0.01)
       expect(config.maxBet).toBe(1000)
       expect(config.maxMultiplier).toBe(1000)
@@ -33,7 +33,7 @@ describe('SugarRushGame', () => {
       expect(game.validateBet(0.01)).toBe(true) // Minimum bet
       expect(game.validateBet(1000)).toBe(true) // Maximum bet
       expect(game.validateBet(10.50)).toBe(true) // Valid middle amount
-      
+
       expect(game.validateBet(0.001)).toBe(false) // Below minimum
       expect(game.validateBet(1001)).toBe(false) // Above maximum
       expect(game.validateBet(-1)).toBe(false) // Negative amount
@@ -61,18 +61,18 @@ describe('SugarRushGame', () => {
       expect(result.seed).toBe(testSeed)
       expect(result.nonce).toBe(testNonce)
       expect(result.config).toEqual(config)
-      
+
       // Verify game state
       expect(result.finalState).toBeDefined()
       expect(result.finalState.grid).toHaveLength(49) // 7x7 grid
       expect(result.finalState.gameStatus).toBe('complete')
-      
+
       // Verify spin result
       expect(result.spinResult).toBeDefined()
       expect(result.spinResult.initialGrid).toHaveLength(49)
       expect(result.spinResult.finalGrid).toHaveLength(49)
       expect(result.spinResult.cascades).toBeDefined()
-      
+
       // Verify payout logic
       if (result.payout > 0) {
         expect(result.status).toBe('win')
@@ -114,7 +114,7 @@ describe('SugarRushGame', () => {
   describe('Symbol Generation', () => {
     it('should generate valid symbols with proper distribution', async () => {
       const results = []
-      
+
       // Run multiple games to test symbol distribution
       for (let i = 0; i < 50; i++) {
         const result = await game.play(1.0, testSeed, testNonce + i)
@@ -126,7 +126,7 @@ describe('SugarRushGame', () => {
 
       // Should have variety in symbols generated
       expect(uniqueSymbols.length).toBeGreaterThan(3)
-      
+
       // All symbols should be valid
       uniqueSymbols.forEach(symbol => {
         expect(['red-candy', 'orange-candy', 'yellow-candy', 'green-candy', 'blue-candy', 'purple-candy', 'pink-candy', 'wild']).toContain(symbol)
@@ -152,11 +152,11 @@ describe('SugarRushGame', () => {
         expect(result.payout).toBeGreaterThan(0)
         expect(result.multiplier).toBeGreaterThan(0)
         expect(result.clustersWon.length).toBeGreaterThan(0)
-        
+
         // Payout should match multiplier * bet
         const expectedPayout = result.betAmount * result.multiplier
         expect(Math.abs(result.payout - expectedPayout)).toBeLessThan(0.01) // Allow for rounding
-        
+
         // Clusters should have valid structure
         result.clustersWon.forEach(cluster => {
           expect(cluster.symbol).toBeDefined()
@@ -190,7 +190,7 @@ describe('SugarRushGame', () => {
       // Test with many games to try to hit edge cases
       for (let i = 0; i < 200; i++) {
         const result = await game.play(1.0, testSeed, testNonce + i)
-        
+
         expect(result.multiplier).toBeLessThanOrEqual(1000) // Max multiplier
         expect(result.spinResult.finalMultiplier).toBeLessThanOrEqual(1000)
       }
@@ -212,7 +212,7 @@ describe('SugarRushGame', () => {
       results.forEach(result => {
         expect(result.cascadeLevels).toBeGreaterThan(0)
         expect(result.spinResult.cascades).toHaveLength(result.cascadeLevels)
-        
+
         // Each cascade should have valid structure
         result.spinResult.cascades.forEach((cascade, index) => {
           expect(cascade.level).toBe(index + 1)
@@ -237,7 +237,7 @@ describe('SugarRushGame', () => {
 
       results.forEach(result => {
         const cascades = result.spinResult.cascades
-        
+
         // Multipliers should generally increase with cascade level
         for (let i = 1; i < cascades.length; i++) {
           expect(cascades[i]?.multiplier).toBeGreaterThanOrEqual(cascades[i - 1]?.multiplier || 0)
@@ -259,7 +259,7 @@ describe('SugarRushGame', () => {
       expect(gameState.gameStatus).toBe('complete')
       expect(gameState.seed).toBe(testSeed)
       expect(gameState.nonce).toBe(testNonce)
-      
+
       // Verify final state consistency
       if (result.status === 'win') {
         expect(gameState.totalPayout).toBeGreaterThan(0)
@@ -273,14 +273,14 @@ describe('SugarRushGame', () => {
   describe('Edge Cases and Error Handling', () => {
     it('should handle minimum bet correctly', async () => {
       const result = await game.play(0.01, testSeed, testNonce)
-      
+
       expect(result.betAmount).toBe(0.01)
       expect(result).toBeDefined()
     })
 
     it('should handle maximum bet correctly', async () => {
       const result = await game.play(1000, testSeed, testNonce)
-      
+
       expect(result.betAmount).toBe(1000)
       expect(result).toBeDefined()
     })
@@ -292,7 +292,7 @@ describe('SugarRushGame', () => {
 
       // Different seeds should give different results
       expect(seed1Result.finalState.grid).not.toEqual(seed2Result.finalState.grid)
-      
+
       // Same seed should give same result (provably fair)
       expect(seed1Result.finalState.grid).toEqual(seed1Repeat.finalState.grid)
     })
@@ -315,12 +315,12 @@ describe('SugarRushGame', () => {
   describe('Performance and Safety', () => {
     it('should complete games within reasonable time', async () => {
       const startTime = Date.now()
-      
+
       await game.play(1.0, testSeed, testNonce)
-      
+
       const endTime = Date.now()
       const duration = endTime - startTime
-      
+
       // Should complete within 5 seconds (very generous limit)
       expect(duration).toBeLessThan(5000)
     })
@@ -329,7 +329,7 @@ describe('SugarRushGame', () => {
       // Test multiple games to ensure cascade limits work
       for (let i = 0; i < 50; i++) {
         const result = await game.play(1.0, testSeed, testNonce + i)
-        
+
         // Should never exceed reasonable cascade limit (safety limit is 10)
         expect(result.cascadeLevels).toBeLessThanOrEqual(10)
         expect(result.spinResult.maxCascadeLevel).toBeLessThanOrEqual(10)
@@ -350,7 +350,7 @@ describe('SugarRushGame', () => {
         // Initial and final grids should always be 7x7
         expect(result.spinResult.initialGrid).toHaveLength(49)
         expect(result.spinResult.finalGrid).toHaveLength(49)
-        
+
         // All cells should have valid positions
         result.spinResult.finalGrid.forEach((cell, index) => {
           expect(cell.row).toBe(Math.floor(index / 7))

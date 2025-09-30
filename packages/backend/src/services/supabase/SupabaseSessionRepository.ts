@@ -128,7 +128,7 @@ export class SupabaseSessionRepository {
     try {
       console.log('🔧 SupabaseSessionRepository: Creating session for user:', sessionData.userId)
 
-      const { data: session, error } = await supabaseService
+      const { data: session, error } = await (supabaseService as any)
         .from('user_sessions')
         .insert({
           user_id: sessionData.userId,
@@ -153,18 +153,19 @@ export class SupabaseSessionRepository {
         throw new Error('Session creation returned no data')
       }
 
+      const typedSession = session as any
       const createdSession: UserSession = {
-        id: session.id,
-        userId: session.user_id,
-        sessionToken: session.session_token,
-        refreshToken: session.refresh_token,
-        deviceInfo: session.device_info,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
-        isActive: session.is_active,
-        expiresAt: session.expires_at,
-        lastUsedAt: session.last_used_at,
-        createdAt: session.created_at
+        id: typedSession.id,
+        userId: typedSession.user_id,
+        sessionToken: typedSession.session_token,
+        refreshToken: typedSession.refresh_token,
+        deviceInfo: typedSession.device_info,
+        ipAddress: typedSession.ip_address,
+        userAgent: typedSession.user_agent,
+        isActive: typedSession.is_active,
+        expiresAt: typedSession.expires_at,
+        lastUsedAt: typedSession.last_used_at,
+        createdAt: typedSession.created_at
       }
 
       console.log('✅ Session created successfully:', createdSession.id)
@@ -195,18 +196,19 @@ export class SupabaseSessionRepository {
         return null
       }
 
+      const typedSession = session as any
       const foundSession: UserSession = {
-        id: session.id,
-        userId: session.user_id,
-        sessionToken: session.session_token,
-        refreshToken: session.refresh_token,
-        deviceInfo: session.device_info,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
-        isActive: session.is_active,
-        expiresAt: session.expires_at,
-        lastUsedAt: session.last_used_at,
-        createdAt: session.created_at
+        id: typedSession.id,
+        userId: typedSession.user_id,
+        sessionToken: typedSession.session_token,
+        refreshToken: typedSession.refresh_token,
+        deviceInfo: typedSession.device_info,
+        ipAddress: typedSession.ip_address,
+        userAgent: typedSession.user_agent,
+        isActive: typedSession.is_active,
+        expiresAt: typedSession.expires_at,
+        lastUsedAt: typedSession.last_used_at,
+        createdAt: typedSession.created_at
       }
 
       console.log('✅ Session found by ID:', foundSession.id)
@@ -238,18 +240,19 @@ export class SupabaseSessionRepository {
         return null
       }
 
+      const typedSession5 = session as any
       const foundSession: UserSession = {
-        id: session.id,
-        userId: session.user_id,
-        sessionToken: session.session_token,
-        refreshToken: session.refresh_token,
-        deviceInfo: session.device_info,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
-        isActive: session.is_active,
-        expiresAt: session.expires_at,
-        lastUsedAt: session.last_used_at,
-        createdAt: session.created_at
+        id: typedSession5.id,
+        userId: typedSession5.user_id,
+        sessionToken: typedSession5.session_token,
+        refreshToken: typedSession5.refresh_token,
+        deviceInfo: typedSession5.device_info,
+        ipAddress: typedSession5.ip_address,
+        userAgent: typedSession5.user_agent,
+        isActive: typedSession5.is_active,
+        expiresAt: typedSession5.expires_at,
+        lastUsedAt: typedSession5.last_used_at,
+        createdAt: typedSession5.created_at
       }
 
       console.log('✅ Session found by token:', foundSession.id)
@@ -284,7 +287,7 @@ export class SupabaseSessionRepository {
       // Always update the last used time when updating a session
       supabaseUpdateData.last_used_at = new Date().toISOString()
 
-      const { data: session, error } = await supabaseService
+      const { data: session, error } = await (supabaseService as any)
         .from('user_sessions')
         .update(supabaseUpdateData)
         .eq('id', id)
@@ -296,18 +299,19 @@ export class SupabaseSessionRepository {
         return null
       }
 
+      const typedSession8 = session as any
       const updatedSession: UserSession = {
-        id: session.id,
-        userId: session.user_id,
-        sessionToken: session.session_token,
-        refreshToken: session.refresh_token,
-        deviceInfo: session.device_info,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
-        isActive: session.is_active,
-        expiresAt: session.expires_at,
-        lastUsedAt: session.last_used_at,
-        createdAt: session.created_at
+        id: typedSession8.id,
+        userId: typedSession8.user_id,
+        sessionToken: typedSession8.session_token,
+        refreshToken: typedSession8.refresh_token,
+        deviceInfo: typedSession8.device_info,
+        ipAddress: typedSession8.ip_address,
+        userAgent: typedSession8.user_agent,
+        isActive: typedSession8.is_active,
+        expiresAt: typedSession8.expires_at,
+        lastUsedAt: typedSession8.last_used_at,
+        createdAt: typedSession8.created_at
       }
 
       console.log('✅ Session updated successfully:', updatedSession.id)
@@ -366,19 +370,22 @@ export class SupabaseSessionRepository {
         return []
       }
 
-      const userSessions = sessions?.map(session => ({
-        id: session.id,
-        userId: session.user_id,
-        sessionToken: session.session_token,
-        refreshToken: session.refresh_token,
-        deviceInfo: session.device_info,
-        ipAddress: session.ip_address,
-        userAgent: session.user_agent,
-        isActive: session.is_active,
-        expiresAt: session.expires_at,
-        lastUsedAt: session.last_used_at,
-        createdAt: session.created_at
-      } as UserSession)) || []
+      const userSessions = sessions?.map(session => {
+        const typedSession = session as any
+        return {
+          id: typedSession.id,
+          userId: typedSession.user_id,
+          sessionToken: typedSession.session_token,
+          refreshToken: typedSession.refresh_token,
+          deviceInfo: typedSession.device_info,
+          ipAddress: typedSession.ip_address,
+          userAgent: typedSession.user_agent,
+          isActive: typedSession.is_active,
+          expiresAt: typedSession.expires_at,
+          lastUsedAt: typedSession.last_used_at,
+          createdAt: typedSession.created_at
+        } as UserSession
+      }) || []
 
       console.log(`✅ Found ${userSessions.length} sessions for user:`, userId)
       return userSessions
