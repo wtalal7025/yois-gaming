@@ -1,0 +1,197 @@
+// Gaming Platform Database Schema
+// Generated from existing SQL schema for Prisma compatibility
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username         String    @unique @db.VarChar(50)
+  email            String    @unique @db.VarChar(255)
+  passwordHash     String    @map("password_hash") @db.VarChar(255)
+  avatarUrl        String?   @map("avatar_url") @db.VarChar(500)
+  balance          Decimal   @default(100.00) @db.Decimal(15, 2)
+  level            Int       @default(1)
+  experiencePoints Int       @default(0) @map("experience_points")
+  totalWagered     Decimal   @default(0.00) @map("total_wagered") @db.Decimal(15, 2)
+  totalWon         Decimal   @default(0.00) @map("total_won") @db.Decimal(15, 2)
+  gamesPlayed      Int       @default(0) @map("games_played")
+  isActive         Boolean   @default(true) @map("is_active")
+  isVerified       Boolean   @default(false) @map("is_verified")
+  lastLoginAt      DateTime? @map("last_login_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  sessions            UserSession[]
+  transactions        Transaction[]
+  balance             Balance?
+  preferences         UserPreferences?
+  gameSessions        GameSession[]
+  passwordResetTokens PasswordResetToken[]
+  auditLogs           AuditLog[]
+
+  @@index([username])
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model UserSession {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  sessionToken String   @unique @map("session_token") @db.VarChar(500)
+  refreshToken String   @unique @map("refresh_token") @db.VarChar(500)
+  deviceInfo   Json?    @map("device_info")
+  ipAddress    String?  @map("ip_address") @db.Inet
+  userAgent    String?  @map("user_agent")
+  isActive     Boolean  @default(true) @map("is_active")
+  expiresAt    DateTime @map("expires_at")
+  lastUsedAt   DateTime @default(now()) @map("last_used_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@index([isActive, expiresAt])
+  @@map("user_sessions")
+}
+
+model Transaction {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  type            String    @db.VarChar(20) // 'bet', 'win', 'deposit', 'withdrawal', 'bonus', 'refund'
+  amount          Decimal   @db.Decimal(15, 2)
+  currency        String    @default("USD") @db.VarChar(3)
+  balanceBefore   Decimal   @map("balance_before") @db.Decimal(15, 2)
+  balanceAfter    Decimal   @map("balance_after") @db.Decimal(15, 2)
+  gameType        String?   @map("game_type") @db.VarChar(50)
+  gameSessionId   String?   @map("game_session_id") @db.Uuid
+  referenceId     String?   @map("reference_id") @db.VarChar(100)
+  description     String?
+  metadata        Json?
+  status          String    @default("completed") @db.VarChar(20) // 'pending', 'processing', 'completed', 'failed', 'cancelled'
+  processedAt     DateTime  @default(now()) @map("processed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  gameSession GameSession? @relation(fields: [gameSessionId], references: [id])
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@index([userId, createdAt])
+  @@index([gameSessionId])
+  @@map("transactions")
+}
+
+model Balance {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  amount      Decimal  @db.Decimal(15, 2)
+  currency    String   @default("USD") @db.VarChar(3)
+  lastUpdated DateTime @default(now()) @updatedAt @map("last_updated")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("balances")
+}
+
+model UserPreferences {
+  id              String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  autoPlayEnabled Boolean  @default(false) @map("auto_play_enabled")
+  soundEnabled    Boolean  @default(true) @map("sound_enabled")
+  animationSpeed  String   @default("normal") @map("animation_speed") @db.VarChar(10) // 'slow', 'normal', 'fast'
+  theme           String   @default("dark") @db.VarChar(10) // 'dark', 'light'
+  language        String   @default("en") @db.VarChar(5)
+  currency        String   @default("USD") @db.VarChar(3)
+  notifications   Json     @default("{\"email\": true, \"push\": true, \"sms\": false}")
+  privacySettings Json     @default("{\"profile_visible\": true, \"stats_visible\": true}") @map("privacy_settings")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_preferences")
+}
+
+model GameSession {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  gameType    String    @map("game_type") @db.VarChar(50)
+  betAmount   Decimal   @map("bet_amount") @db.Decimal(10, 2)
+  payout      Decimal   @default(0.00) @db.Decimal(10, 2)
+  multiplier  Decimal   @default(1.0000) @db.Decimal(8, 4)
+  profitLoss  Decimal   @map("profit_loss") @db.Decimal(10, 2)
+  gameData    Json      @map("game_data")
+  seedClient  String?   @map("seed_client") @db.VarChar(64)
+  seedServer  String?   @map("seed_server") @db.VarChar(64)
+  seedNonce   Int       @default(1) @map("seed_nonce")
+  isCompleted Boolean   @default(false) @map("is_completed")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@index([userId])
+  @@index([gameType])
+  @@index([createdAt])
+  @@index([userId, gameType, createdAt])
+  @@map("game_sessions")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at")
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model AuditLog {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId       String?   @map("user_id") @db.Uuid
+  action       String    @db.VarChar(50)
+  resourceType String?   @map("resource_type") @db.VarChar(50)
+  resourceId   String?   @map("resource_id") @db.Uuid
+  oldValues    Json?     @map("old_values")
+  newValues    Json?     @map("new_values")
+  ipAddress    String?   @map("ip_address") @db.Inet
+  userAgent    String?   @map("user_agent")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

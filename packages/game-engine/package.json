@@ -1,0 +1,44 @@
+{
+  "name": "@yois-games/game-engine",
+  "version": "1.0.0",
+  "description": "Core game logic framework for Yois Gaming platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "keywords": [
+    "typescript",
+    "game-engine",
+    "gaming",
+    "yois",
+    "provably-fair",
+    "random"
+  ],
+  "author": "Yois Gaming Team",
+  "license": "MIT",
+  "dependencies": {
+    "@yois-games/shared": "workspace:*",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "eslint": "^9.8.0",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
+    "@typescript-eslint/parser": "^8.1.0",
+    "vitest": "^2.0.5",
+    "@types/node": "^22.1.0"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

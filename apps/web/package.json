@@ -1,0 +1,49 @@
+{
+  "name": "@yois-games/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Main web application for Yois gaming platform",
+  "scripts": {
+    "dev": "next dev --turbo",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf .next"
+  },
+  "dependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@heroui/react": "^2.4.22",
+    "@heroui/system": "^2.4.22",
+    "@heroui/theme": "^2.4.22",
+    "@hookform/resolvers": "^3.10.0",
+    "@yois-games/frontend": "workspace:*",
+    "@yois-games/game-engine": "workspace:*",
+    "@yois-games/shared": "workspace:*",
+    "framer-motion": "^11.0.0",
+    "next": "15.0.3",
+    "next-themes": "^0.3.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-error-boundary": "^6.0.0",
+    "react-hook-form": "^7.53.0",
+    "socket.io-client": "^4.8.0",
+    "zod": "^3.24.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.1",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.15.0",
+    "eslint-config-next": "15.0.3",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.0",
+    "typescript": "5.6.3"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}

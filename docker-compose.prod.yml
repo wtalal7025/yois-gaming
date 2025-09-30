@@ -1,0 +1,184 @@
+# ===========================================
+# PRODUCTION DOCKER COMPOSE CONFIGURATION
+# ===========================================
+# Production deployment configuration for Stake Games platform
+# This file is used for local production testing and container orchestration
+
+version: '3.8'
+
+services:
+  # ===========================================
+  # FRONTEND - Next.js Web Application
+  # ===========================================
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: runner
+    container_name: stake-games-frontend-prod
+    image: stake-games/frontend:production
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL:-http://backend:3001/api}
+      - NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL:-http://backend:3001}
+      - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-Stake Games}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - stake-games-network
+    labels:
+      - "com.stakegames.service=frontend"
+      - "com.stakegames.environment=production"
+
+  # ===========================================
+  # BACKEND - Fastify API Server
+  # ===========================================
+  backend:
+    build:
+      context: .
+      dockerfile: packages/backend/Dockerfile
+      target: runtime
+    container_name: stake-games-backend-prod
+    image: stake-games/backend:production
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - HOST=0.0.0.0
+      
+      # Database Configuration
+      - DATABASE_URL=${DATABASE_URL}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      
+      # Redis Configuration
+      - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
+      - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
+      - REDIS_RETRY_ATTEMPTS=${REDIS_RETRY_ATTEMPTS:-5}
+      - REDIS_RETRY_DELAY=${REDIS_RETRY_DELAY:-2000}
+      - REDIS_TIMEOUT=${REDIS_TIMEOUT:-10000}
+      
+      # Security Configuration
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - SESSION_SECRET=${SESSION_SECRET}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      
+      # Email Configuration
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - FROM_EMAIL=${FROM_EMAIL}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
+      
+      # File Storage Configuration
+      - SUPABASE_STORAGE_URL=${SUPABASE_STORAGE_URL}
+      - SUPABASE_STORAGE_BUCKET=${SUPABASE_STORAGE_BUCKET:-game-assets-prod}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-10485760}
+      
+      # Game Engine Configuration
+      - PROVABLY_FAIR_SERVER_SEED=${PROVABLY_FAIR_SERVER_SEED}
+      - HOUSE_EDGE_PERCENTAGE=${HOUSE_EDGE_PERCENTAGE:-1}
+      
+      # Performance Configuration
+      - ENABLE_COMPRESSION=${ENABLE_COMPRESSION:-true}
+      - COMPRESSION_LEVEL=${COMPRESSION_LEVEL:-6}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-50}
+      
+      # Monitoring Configuration
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
+      - ENABLE_ANALYTICS=${ENABLE_ANALYTICS:-true}
+      - ENABLE_ERROR_TRACKING=${ENABLE_ERROR_TRACKING:-true}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - stake-games-network
+    labels:
+      - "com.stakegames.service=backend"
+      - "com.stakegames.environment=production"
+
+  # ===========================================
+  # NGINX REVERSE PROXY (Optional)
+  # ===========================================
+  nginx:
+    image: nginx:alpine
+    container_name: stake-games-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - stake-games-network
+    labels:
+      - "com.stakegames.service=nginx"
+      - "com.stakegames.environment=production"
+    profiles:
+      - nginx
+
+# ===========================================
+# NETWORK CONFIGURATION
+# ===========================================
+networks:
+  stake-games-network:
+    name: stake-games-prod-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# ===========================================
+# VOLUME CONFIGURATION
+# ===========================================
+volumes:
+  nginx_ssl:
+    driver: local
+    labels:
+      - "com.stakegames.volume=ssl"
+
+# ===========================================
+# DEPLOYMENT NOTES
+# ===========================================
+# To deploy this production setup:
+# 
+# 1. Set environment variables:
+#    export DATABASE_URL="your_supabase_database_url"
+#    export SUPABASE_URL="your_supabase_url"
+#    export UPSTASH_REDIS_REST_URL="your_redis_url"
+#    # ... set all other required environment variables
+# 
+# 2. Build and run:
+#    docker-compose -f docker-compose.prod.yml up -d
+# 
+# 3. View logs:
+#    docker-compose -f docker-compose.prod.yml logs -f
+# 
+# 4. Stop services:
+#    docker-compose -f docker-compose.prod.yml down
+# 
+# 5. With nginx reverse proxy:
+#    docker-compose -f docker-compose.prod.yml --profile nginx up -d

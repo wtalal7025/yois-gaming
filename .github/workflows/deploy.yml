@@ -1,0 +1,379 @@
+# ===========================================
+# PRODUCTION DEPLOYMENT CI/CD PIPELINE
+# ===========================================
+# GitHub Actions workflow for automated deployment
+# Deploys frontend to Vercel and backend to Railway
+
+name: 🚀 Production Deployment
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/**'
+      - 'packages/**'
+      - '.github/workflows/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, ready_for_review]
+
+# Cancel previous runs on the same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Set default permissions
+permissions:
+  contents: read
+  deployments: write
+  pull-requests: write
+  checks: write
+
+# Environment variables
+env:
+  NODE_VERSION: '22'
+  PNPM_VERSION: '9.0.0'
+
+jobs:
+  # ===========================================
+  # QUALITY CHECKS & TESTING
+  # ===========================================
+  quality-checks:
+    name: 🧪 Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      
+      - name: 📋 Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: 🗄️ Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: 🔍 Type checking
+        run: pnpm run type-check
+      
+      - name: 🧹 Linting
+        run: pnpm run lint
+      
+      - name: 🧪 Run tests
+        run: pnpm run test
+        env:
+          CI: true
+      
+      - name: 📊 Test coverage
+        run: pnpm run test:coverage
+        continue-on-error: true
+
+  # ===========================================
+  # BUILD & VALIDATE
+  # ===========================================
+  build-validation:
+    name: 🏗️ Build Validation
+    runs-on: ubuntu-latest
+    needs: [quality-checks]
+    timeout-minutes: 20
+    
+    strategy:
+      matrix:
+        include:
+          - app: frontend
+            path: apps/web
+          - app: backend
+            path: packages/backend
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      
+      - name: 📦 Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+      
+      - name: 🗄️ Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+      
+      - name: 🗄️ Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: 🏗️ Build application
+        run: pnpm run build --filter=${{ matrix.app == 'frontend' && '@stake-games/web' || '@stake-games/backend' }}
+        env:
+          NODE_ENV: production
+          NEXT_TELEMETRY_DISABLED: 1
+
+  # ===========================================
+  # SECURITY SCANNING
+  # ===========================================
+  security-scan:
+    name: 🛡️ Security Scan
+    runs-on: ubuntu-latest
+    needs: [quality-checks]
+    timeout-minutes: 10
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🔐 Run security audit
+        run: |
+          npm audit --audit-level high --production
+          pnpm audit --audit-level high --prod
+        continue-on-error: true
+
+  # ===========================================
+  # DOCKER BUILD & PUSH
+  # ===========================================
+  docker-build:
+    name: 🐳 Docker Build
+    runs-on: ubuntu-latest
+    needs: [build-validation, security-scan]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 30
+    
+    strategy:
+      matrix:
+        include:
+          - service: frontend
+            dockerfile: apps/web/Dockerfile
+            context: .
+          - service: backend
+            dockerfile: packages/backend/Dockerfile
+            context: .
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: 🏗️ Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          tags: stake-games/${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          outputs: type=docker,dest=/tmp/${{ matrix.service }}-image.tar
+      
+      - name: 📦 Upload Docker image artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.service }}-docker-image
+          path: /tmp/${{ matrix.service }}-image.tar
+          retention-days: 1
+
+  # ===========================================
+  # DEPLOY TO VERCEL (FRONTEND)
+  # ===========================================
+  deploy-frontend:
+    name: 🌐 Deploy Frontend
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 15
+    
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🚀 Deploy to Vercel
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: apps/web
+          alias-domains: |
+            ${{ secrets.PRODUCTION_DOMAIN }}
+      
+      - name: 💬 Comment deployment URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Frontend deployed to Vercel**\n\n**Preview URL:** ${{ steps.deploy.outputs.preview-url }}\n**Production URL:** ${{ steps.deploy.outputs.url }}`
+            })
+
+  # ===========================================
+  # DEPLOY TO RAILWAY (BACKEND)
+  # ===========================================
+  deploy-backend:
+    name: 🚂 Deploy Backend
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+    
+    environment:
+      name: production-backend
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🚂 Install Railway CLI
+        run: |
+          npm install -g @railway/cli
+      
+      - name: 🚂 Deploy to Railway
+        run: |
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway up --service ${{ secrets.RAILWAY_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      
+      - name: 🏥 Health check
+        run: |
+          echo "Waiting for deployment to be ready..."
+          sleep 30
+          
+          for i in {1..10}; do
+            if curl -f -s "${{ secrets.RAILWAY_BACKEND_URL }}/api/health"; then
+              echo "✅ Backend health check passed"
+              exit 0
+            fi
+            echo "⏳ Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          
+          echo "❌ Backend health check failed"
+          exit 1
+
+  # ===========================================
+  # POST-DEPLOYMENT VALIDATION
+  # ===========================================
+  post-deployment:
+    name: ✅ Post-Deployment Validation
+    runs-on: ubuntu-latest
+    needs: [deploy-frontend, deploy-backend]
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 10
+    
+    steps:
+      - name: 🔍 Frontend health check
+        run: |
+          echo "Testing frontend deployment..."
+          curl -f -s "${{ secrets.PRODUCTION_DOMAIN }}" > /dev/null
+          echo "✅ Frontend is responding"
+      
+      - name: 🔍 Backend health check
+        run: |
+          echo "Testing backend deployment..."
+          curl -f -s "${{ secrets.RAILWAY_BACKEND_URL }}/api/health" > /dev/null
+          echo "✅ Backend API is responding"
+      
+      - name: 🧪 End-to-end smoke test
+        run: |
+          echo "Running basic smoke tests..."
+          # Test basic API endpoints
+          curl -f -s "${{ secrets.RAILWAY_BACKEND_URL }}/api/games" > /dev/null
+          echo "✅ Games API is responding"
+          
+          # Test frontend-backend integration
+          curl -f -s "${{ secrets.PRODUCTION_DOMAIN }}/api/health" > /dev/null || echo "⚠️ Frontend API route may not be configured"
+          
+          echo "🎉 Deployment validation completed successfully!"
+
+  # ===========================================
+  # SLACK NOTIFICATION
+  # ===========================================
+  notify:
+    name: 📢 Notifications
+    runs-on: ubuntu-latest
+    needs: [post-deployment]
+    if: always() && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    
+    steps:
+      - name: 📨 Notify deployment status
+        uses: 8398a7/action-slack@v3
+        if: env.SLACK_WEBHOOK_URL != ''
+        with:
+          status: ${{ job.status }}
+          channel: '#deployments'
+          username: 'GitHub Actions'
+          icon_emoji: ':rocket:'
+          text: |
+            *Stake Games Deployment* ${{ job.status == 'success' && 'succeeded' || 'failed' }}!
+            
+            **Frontend:** ${{ secrets.PRODUCTION_DOMAIN }}
+            **Backend:** ${{ secrets.RAILWAY_BACKEND_URL }}
+            **Commit:** ${{ github.sha }}
+            **Author:** ${{ github.actor }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+# ===========================================
+# REQUIRED SECRETS SETUP
+# ===========================================
+# Add these secrets to your GitHub repository:
+# 
+# VERCEL_TOKEN - Vercel deployment token
+# VERCEL_ORG_ID - Your Vercel organization ID  
+# VERCEL_PROJECT_ID - Your Vercel project ID
+# PRODUCTION_DOMAIN - Your production domain (e.g., https://yourgame.com)
+# 
+# RAILWAY_TOKEN - Railway deployment token
+# RAILWAY_SERVICE_ID - Railway service ID for backend
+# RAILWAY_BACKEND_URL - Railway backend URL (e.g., https://backend.up.railway.app)
+# 
+# SLACK_WEBHOOK_URL - Optional Slack webhook for notifications

@@ -1,0 +1,330 @@
+/* Import Google Fonts for gaming aesthetics */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables for Gaming Theme */
+:root {
+  /* Primary gaming colors */
+  --primary: 0 230 204; /* #00E6CC - Teal primary */
+  --primary-foreground: 0 0 0;
+  --secondary: 139 92 246; /* #8B5CF6 - Purple secondary */
+  --secondary-foreground: 255 255 255;
+  
+  /* Dark theme backgrounds */
+  --background: 15 15 35; /* #0F0F23 - Very dark blue */
+  --foreground: 255 255 255;
+  --card: 26 26 46; /* #1A1A2E - Dark surface */
+  --card-foreground: 255 255 255;
+  --popover: 22 33 62; /* #16213E - Darker surface */
+  --popover-foreground: 255 255 255;
+  
+  /* Borders and inputs */
+  --border: 26 26 46; /* #1A1A2E */
+  --input: 22 33 62; /* #16213E */
+  --ring: 0 230 204; /* Primary color for focus rings */
+  
+  /* Status colors */
+  --success: 34 197 94;
+  --warning: 245 158 11;
+  --danger: 239 68 68;
+  --muted: 13 13 31; /* #0D0D1F */
+  --muted-foreground: 156 163 175;
+  
+  /* Accent colors for gaming effects */
+  --accent: 139 92 246; /* Secondary purple */
+  --accent-foreground: 255 255 255;
+  
+  /* Gaming glow effects */
+  --glow-primary: 0 230 204;
+  --glow-secondary: 139 92 246;
+  --glow-success: 34 197 94;
+  --glow-danger: 239 68 68;
+  
+  /* Radius for consistent UI */
+  --radius: 0.75rem;
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  background: linear-gradient(135deg, rgb(15, 15, 35) 0%, rgb(13, 13, 31) 100%);
+  color: rgb(var(--foreground));
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Gaming-themed scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(var(--muted), 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary), 0.6) 0%, 
+    rgba(var(--secondary), 0.6) 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, 
+    rgba(var(--primary), 0.8) 0%, 
+    rgba(var(--secondary), 0.8) 100%);
+}
+
+/* Gaming component styles */
+@layer components {
+  /* Gaming button with glow effect */
+  .gaming-button {
+    @apply relative inline-flex items-center justify-center px-6 py-3 text-sm font-medium;
+    @apply bg-gradient-to-r from-primary to-primary-600 text-black;
+    @apply border border-primary/20 rounded-lg;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:shadow-glow hover:scale-105;
+    @apply active:scale-95;
+  }
+  
+  .gaming-button:hover {
+    box-shadow: 0 0 20px rgba(var(--glow-primary), 0.4);
+  }
+  
+  /* Secondary gaming button */
+  .gaming-button-secondary {
+    @apply gaming-button;
+    @apply bg-gradient-to-r from-secondary to-secondary-600 text-white;
+    @apply border-secondary/20;
+  }
+  
+  .gaming-button-secondary:hover {
+    box-shadow: 0 0 20px rgba(var(--glow-secondary), 0.4);
+  }
+  
+  /* Gaming card with subtle glow */
+  .gaming-card {
+    @apply bg-gradient-to-br from-dark-500 to-dark-600/80;
+    @apply border border-gray-700/50 rounded-xl;
+    @apply backdrop-blur-sm;
+    @apply transition-all duration-300;
+    @apply hover:border-primary/30 hover:shadow-lg;
+  }
+  
+  .gaming-card:hover {
+    box-shadow: 0 8px 32px rgba(var(--glow-primary), 0.1);
+  }
+  
+  /* Gaming input with focus glow */
+  .gaming-input {
+    @apply w-full px-4 py-3 bg-input border border-border;
+    @apply rounded-lg text-foreground placeholder-muted-foreground;
+    @apply transition-all duration-300;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50;
+    @apply focus:border-primary;
+  }
+  
+  .gaming-input:focus {
+    box-shadow: 0 0 0 2px rgba(var(--ring), 0.2);
+  }
+  
+  /* Navigation link styles */
+  .nav-link {
+    @apply relative px-4 py-2 text-sm font-medium text-muted-foreground;
+    @apply transition-all duration-300;
+    @apply hover:text-foreground;
+  }
+  
+  .nav-link.active {
+    @apply text-primary;
+  }
+  
+  .nav-link.active::after {
+    @apply content-[''] absolute bottom-0 left-0 w-full h-0.5;
+    @apply bg-gradient-to-r from-primary to-secondary;
+  }
+  
+  /* Game card with hover effects */
+  .game-card {
+    @apply gaming-card p-6 cursor-pointer group;
+    @apply hover:scale-105 hover:shadow-glow;
+  }
+  
+  /* Statistics card */
+  .stat-card {
+    @apply gaming-card p-6 text-center;
+    @apply hover:border-success/30;
+  }
+  
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50;
+    @apply flex items-center justify-center p-4;
+  }
+  
+  /* Toast notification */
+  .toast {
+    @apply gaming-card px-6 py-4 max-w-sm;
+    @apply shadow-lg border-l-4;
+  }
+  
+  .toast.success {
+    @apply border-l-success bg-success/5;
+  }
+  
+  .toast.error {
+    @apply border-l-danger bg-danger/5;
+  }
+  
+  .toast.warning {
+    @apply border-l-warning bg-warning/5;
+  }
+  
+  /* Loading spinner */
+  .gaming-spinner {
+    @apply animate-spin rounded-full border-2 border-muted;
+    @apply border-t-primary;
+  }
+  
+  /* Progress bar */
+  .gaming-progress {
+    @apply w-full bg-muted rounded-full overflow-hidden;
+  }
+  
+  .gaming-progress-fill {
+    @apply h-full bg-gradient-to-r from-primary to-secondary;
+    @apply transition-all duration-500 ease-out;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-secondary;
+    @apply bg-clip-text text-transparent;
+  }
+  
+  /* Gaming grid pattern background */
+  .gaming-grid {
+    background-image: 
+      linear-gradient(rgba(0,230,204,0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,230,204,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+/* Utility classes */
+@layer utilities {
+  /* Glow effects */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(var(--glow-primary), 0.3);
+  }
+  
+  .glow-secondary {
+    box-shadow: 0 0 20px rgba(var(--glow-secondary), 0.3);
+  }
+  
+  .glow-success {
+    box-shadow: 0 0 20px rgba(var(--glow-success), 0.3);
+  }
+  
+  .glow-danger {
+    box-shadow: 0 0 20px rgba(var(--glow-danger), 0.3);
+  }
+  
+  /* Text shadows */
+  .text-glow {
+    text-shadow: 0 0 10px rgba(var(--glow-primary), 0.5);
+  }
+  
+  .text-glow-secondary {
+    text-shadow: 0 0 10px rgba(var(--glow-secondary), 0.5);
+  }
+  
+  /* Animation utilities */
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounce 2s infinite;
+  }
+}
+
+/* Keyframe animations */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(var(--glow-primary), 0.2);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(var(--glow-primary), 0.6);
+  }
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .gaming-card {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --border: 255 255 255;
+    --primary: 0 255 255;
+    --secondary: 255 0 255;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .gaming-button {
+    @apply px-4 py-2 text-xs;
+  }
+  
+  .gaming-card {
+    @apply p-4;
+  }
+  
+  .game-card {
+    @apply p-4;
+  }
+}
