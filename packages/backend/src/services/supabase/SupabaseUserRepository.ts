@@ -4,7 +4,7 @@
  */
 
 import { supabaseService } from '../../database/supabase'
-import type { User } from '@stake-games/shared'
+import type { User } from '@yois-games/shared'
 
 interface UserWithPassword extends Omit<User, 'id' | 'createdAt' | 'updatedAt'> {
   passwordHash: string
@@ -186,7 +186,7 @@ export class SupabaseUserRepository {
   async update(id: string, updates: Partial<User>): Promise<User | null> {
     try {
       const updateData: any = {}
-      
+
       if (updates.username !== undefined) updateData.username = updates.username
       if (updates.email !== undefined) updateData.email = updates.email
       if (updates.avatarUrl !== undefined) updateData.avatar_url = updates.avatarUrl || null

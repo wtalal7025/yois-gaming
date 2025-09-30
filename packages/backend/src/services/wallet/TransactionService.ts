@@ -4,17 +4,17 @@
  * status management, and history retrieval
  */
 
-import type { 
-  Transaction, 
+import type {
+  Transaction,
   CreateTransactionRequest,
   TransactionFilter,
   TransactionHistory
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
-import { 
-  TransactionType, 
-  TransactionStatus 
-} from '@stake-games/shared'
+import {
+  TransactionType,
+  TransactionStatus
+} from '@yois-games/shared'
 
 // Reason: Interface for database operations, will be implemented with actual DB later
 interface TransactionRepository {
@@ -122,8 +122,8 @@ export class TransactionService {
    * @returns Promise with updated transaction or null
    */
   async updateTransactionStatus(
-    transactionId: string, 
-    status: TransactionStatus, 
+    transactionId: string,
+    status: TransactionStatus,
     metadata?: Record<string, any>
   ): Promise<Transaction | null> {
     try {
@@ -246,9 +246,9 @@ export class TransactionService {
    * @returns Promise with statistics
    */
   async getTransactionStats(
-    userId: string, 
-    type?: TransactionType, 
-    fromDate?: Date, 
+    userId: string,
+    type?: TransactionType,
+    fromDate?: Date,
     toDate?: Date
   ): Promise<{
     count: number
@@ -271,7 +271,7 @@ export class TransactionService {
         for (const transactionType of allTypes) {
           const count = await this.transactionRepository.countTransactionsByType(userId, transactionType)
           const amount = await this.transactionRepository.getTotalAmountByType(userId, transactionType, fromDate, toDate)
-          
+
           totalCount += count
           totalAmount += amount
         }
@@ -349,7 +349,7 @@ export class TransactionService {
    * @returns Promise with number of updated transactions
    */
   async bulkUpdateTransactions(
-    transactionIds: string[], 
+    transactionIds: string[],
     updates: Partial<Transaction>
   ): Promise<number> {
     try {

@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { Balance, WalletStats } from '@stake-games/shared'
+import type { Balance, WalletStats } from '@yois-games/shared'
 import { WalletService } from '../../services/wallet/WalletService'
 
 // Validation schema for balance history query
@@ -23,7 +23,7 @@ interface BalanceRouteContext {
 // Middleware to extract user from JWT token
 async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return reply.status(401).send({
       success: false,
@@ -33,11 +33,11 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
 
   // In production, verify JWT token and extract user info
   const token = authHeader.substring(7)
-  // const user = await verifyAccessToken(token)
-  // request.user = user
-  
-  // For now, simulate authenticated user
-  (request as any).user = {
+    // const user = await verifyAccessToken(token)
+    // request.user = user
+
+    // For now, simulate authenticated user
+    (request as any).user = {
     id: 'user-123',
     username: 'testuser',
     email: 'test@example.com'
@@ -103,7 +103,7 @@ export async function balanceRoutes(
 
     } catch (error) {
       fastify.log.error('Get balance error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve balance'
@@ -176,15 +176,15 @@ export async function balanceRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
-    Querystring: { limit?: number; offset?: number; startDate?: string; endDate?: string } 
+  }, async (request: FastifyRequest<{
+    Querystring: { limit?: number; offset?: number; startDate?: string; endDate?: string }
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
-      
+
       // Validate query parameters
       const validationResult = balanceHistorySchema.safeParse(request.query)
-      
+
       if (!validationResult.success) {
         return reply.status(400).send({
           success: false,
@@ -211,7 +211,7 @@ export async function balanceRoutes(
 
     } catch (error) {
       fastify.log.error('Get balance history error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve balance history'
@@ -266,7 +266,7 @@ export async function balanceRoutes(
 
     } catch (error) {
       fastify.log.error('Get wallet stats error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve wallet statistics'
@@ -331,7 +331,7 @@ export async function balanceRoutes(
 
     } catch (error) {
       fastify.log.error('Balance validation error:', error)
-      
+
       return reply.send({
         valid: false,
         error: 'Failed to validate balance'
@@ -344,7 +344,7 @@ export async function balanceRoutes(
    * Get balance summary with recent activity
    */
   fastify.get<{
-    Reply: { 
+    Reply: {
       success: boolean
       summary?: {
         currentBalance: number
@@ -355,7 +355,7 @@ export async function balanceRoutes(
         lastDeposit?: any
         lastWithdrawal?: any
       }
-      error?: string 
+      error?: string
     }
   }>('/balance/summary', {
     schema: {
@@ -413,7 +413,7 @@ export async function balanceRoutes(
 
       // Get current balance
       const balance = await walletService.getBalance(userId)
-      
+
       // Get wallet stats
       const stats = await walletService.getWalletStats(userId)
 
@@ -435,7 +435,7 @@ export async function balanceRoutes(
 
     } catch (error) {
       fastify.log.error('Balance summary error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve balance summary'

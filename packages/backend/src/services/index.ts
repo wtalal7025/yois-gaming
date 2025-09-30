@@ -16,20 +16,20 @@ import { BalanceService } from './wallet/BalanceService'
 import { TransactionService } from './wallet/TransactionService'
 import { AuditService } from './wallet/AuditService'
 import { WalletService } from './wallet/WalletService'
-import type { EmailConfig } from '@stake-games/shared'
+import type { EmailConfig } from '@yois-games/shared'
 
 // Simple audit logger for authentication events
 class SimpleAuditLogger {
   async logAuthentication(userId: string, action: string, success: boolean, metadata?: Record<string, any>): Promise<void> {
     console.log('📝 Auth Audit:', { userId, action, success, metadata, timestamp: new Date().toISOString() })
-    
+
     // TODO: Store audit logs in Supabase audit_logs table
     // This would be implemented here for production audit trails
   }
 
   async logSecurityEvent(userId: string | null, event: string, metadata?: Record<string, any>): Promise<void> {
     console.log('🔒 Security Event:', { userId, event, metadata, timestamp: new Date().toISOString() })
-    
+
     // TODO: Store security events in Supabase for monitoring
     // Critical for production security monitoring and compliance
   }
@@ -92,33 +92,33 @@ const initializeWalletServices = async () => {
     if (redisConfig.url && redisConfig.token) {
       // Initialize Redis service
       await initializeRedisService(redisConfig)
-      
+
       // Create enhanced audit logger that matches AuditLogger interface
       class EnhancedAuditLogger {
         async log(level: string, message: string, metadata?: Record<string, any>): Promise<void> {
           console.log(`[${level.toUpperCase()}] ${message}`, metadata)
         }
-        
+
         async logError(message: string, metadata?: Record<string, any>): Promise<void> {
           console.error(`[ERROR] ${message}`, metadata)
         }
-        
+
         async logWarn(message: string, metadata?: Record<string, any>): Promise<void> {
           console.warn(`[WARN] ${message}`, metadata)
         }
-        
+
         async logInfo(message: string, metadata?: Record<string, any>): Promise<void> {
           console.info(`[INFO] ${message}`, metadata)
         }
-        
+
         async logDebug(message: string, metadata?: Record<string, any>): Promise<void> {
           console.log(`[DEBUG] ${message}`, metadata)
         }
-        
+
         async logBalanceChange(userId: string, action: string, amount: number, transactionId: string, metadata?: Record<string, any>): Promise<void> {
           console.log('📊 Balance Change:', { userId, action, amount, transactionId, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logBalanceError(userId: string, error: string, metadata?: Record<string, any>): Promise<void> {
           console.error('❌ Balance Error:', { userId, error, metadata, timestamp: new Date().toISOString() })
         }
@@ -126,51 +126,51 @@ const initializeWalletServices = async () => {
 
       // Create Redis-based repositories
       const redisBalanceRepository = new RedisBalanceRepository()
-      
+
       // Create wallet services with Redis persistence
       const enhancedAuditLogger = new EnhancedAuditLogger()
       const balanceService = new BalanceService(redisBalanceRepository, enhancedAuditLogger)
-      
+
       // Create simple audit service implementation for wallet
       class SimpleAuditRepository {
         async logAuthenticationEvent(userId: string, action: string, success: boolean, metadata?: Record<string, any>): Promise<void> {
           console.log('📝 Wallet Audit:', { userId, action, success, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logSecurityEvent(userId: string | null, event: string, severity: string, metadata?: Record<string, any>): Promise<void> {
           console.log('🔒 Wallet Security:', { userId, event, severity, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logWalletOperation(userId: string, operation: string, amount?: number, transactionId?: string, metadata?: Record<string, any>): Promise<void> {
           console.log('💰 Wallet Operation:', { userId, operation, amount, transactionId, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logBalanceChange(userId: string, action: string, amount: number, transactionId: string, oldBalance?: number, newBalance?: number, metadata?: Record<string, any>): Promise<void> {
           console.log('📊 Balance Change:', { userId, action, amount, transactionId, oldBalance, newBalance, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logGameEvent(userId: string, gameId: string, event: string, amount?: number, metadata?: Record<string, any>): Promise<void> {
           console.log('🎮 Game Event:', { userId, gameId, event, amount, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logError(userId: string | null, error: string, level: string, metadata?: Record<string, any>): Promise<void> {
           console.error('❌ Wallet Error:', { userId, error, level, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async logSystemEvent(event: string, level: string, metadata?: Record<string, any>): Promise<void> {
           console.log('⚙️ Wallet System:', { event, level, metadata, timestamp: new Date().toISOString() })
         }
-        
+
         async searchAuditLogs(filters: any): Promise<any[]> {
           console.log('🔍 Audit Search:', filters)
           return []
         }
       }
-      
+
       // Create Redis-based transaction repository with adapter
       const { RedisTransactionRepository } = await import('./wallet/RedisTransactionRepository')
       const redisTransactionRepo = new RedisTransactionRepository()
-      
+
       // Adapter to match TransactionRepository interface expected by TransactionService
       const transactionRepositoryAdapter = {
         async create(transaction: any): Promise<any> {
@@ -194,69 +194,69 @@ const initializeWalletServices = async () => {
           }
           return await redisTransactionRepo.create(serviceTransaction)
         },
-        
+
         async findById(id: string) {
           return await redisTransactionRepo.findById(id)
         },
-        
+
         async findByUserId(userId: string, limit?: number, offset?: number) {
           return await redisTransactionRepo.findByUserId(userId, limit, offset)
         },
-        
+
         async update(id: string, updates: any) {
           return await redisTransactionRepo.update(id, updates)
         },
-        
+
         async delete(id: string) {
           return await redisTransactionRepo.delete(id)
         },
-        
+
         async findByFilter(filter: any) {
           return await redisTransactionRepo.findByFilter(filter)
         },
-        
+
         async getTransactionHistory(userId: string, filter?: any) {
           return await redisTransactionRepo.getTransactionHistory(userId, filter)
         },
-        
+
         async getTransactionsByGameRound(gameRoundId: string) {
           return await redisTransactionRepo.getTransactionsByGameRound(gameRoundId)
         },
-        
+
         async findPendingTransactions(userId: string) {
           return await redisTransactionRepo.findPendingTransactions(userId)
         },
-        
+
         async countTransactionsByType(userId: string, type: any) {
           return await redisTransactionRepo.countTransactionsByType(userId, type)
         },
-        
+
         async getTotalAmountByType(userId: string, type: any, from?: Date, to?: Date) {
           return await redisTransactionRepo.getTotalAmountByType(userId, type, from, to)
         }
       }
-      
+
       // Mock payment provider
       class MockPaymentProvider {
         async processDeposit(): Promise<any> {
           return { success: true, transactionId: `mock_${Date.now()}` }
         }
-        
+
         async processWithdrawal(): Promise<any> {
           return { success: true, transactionId: `mock_${Date.now()}` }
         }
-        
+
         async verifyPayment(transactionId: string): Promise<any> {
           return { verified: true, transactionId, status: 'confirmed' }
         }
       }
-      
+
       // Mock wallet repository
       class MockWalletRepository {
         async getUserBalance(userId: string) {
           return await redisBalanceRepository.getBalance(userId)
         }
-        
+
         async updateBalance(userId: string, amount: number) {
           const currentBalance = await redisBalanceRepository.getBalance(userId)
           if (!currentBalance) {
@@ -264,19 +264,19 @@ const initializeWalletServices = async () => {
           }
           return await redisBalanceRepository.updateBalance(userId, amount - currentBalance.amount, `update_${Date.now()}`)
         }
-        
+
         async lockBalanceForTransaction(userId: string): Promise<boolean> {
           return await redisBalanceRepository.lockBalance(userId)
         }
-        
+
         async unlockBalanceForTransaction(): Promise<boolean> {
           return true
         }
-        
+
         async validateBalance(userId: string, amount: number): Promise<boolean> {
           return await redisBalanceRepository.validateSufficientBalance(userId, amount)
         }
-        
+
         async getWalletStats(): Promise<any> {
           return {
             totalDeposits: 0,
@@ -291,13 +291,13 @@ const initializeWalletServices = async () => {
           }
         }
       }
-      
+
       const auditRepository = new SimpleAuditRepository()
       const auditService = new AuditService(auditRepository)
       transactionService = new TransactionService(transactionRepositoryAdapter)
       const paymentProvider = new MockPaymentProvider()
       const walletRepository = new MockWalletRepository()
-      
+
       walletService = new WalletService(
         walletRepository,
         transactionService,
@@ -305,7 +305,7 @@ const initializeWalletServices = async () => {
         auditService,
         paymentProvider
       )
-      
+
       console.log('✅ Redis wallet services initialized successfully')
     } else {
       console.warn('⚠️ Redis not configured - using fallback wallet implementation')

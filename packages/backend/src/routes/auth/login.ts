@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { LoginRequest, LoginResponse } from '@stake-games/shared'
+import type { LoginRequest, LoginResponse } from '@yois-games/shared'
 import { AuthService } from '../../services/auth/AuthService'
 
 // Validation schema for login request
@@ -108,10 +108,10 @@ export async function loginRoutes(
       // Rate limiting for login attempts
       const clientIp = request.ip
       const userAgent = request.headers['user-agent']
-      
+
       // In production, implement rate limiting here
       // Check for suspicious login patterns
-      
+
       // Log login attempt for security monitoring
       console.log('📝 Login attempt:', {
         ip: clientIp,
@@ -123,13 +123,13 @@ export async function loginRoutes(
     try {
       // Validate request body
       const validationResult = loginSchema.safeParse(request.body)
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map((err: any) => ({
           field: err.path.join('.'),
           message: err.message
         }))
-        
+
         return reply.status(400).send({
           success: false,
           error: 'Invalid request data',
@@ -143,7 +143,7 @@ export async function loginRoutes(
       const userAgent = request.headers['user-agent']
       const platform = request.headers['sec-ch-ua-platform']
       const browser = request.headers['sec-ch-ua']
-      
+
       const clientInfo = {
         ipAddress: request.ip,
         ...(userAgent ? { userAgent: Array.isArray(userAgent) ? userAgent[0] : userAgent } : {}),
@@ -163,9 +163,9 @@ export async function loginRoutes(
           userAgent: clientInfo.userAgent?.substring(0, 100)
         }
       })
-      
+
       const authResult = await authService.login(loginData, clientInfo)
-      
+
       console.log('✅ LOGIN: Login successful for user:', {
         userId: authResult.user.id,
         username: authResult.user.username,
@@ -173,7 +173,7 @@ export async function loginRoutes(
       })
 
       // Set refresh token cookie
-      const cookieMaxAge = loginData.rememberMe 
+      const cookieMaxAge = loginData.rememberMe
         ? 30 * 24 * 60 * 60 * 1000  // 30 days if remember me
         : 7 * 24 * 60 * 60 * 1000   // 7 days default
 
@@ -221,9 +221,9 @@ export async function loginRoutes(
         }
 
         // Invalid credentials
-        if (error.message.includes('Invalid email') || 
-            error.message.includes('Invalid password') ||
-            error.message.includes('password')) {
+        if (error.message.includes('Invalid email') ||
+          error.message.includes('Invalid password') ||
+          error.message.includes('password')) {
           return reply.status(401).send({
             success: false,
             error: 'Invalid email or password',
@@ -232,8 +232,8 @@ export async function loginRoutes(
         }
 
         // Account deactivated
-        if (error.message.includes('deactivated') || 
-            error.message.includes('inactive')) {
+        if (error.message.includes('deactivated') ||
+          error.message.includes('inactive')) {
           return reply.status(401).send({
             success: false,
             error: 'Account is deactivated. Please contact support.'
@@ -241,8 +241,8 @@ export async function loginRoutes(
         }
 
         // Two-factor authentication required
-        if (error.message.includes('2FA') || 
-            error.message.includes('two-factor')) {
+        if (error.message.includes('2FA') ||
+          error.message.includes('two-factor')) {
           return reply.status(400).send({
             success: false,
             error: 'Two-factor authentication code required',
@@ -290,7 +290,7 @@ export async function loginRoutes(
     preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
       // Extract user from JWT token (would be done by auth middleware)
       const authHeader = request.headers.authorization
-      
+
       if (!authHeader?.startsWith('Bearer ')) {
         return reply.status(401).send({
           success: false,
@@ -308,7 +308,7 @@ export async function loginRoutes(
       // Extract user ID from verified token (would be set by middleware)
       const userId = 'user-id-from-token' // Placeholder
       const sessionId = 'session-id-from-token' // Placeholder
-      
+
       const { allDevices = false } = request.body
 
       // Logout user
@@ -331,7 +331,7 @@ export async function loginRoutes(
 
         return reply.send({
           success: true,
-          message: allDevices 
+          message: allDevices
             ? 'Logged out from all devices'
             : 'Logged out successfully'
         })
@@ -346,7 +346,7 @@ export async function loginRoutes(
       const errorMessage = error instanceof Error ? error.message : 'Unknown logout error'
       fastify.log.error('Logout error: ' + errorMessage)
       console.error('❌ LOGOUT ERROR:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Logout failed'

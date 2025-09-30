@@ -5,16 +5,16 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { 
-  Transaction, 
-  TransactionFilter, 
-  TransactionHistory 
-} from '@stake-games/shared'
+import type {
+  Transaction,
+  TransactionFilter,
+  TransactionHistory
+} from '@yois-games/shared'
 
-import { 
-  TransactionType, 
-  TransactionStatus 
-} from '@stake-games/shared'
+import {
+  TransactionType,
+  TransactionStatus
+} from '@yois-games/shared'
 
 import { TransactionService } from '../../services/wallet/TransactionService'
 
@@ -38,7 +38,7 @@ interface TransactionRouteContext {
 // Middleware to extract user from JWT token
 async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return reply.status(401).send({
       success: false,
@@ -48,11 +48,11 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
 
   // In production, verify JWT token and extract user info
   const token = authHeader.substring(7)
-  // const user = await verifyAccessToken(token)
-  // request.user = user
-  
-  // For now, simulate authenticated user
-  (request as any).user = {
+    // const user = await verifyAccessToken(token)
+    // request.user = user
+
+    // For now, simulate authenticated user
+    (request as any).user = {
     id: 'user-123',
     username: 'testuser',
     email: 'test@example.com'
@@ -81,11 +81,11 @@ export async function transactionRoutes(
       minAmount?: number
       maxAmount?: number
     }
-    Reply: { 
+    Reply: {
       success: boolean
       transactions?: Transaction[]
       pagination?: any
-      error?: string 
+      error?: string
     }
   }>('/transactions', {
     schema: {
@@ -170,7 +170,7 @@ export async function transactionRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
+  }, async (request: FastifyRequest<{
     Querystring: {
       limit?: number
       offset?: number
@@ -185,10 +185,10 @@ export async function transactionRoutes(
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
-      
+
       // Validate query parameters
       const validationResult = transactionFilterSchema.safeParse(request.query)
-      
+
       if (!validationResult.success) {
         return reply.status(400).send({
           success: false,
@@ -223,7 +223,7 @@ export async function transactionRoutes(
 
     } catch (error) {
       fastify.log.error('Get transactions error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve transactions'
@@ -309,7 +309,7 @@ export async function transactionRoutes(
 
     } catch (error) {
       fastify.log.error('Get transaction error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve transaction'
@@ -383,8 +383,8 @@ export async function transactionRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
-    Querystring: { period?: string; groupBy?: string } 
+  }, async (request: FastifyRequest<{
+    Querystring: { period?: string; groupBy?: string }
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
@@ -422,7 +422,7 @@ export async function transactionRoutes(
 
     } catch (error) {
       fastify.log.error('Get transaction history error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve transaction history'
@@ -476,7 +476,7 @@ export async function transactionRoutes(
 
     } catch (error) {
       fastify.log.error('Get pending transactions error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve pending transactions'
@@ -573,7 +573,7 @@ export async function transactionRoutes(
           })
         }
       }
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to cancel transaction'
@@ -587,7 +587,7 @@ export async function transactionRoutes(
    */
   fastify.get<{
     Querystring: { period?: string }
-    Reply: { 
+    Reply: {
       success: boolean
       stats?: {
         totalTransactions: number
@@ -597,7 +597,7 @@ export async function transactionRoutes(
         byStatus: Record<string, number>
         trends: any[]
       }
-      error?: string 
+      error?: string
     }
   }>('/transactions/stats', {
     schema: {
@@ -633,8 +633,8 @@ export async function transactionRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
-    Querystring: { period?: string } 
+  }, async (request: FastifyRequest<{
+    Querystring: { period?: string }
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
@@ -696,7 +696,7 @@ export async function transactionRoutes(
 
     } catch (error) {
       fastify.log.error('Get transaction stats error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve transaction statistics'

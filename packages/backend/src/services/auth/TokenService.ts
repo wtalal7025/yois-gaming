@@ -5,7 +5,7 @@
 
 import * as jose from 'jose'
 import crypto from 'crypto'
-import type { JWTPayload } from '@stake-games/shared'
+import type { JWTPayload } from '@yois-games/shared'
 
 export class TokenService {
   private static readonly ACCESS_TOKEN_EXPIRY = '15m' // 15 minutes
@@ -29,7 +29,7 @@ export class TokenService {
    */
   static async generateAccessToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): Promise<string> {
     const secretKey = this.getSecretKey(this.JWT_SECRET)
-    
+
     const jwt = await new jose.SignJWT({
       sub: payload.sub,
       username: payload.username,
@@ -55,7 +55,7 @@ export class TokenService {
    */
   static async generateRefreshToken(userId: string, sessionId: string): Promise<string> {
     const secretKey = this.getSecretKey(this.REFRESH_SECRET)
-    
+
     const jwt = await new jose.SignJWT({
       sub: userId,
       sessionId,
@@ -79,7 +79,7 @@ export class TokenService {
   static async verifyAccessToken(token: string): Promise<JWTPayload | null> {
     try {
       const secretKey = this.getSecretKey(this.JWT_SECRET)
-      
+
       const { payload } = await jose.jwtVerify(token, secretKey, {
         issuer: this.ISSUER,
         audience: this.AUDIENCE
@@ -108,7 +108,7 @@ export class TokenService {
   static async verifyRefreshToken(token: string): Promise<{ sub: string; sessionId: string } | null> {
     try {
       const secretKey = this.getSecretKey(this.REFRESH_SECRET)
-      
+
       const { payload } = await jose.jwtVerify(token, secretKey, {
         issuer: this.ISSUER,
         audience: this.AUDIENCE
@@ -221,7 +221,7 @@ export class TokenService {
    * @returns Promise with access and refresh tokens plus expiry
    */
   static async createTokenPair(
-    user: { id: string; username: string; email: string; role?: string }, 
+    user: { id: string; username: string; email: string; role?: string },
     sessionId: string
   ): Promise<{ accessToken: string; refreshToken: string; expiresAt: string }> {
     const [accessToken, refreshToken] = await Promise.all([

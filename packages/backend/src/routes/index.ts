@@ -23,8 +23,8 @@ import { authService, emailService, storageService, walletService, getTransactio
 export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
   // Health check endpoint
   fastify.get('/health', async () => {
-    return { 
-      status: 'healthy', 
+    return {
+      status: 'healthy',
       timestamp: new Date().toISOString(),
       service: 'authentication-api'
     }
@@ -33,7 +33,7 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
   // API info endpoint  
   fastify.get('/info', async () => {
     return {
-      name: '@stake-games/backend',
+      name: '@yois-games/backend',
       version: '1.0.0',
       status: 'running',
       endpoints: {
@@ -53,7 +53,7 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
       reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
       reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
       reply.header('Access-Control-Allow-Credentials', 'true')
-      
+
       if (request.method === 'OPTIONS') {
         reply.status(200).send()
       }
@@ -79,7 +79,7 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
       reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
       reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
       reply.header('Access-Control-Allow-Credentials', 'true')
-      
+
       if (request.method === 'OPTIONS') {
         reply.status(200).send()
       }
@@ -102,7 +102,7 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
         reply.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         reply.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         reply.header('Access-Control-Allow-Credentials', 'true')
-        
+
         if (request.method === 'OPTIONS') {
           reply.status(200).send()
         }
@@ -110,7 +110,7 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
 
       // Create wallet contexts - each route has different context requirements
       const walletContext = { walletService: walletService! } // Non-null assertion since we checked above
-      
+
       // Get the actual transaction service
       const actualTransactionService = getTransactionService()
       const transactionContext = actualTransactionService
@@ -120,14 +120,14 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
       // Register wallet route modules with proper contexts
       try {
         await balanceRoutes(fastify, walletContext)
-        
+
         // Only register transaction routes if transaction service is available
         if (transactionContext) {
           await transactionRoutes(fastify, transactionContext)
         } else {
           console.warn('⚠️ Transaction service not available, skipping transaction routes')
         }
-        
+
         await depositRoutes(fastify, walletContext)
         await withdrawRoutes(fastify, walletContext)
         console.log('✅ Wallet routes registered successfully with Redis persistence')
@@ -144,4 +144,4 @@ export async function registerRoutes(fastify: FastifyInstance): Promise<void> {
 }
 
 // Export for backward compatibility
-export {}
+export { }

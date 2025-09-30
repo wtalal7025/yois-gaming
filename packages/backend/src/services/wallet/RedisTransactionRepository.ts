@@ -5,7 +5,7 @@
  */
 
 import { getRedisService } from '../cache/RedisService'
-import type { Transaction, TransactionType, TransactionStatus, TransactionFilter, TransactionHistory } from '@stake-games/shared'
+import type { Transaction, TransactionType, TransactionStatus, TransactionFilter, TransactionHistory } from '@yois-games/shared'
 
 // Internal transaction type that matches what TransactionService expects
 interface ServiceTransaction {
@@ -121,7 +121,7 @@ export class RedisTransactionRepository {
     try {
       const id = `txn_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const now = new Date().toISOString()
-      
+
       const transaction: ServiceTransaction = {
         ...transactionData,
         id,
@@ -182,7 +182,7 @@ export class RedisTransactionRepository {
       const redis = this.getRedis()
       const userKey = this.getUserTransactionsKey(userId)
       const transactionIds = await redis.lRange(userKey, offset, offset + limit - 1)
-      
+
       if (!transactionIds.length) return []
 
       const transactions: Transaction[] = []
@@ -230,7 +230,7 @@ export class RedisTransactionRepository {
   async delete(id: string): Promise<boolean> {
     try {
       const redis = this.getRedis()
-      
+
       // Get transaction to find userId for cleanup
       const existing = await redis.get(this.getTransactionKey(id))
       if (!existing) return false
@@ -267,7 +267,7 @@ export class RedisTransactionRepository {
 
       // Get all user transactions
       const allTransactions = await this.findByUserId(filter.userId, filter.limit || 100, filter.offset || 0)
-      
+
       // Apply filters
       let filtered = allTransactions
 
@@ -305,13 +305,13 @@ export class RedisTransactionRepository {
       // Apply sorting
       if (filter.sortBy) {
         filtered.sort((a, b) => {
-          const aVal = filter.sortBy === 'amount' ? a.amount : 
-                       filter.sortBy === 'createdAt' ? new Date(a.createdAt).getTime() :
-                       new Date(a.processedAt).getTime()
-          const bVal = filter.sortBy === 'amount' ? b.amount : 
-                       filter.sortBy === 'createdAt' ? new Date(b.createdAt).getTime() :
-                       new Date(b.processedAt).getTime()
-          
+          const aVal = filter.sortBy === 'amount' ? a.amount :
+            filter.sortBy === 'createdAt' ? new Date(a.createdAt).getTime() :
+              new Date(a.processedAt).getTime()
+          const bVal = filter.sortBy === 'amount' ? b.amount :
+            filter.sortBy === 'createdAt' ? new Date(b.createdAt).getTime() :
+              new Date(b.processedAt).getTime()
+
           return filter.sortOrder === 'desc' ? bVal - aVal : aVal - bVal
         })
       }
@@ -328,8 +328,8 @@ export class RedisTransactionRepository {
    */
   async getTransactionHistory(userId: string, filter?: TransactionFilter): Promise<TransactionHistory> {
     try {
-      const transactions = filter ? 
-        await this.findByFilter({ ...filter, userId }) : 
+      const transactions = filter ?
+        await this.findByFilter({ ...filter, userId }) :
         await this.findByUserId(userId, 50, 0)
 
       const total = transactions.length
@@ -365,7 +365,7 @@ export class RedisTransactionRepository {
       const redis = this.getRedis()
       const gameKey = this.getGameTransactionsKey(gameRoundId)
       const transactionIds = await redis.lRange(gameKey, 0, -1)
-      
+
       if (!transactionIds.length) return []
 
       const transactions: Transaction[] = []

@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { WithdrawRequest } from '@stake-games/shared'
+import type { WithdrawRequest } from '@yois-games/shared'
 import { WalletService } from '../../services/wallet/WalletService'
 
 // Validation schema for withdrawal request
@@ -40,7 +40,7 @@ interface WithdrawRouteContext {
 // Middleware to extract user from JWT token
 async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return reply.status(401).send({
       success: false,
@@ -50,11 +50,11 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
 
   // In production, verify JWT token and extract user info
   const token = authHeader.substring(7)
-  // const user = await verifyAccessToken(token)
-  // request.user = user
-  
-  // For now, simulate authenticated user
-  (request as any).user = {
+    // const user = await verifyAccessToken(token)
+    // request.user = user
+
+    // For now, simulate authenticated user
+    (request as any).user = {
     id: 'user-123',
     username: 'testuser',
     email: 'test@example.com'
@@ -73,7 +73,7 @@ export async function withdrawRoutes(
    */
   fastify.post<{
     Body: WithdrawRequest
-    Reply: { 
+    Reply: {
       success: boolean
       transaction?: any
       estimatedProcessingTime?: string
@@ -145,13 +145,13 @@ export async function withdrawRoutes(
     preHandler: [authenticateUser, async (request: FastifyRequest, reply: FastifyReply) => {
       // Enhanced security checks for withdrawals
       const clientIp = request.ip
-      
+
       // In production, implement additional security measures:
       // - Check for suspicious withdrawal patterns
       // - Verify user identity/KYC status
       // - Check withdrawal limits and cooling periods
       // - Implement additional 2FA verification
-      
+
       fastify.log.info('Withdrawal attempt', {
         ip: clientIp,
         timestamp: new Date().toISOString()
@@ -160,16 +160,16 @@ export async function withdrawRoutes(
   }, async (request: FastifyRequest<{ Body: WithdrawRequest }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
-      
+
       // Validate request body
       const validationResult = withdrawRequestSchema.safeParse(request.body)
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map((err: any) => ({
           field: err.path.join('.'),
           message: err.message
         }))
-        
+
         return reply.status(400).send({
           success: false,
           error: 'Validation failed',
@@ -190,9 +190,9 @@ export async function withdrawRoutes(
 
       // Additional validation based on payment method
       if (withdrawData.paymentMethod === 'bank_transfer') {
-        if (!withdrawData.paymentDetails?.bankAccount || 
-            !withdrawData.paymentDetails?.routingNumber || 
-            !withdrawData.paymentDetails?.accountHolderName) {
+        if (!withdrawData.paymentDetails?.bankAccount ||
+          !withdrawData.paymentDetails?.routingNumber ||
+          !withdrawData.paymentDetails?.accountHolderName) {
           return reply.status(400).send({
             success: false,
             error: 'Bank account details are required'
@@ -201,8 +201,8 @@ export async function withdrawRoutes(
       }
 
       if (withdrawData.paymentMethod === 'crypto') {
-        if (!withdrawData.paymentDetails?.walletAddress || 
-            !withdrawData.paymentDetails?.currency) {
+        if (!withdrawData.paymentDetails?.walletAddress ||
+          !withdrawData.paymentDetails?.currency) {
           return reply.status(400).send({
             success: false,
             error: 'Crypto wallet address and currency are required'
@@ -237,17 +237,17 @@ export async function withdrawRoutes(
           fees = Math.max(5.00, withdrawData.amount * 0.01) // $5 or 1%, whichever is higher
           processingTime = '1-3 business days'
           break
-        
+
         case 'crypto':
           fees = withdrawData.amount * 0.005 // 0.5%
           processingTime = '30 minutes - 2 hours'
           break
-        
+
         case 'paypal':
           fees = withdrawData.amount * 0.025 // 2.5%
           processingTime = 'Within 24 hours'
           break
-        
+
         case 'skrill':
           fees = withdrawData.amount * 0.02 // 2%
           processingTime = 'Within 24 hours'
@@ -335,7 +335,7 @@ export async function withdrawRoutes(
    * Get available withdrawal methods
    */
   fastify.get<{
-    Reply: { 
+    Reply: {
       success: boolean
       methods?: Array<{
         id: string
@@ -348,7 +348,7 @@ export async function withdrawRoutes(
         isEnabled: boolean
         requirements: string[]
       }>
-      error?: string 
+      error?: string
     }
   }>('/withdraw/methods', {
     schema: {
@@ -453,7 +453,7 @@ export async function withdrawRoutes(
 
     } catch (error) {
       fastify.log.error('Get withdrawal methods error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve withdrawal methods'
@@ -466,7 +466,7 @@ export async function withdrawRoutes(
    * Get user's withdrawal limits and restrictions
    */
   fastify.get<{
-    Reply: { 
+    Reply: {
       success: boolean
       limits?: {
         dailyLimit: number
@@ -481,7 +481,7 @@ export async function withdrawRoutes(
         hasActiveCooldown: boolean
         cooldownEndsAt?: string
       }
-      error?: string 
+      error?: string
     }
   }>('/withdraw/limits', {
     schema: {
@@ -538,7 +538,7 @@ export async function withdrawRoutes(
 
     } catch (error) {
       fastify.log.error('Get withdrawal limits error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve withdrawal limits'
@@ -552,11 +552,11 @@ export async function withdrawRoutes(
    */
   fastify.get<{
     Querystring: { limit?: number; offset?: number; status?: string }
-    Reply: { 
+    Reply: {
       success: boolean
       withdrawals?: any[]
       pagination?: any
-      error?: string 
+      error?: string
     }
   }>('/withdraw/history', {
     schema: {
@@ -616,8 +616,8 @@ export async function withdrawRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
-    Querystring: { limit?: number; offset?: number; status?: string } 
+  }, async (request: FastifyRequest<{
+    Querystring: { limit?: number; offset?: number; status?: string }
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
@@ -640,7 +640,7 @@ export async function withdrawRoutes(
 
     } catch (error) {
       fastify.log.error('Get withdrawal history error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve withdrawal history'
@@ -654,7 +654,7 @@ export async function withdrawRoutes(
    */
   fastify.get<{
     Params: { id: string }
-    Reply: { 
+    Reply: {
       success: boolean
       withdrawal?: {
         id: string
@@ -668,7 +668,7 @@ export async function withdrawRoutes(
         failureReason?: string
         estimatedCompletion?: string
       }
-      error?: string 
+      error?: string
     }
   }>('/withdraw/:id/status', {
     schema: {
@@ -719,7 +719,7 @@ export async function withdrawRoutes(
 
       // In production, fetch transaction from TransactionService
       // Verify it belongs to the user and is a withdrawal type
-      
+
       // For now, return mock data
       const mockWithdrawal = {
         id,
@@ -739,7 +739,7 @@ export async function withdrawRoutes(
 
     } catch (error) {
       fastify.log.error('Get withdrawal status error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve withdrawal status'

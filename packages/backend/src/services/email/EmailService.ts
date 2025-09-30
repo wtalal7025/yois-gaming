@@ -14,7 +14,7 @@ import type {
   TransactionNotificationData,
   EmailOptions,
   EmailTemplateType
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 export class EmailService {
   private resend: Resend
@@ -32,12 +32,12 @@ export class EmailService {
    * @returns Promise with email result
    */
   async sendWelcomeEmail(
-    data: WelcomeEmailData, 
+    data: WelcomeEmailData,
     options?: EmailOptions
   ): Promise<EmailResult> {
     try {
       const template = this.generateWelcomeTemplate(data)
-      
+
       const emailData = {
         from: `${this.config.fromName} <${this.config.fromEmail}>`,
         to: data.email,
@@ -59,10 +59,10 @@ export class EmailService {
         }
       }
 
-      console.log('✅ Welcome email sent successfully:', { 
+      console.log('✅ Welcome email sent successfully:', {
         messageId: result.data?.id,
         email: data.email,
-        username: data.username 
+        username: data.username
       })
 
       return {
@@ -72,7 +72,7 @@ export class EmailService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       console.error('❌ Welcome email error:', errorMessage)
-      
+
       return {
         success: false,
         error: errorMessage
@@ -92,7 +92,7 @@ export class EmailService {
   ): Promise<EmailResult> {
     try {
       const template = this.generatePasswordResetTemplate(data)
-      
+
       const emailData = {
         from: `${this.config.fromName} <${this.config.fromEmail}>`,
         to: data.email,
@@ -114,10 +114,10 @@ export class EmailService {
         }
       }
 
-      console.log('✅ Password reset email sent successfully:', { 
+      console.log('✅ Password reset email sent successfully:', {
         messageId: result.data?.id,
         email: data.email,
-        username: data.username 
+        username: data.username
       })
 
       return {
@@ -127,7 +127,7 @@ export class EmailService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       console.error('❌ Password reset email error:', errorMessage)
-      
+
       return {
         success: false,
         error: errorMessage
@@ -147,7 +147,7 @@ export class EmailService {
   ): Promise<EmailResult> {
     try {
       const template = this.generateEmailVerificationTemplate(data)
-      
+
       const emailData = {
         from: `${this.config.fromName} <${this.config.fromEmail}>`,
         to: data.email,
@@ -169,10 +169,10 @@ export class EmailService {
         }
       }
 
-      console.log('✅ Email verification sent successfully:', { 
+      console.log('✅ Email verification sent successfully:', {
         messageId: result.data?.id,
         email: data.email,
-        username: data.username 
+        username: data.username
       })
 
       return {
@@ -182,7 +182,7 @@ export class EmailService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       console.error('❌ Email verification error:', errorMessage)
-      
+
       return {
         success: false,
         error: errorMessage
@@ -202,7 +202,7 @@ export class EmailService {
   ): Promise<EmailResult> {
     try {
       const template = this.generateTransactionNotificationTemplate(data)
-      
+
       const emailData = {
         from: `${this.config.fromName} <${this.config.fromEmail}>`,
         to: data.email,
@@ -224,7 +224,7 @@ export class EmailService {
         }
       }
 
-      console.log('✅ Transaction notification sent successfully:', { 
+      console.log('✅ Transaction notification sent successfully:', {
         messageId: result.data?.id,
         email: data.email,
         transactionType: data.transactionType,
@@ -238,7 +238,7 @@ export class EmailService {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       console.error('❌ Transaction notification error:', errorMessage)
-      
+
       return {
         success: false,
         error: errorMessage
@@ -252,7 +252,7 @@ export class EmailService {
    */
   private generateWelcomeTemplate(data: WelcomeEmailData) {
     const subject = `Welcome to Gaming Platform, ${data.username}!`
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -327,7 +327,7 @@ Gaming Platform Team
    */
   private generatePasswordResetTemplate(data: PasswordResetEmailData) {
     const subject = `Reset your Gaming Platform password`
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -402,7 +402,7 @@ Gaming Platform Team
    */
   private generateEmailVerificationTemplate(data: EmailVerificationData) {
     const subject = `Verify your Gaming Platform email address`
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -485,7 +485,7 @@ Gaming Platform Team
 
     const typeInfo = transactionTypeMap[data.transactionType]
     const subject = `${typeInfo.emoji} ${typeInfo.title} - ${data.amount} ${data.currency}`
-    
+
     const html = `
       <!DOCTYPE html>
       <html>

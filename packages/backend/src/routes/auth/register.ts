@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { RegisterRequest, RegisterResponse, WelcomeEmailData } from '@stake-games/shared'
+import type { RegisterRequest, RegisterResponse, WelcomeEmailData } from '@yois-games/shared'
 import { AuthService } from '../../services/auth/AuthService'
 import { EmailService } from '../../services/email/EmailService'
 
@@ -138,7 +138,7 @@ export async function registerRoutes(
     preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
       // Rate limiting for registration attempts
       // This would be implemented with fastify-rate-limit plugin
-      
+
       // Basic IP rate limiting (simplified)
       const clientIp = request.ip
       // In production, implement proper rate limiting here
@@ -147,13 +147,13 @@ export async function registerRoutes(
     try {
       // Validate request body with Zod
       const validationResult = registerSchema.safeParse(request.body)
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map(err => ({
           field: err.path.join('.'),
           message: err.message
         }))
-        
+
         return reply.status(400).send({
           success: false,
           error: 'Validation failed',
@@ -169,11 +169,11 @@ export async function registerRoutes(
         const today = new Date()
         let age = today.getFullYear() - birthDate.getFullYear()
         const monthDiff = today.getMonth() - birthDate.getMonth()
-        
+
         if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
           age--
         }
-        
+
         if (age < 18) {
           return reply.status(400).send({
             success: false,
@@ -186,15 +186,15 @@ export async function registerRoutes(
       const userAgent = request.headers['user-agent']
       const platform = request.headers['sec-ch-ua-platform']
       const browser = request.headers['sec-ch-ua']
-      
+
       const clientInfo = {
         ipAddress: request.ip,
         userAgent: Array.isArray(userAgent) ? userAgent[0] : userAgent,
         deviceInfo: {
           platform: typeof platform === 'string' ? platform.replace(/"/g, '') :
-                   Array.isArray(platform) ? platform[0]?.replace(/"/g, '') : undefined,
+            Array.isArray(platform) ? platform[0]?.replace(/"/g, '') : undefined,
           browser: typeof browser === 'string' ? browser.split('"')[1] :
-                  Array.isArray(browser) ? browser[0]?.split('"')[1] : undefined,
+            Array.isArray(browser) ? browser[0]?.split('"')[1] : undefined,
           mobile: request.headers['sec-ch-ua-mobile'] === '?1'
         }
       }
@@ -208,9 +208,9 @@ export async function registerRoutes(
           userAgent: clientInfo.userAgent?.substring(0, 100)
         }
       })
-      
+
       const authResult = await authService.register(registerData, clientInfo)
-      
+
       console.log('✅ REGISTRATION: Registration successful for user:', {
         userId: authResult.user.id,
         username: authResult.user.username,
@@ -226,7 +226,7 @@ export async function registerRoutes(
         }
 
         const emailResult = await emailService.sendWelcomeEmail(welcomeEmailData)
-        
+
         if (emailResult.success) {
           console.log('✅ Welcome email sent successfully to:', authResult.user.email)
         } else {
@@ -264,17 +264,17 @@ export async function registerRoutes(
 
       // Handle specific error types
       if (error instanceof Error) {
-        if (error.message.includes('already registered') || 
-            error.message.includes('already taken')) {
+        if (error.message.includes('already registered') ||
+          error.message.includes('already taken')) {
           return reply.status(409).send({
             success: false,
             error: error.message
           })
         }
-        
+
         if (error.message.includes('password') ||
-            error.message.includes('validation') ||
-            error.message.includes('terms')) {
+          error.message.includes('validation') ||
+          error.message.includes('terms')) {
           return reply.status(400).send({
             success: false,
             error: error.message

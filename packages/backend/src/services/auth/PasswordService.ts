@@ -4,11 +4,11 @@
  */
 
 import bcrypt from 'bcryptjs'
-import type { PasswordStrength } from '@stake-games/shared'
+import type { PasswordStrength } from '@yois-games/shared'
 
 export class PasswordService {
   private static readonly SALT_ROUNDS = 12
-  
+
   // Reason: Higher cost factor for better security, but still reasonable performance
   private static readonly MIN_PASSWORD_LENGTH = 8
   private static readonly MAX_PASSWORD_LENGTH = 128
@@ -173,7 +173,7 @@ export class PasswordService {
     const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const numbers = '0123456789'
     const specialChars = '!@#$%^&*()_+-=[]{}|;:,.<>?'
-    
+
     const allChars = lowercase + uppercase + numbers + specialChars
     let password = ''
 

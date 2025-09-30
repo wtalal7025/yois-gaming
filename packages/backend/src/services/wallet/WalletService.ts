@@ -11,12 +11,12 @@ import type {
   WithdrawalRequest,
   TransferRequest,
   WalletStats
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 import {
   TransactionTypeEnum,
   TransactionStatusEnum
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 import { TransactionService } from './TransactionService'
 import { BalanceService } from './BalanceService'
@@ -67,7 +67,7 @@ export class WalletService {
   async getBalance(userId: string): Promise<Balance> {
     try {
       const balance = await this.walletRepository.getUserBalance(userId)
-      
+
       if (!balance) {
         // Initialize balance for new user
         return await this.walletRepository.updateBalance(userId, 100.00) // Starting bonus
@@ -387,9 +387,9 @@ export class WalletService {
    * @param request - Transfer request
    * @returns Promise with transaction results
    */
-  async processTransfer(fromUserId: string, toUserId: string, request: TransferRequest): Promise<{ 
-    debitTransaction: Transaction; 
-    creditTransaction: Transaction 
+  async processTransfer(fromUserId: string, toUserId: string, request: TransferRequest): Promise<{
+    debitTransaction: Transaction;
+    creditTransaction: Transaction
   }> {
     try {
       if (request.amount <= 0) {

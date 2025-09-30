@@ -12,16 +12,18 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
     // Modules
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
-
     // Emit
     "declaration": true,
     "declarationMap": true,
@@ -31,40 +33,50 @@
     "noEmit": false,
     "importHelpers": true,
     "downlevelIteration": true,
-
     // JavaScript Support
     "allowJs": true,
     "checkJs": false,
-
     // Interop Constraints
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-
     // Language and Environment
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": true,
-
     // Projects
     "composite": true,
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-
     // Completeness
     "skipLibCheck": true,
-
     // Path Mapping for Monorepo
     "baseUrl": ".",
     "paths": {
-      "@stake-games/shared": ["./packages/shared/src"],
-      "@stake-games/shared/*": ["./packages/shared/src/*"],
-      "@stake-games/game-engine": ["./packages/game-engine/src"],
-      "@stake-games/game-engine/*": ["./packages/game-engine/src/*"],
-      "@stake-games/frontend": ["./packages/frontend/src"],
-      "@stake-games/frontend/*": ["./packages/frontend/src/*"],
-      "@stake-games/backend": ["./packages/backend/src"],
-      "@stake-games/backend/*": ["./packages/backend/src/*"]
+      "@yois-games/shared": [
+        "./packages/shared/src"
+      ],
+      "@yois-games/shared/*": [
+        "./packages/shared/src/*"
+      ],
+      "@yois-games/game-engine": [
+        "./packages/game-engine/src"
+      ],
+      "@yois-games/game-engine/*": [
+        "./packages/game-engine/src/*"
+      ],
+      "@yois-games/frontend": [
+        "./packages/frontend/src"
+      ],
+      "@yois-games/frontend/*": [
+        "./packages/frontend/src/*"
+      ],
+      "@yois-games/backend": [
+        "./packages/backend/src"
+      ],
+      "@yois-games/backend/*": [
+        "./packages/backend/src/*"
+      ]
     }
   },
   "include": [

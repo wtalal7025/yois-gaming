@@ -4,7 +4,7 @@
  * with atomic operations and concurrency protection
  */
 
-import type { Balance } from '@stake-games/shared'
+import type { Balance } from '@yois-games/shared'
 
 // Reason: Interface for database operations, will be implemented with actual DB later
 interface BalanceRepository {
@@ -44,7 +44,7 @@ export class BalanceService {
   async getBalance(userId: string): Promise<Balance | null> {
     try {
       const balance = await this.balanceRepository.getBalance(userId)
-      
+
       if (!balance) {
         // Create initial balance for new user
         return await this.balanceRepository.createBalance(userId, 100.00) // Starting bonus
@@ -257,7 +257,7 @@ export class BalanceService {
 
     // Acquire locks for both users in consistent order to prevent deadlocks
     const userIds = [fromUserId, toUserId].sort()
-    
+
     try {
       // Lock both user balances
       for (const userId of userIds) {
@@ -344,7 +344,7 @@ export class BalanceService {
     // Wait for any existing lock to be released
     let attempts = 0
     const maxAttempts = 50 // 5 seconds timeout
-    
+
     while (this.balanceLocks.has(userId)) {
       if (attempts >= maxAttempts) {
         throw new Error('Balance lock timeout - operation aborted')

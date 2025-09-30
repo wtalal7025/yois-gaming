@@ -3,7 +3,7 @@
  * Handles user session management, storage, and cleanup
  */
 
-import type { UserSession } from '@stake-games/shared'
+import type { UserSession } from '@yois-games/shared'
 import { TokenService } from './TokenService'
 
 // Reason: Interface for database operations, will be implemented with actual DB later
@@ -77,7 +77,7 @@ export class SessionService {
    */
   async getSessionByToken(sessionToken: string): Promise<UserSession | null> {
     const session = await this.repository.findByToken(sessionToken)
-    
+
     if (!session || !session.isActive) {
       return null
     }
@@ -109,7 +109,7 @@ export class SessionService {
     const sessions = await this.repository.findByUserId(userId)
     const now = new Date()
 
-    return sessions.filter(session => 
+    return sessions.filter(session =>
       session.isActive && new Date(session.expiresAt) > now
     )
   }
@@ -190,7 +190,7 @@ export class SessionService {
     timeToExpiry: number
   }> {
     const session = await this.getSessionByToken(sessionToken)
-    
+
     if (!session) {
       return {
         session: null,
@@ -210,7 +210,7 @@ export class SessionService {
       // Extend session by 7 days
       const newExpiryDate = new Date()
       newExpiryDate.setDate(newExpiryDate.getDate() + 7)
-      
+
       await this.repository.update(session.id, {
         expiresAt: newExpiryDate.toISOString(),
         lastUsedAt: new Date().toISOString()
@@ -247,33 +247,33 @@ export class SessionService {
     const sessions = await this.repository.findByUserId(userId)
     const now = new Date()
 
-    const activeSessions = sessions.filter(s => 
+    const activeSessions = sessions.filter(s =>
       s.isActive && new Date(s.expiresAt) > now
     ).length
 
-    const expiredSessions = sessions.filter(s => 
+    const expiredSessions = sessions.filter(s =>
       !s.isActive || new Date(s.expiresAt) <= now
     ).length
 
-    const lastActivity = sessions.length > 0 
+    const lastActivity = sessions.length > 0
       ? sessions.reduce((latest, session) => {
-          const sessionTime = new Date(session.lastUsedAt)
-          const latestTime = latest ? new Date(latest) : new Date(0)
-          return sessionTime > latestTime ? session.lastUsedAt : latest
-        }, sessions[0]?.lastUsedAt)
+        const sessionTime = new Date(session.lastUsedAt)
+        const latestTime = latest ? new Date(latest) : new Date(0)
+        return sessionTime > latestTime ? session.lastUsedAt : latest
+      }, sessions[0]?.lastUsedAt)
       : null
 
     const mostRecentSession = sessions.length > 0
       ? sessions.reduce((latest, session) => {
-          const sessionTime = new Date(session.lastUsedAt)
-          const latestTime = latest ? new Date(latest.lastUsedAt) : new Date()
-          return sessionTime > latestTime ? session : latest
-        }, sessions[0])
+        const sessionTime = new Date(session.lastUsedAt)
+        const latestTime = latest ? new Date(latest.lastUsedAt) : new Date()
+        return sessionTime > latestTime ? session : latest
+      }, sessions[0])
       : null
 
-    const mostRecentDevice = mostRecentSession?.deviceInfo?.platform || 
-                           mostRecentSession?.userAgent?.split(' ')[0] || 
-                           null
+    const mostRecentDevice = mostRecentSession?.deviceInfo?.platform ||
+      mostRecentSession?.userAgent?.split(' ')[0] ||
+      null
 
     return {
       totalSessions: sessions.length,
@@ -303,13 +303,13 @@ export class SessionService {
    */
   async enforceSessionLimit(userId: string, maxSessions: number = 5): Promise<number> {
     const activeSessions = await this.getActiveSessions(userId)
-    
+
     if (activeSessions.length <= maxSessions) {
       return 0
     }
 
     // Sort by last used time, oldest first
-    const sortedSessions = activeSessions.sort((a, b) => 
+    const sortedSessions = activeSessions.sort((a, b) =>
       new Date(a.lastUsedAt).getTime() - new Date(b.lastUsedAt).getTime()
     )
 

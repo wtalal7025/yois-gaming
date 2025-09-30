@@ -31,7 +31,7 @@ for (const envPath of envPaths) {
 
 import { supabaseService } from '../database/supabase'
 import { PasswordService } from '../services/auth/PasswordService'
-import type { User } from '@stake-games/shared'
+import type { User } from '@yois-games/shared'
 
 interface CreateUserData {
   username: string

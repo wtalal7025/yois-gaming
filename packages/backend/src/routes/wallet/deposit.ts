@@ -5,7 +5,7 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import type { DepositRequest } from '@stake-games/shared'
+import type { DepositRequest } from '@yois-games/shared'
 import { WalletService } from '../../services/wallet/WalletService'
 
 // Validation schema for deposit request
@@ -44,7 +44,7 @@ interface DepositRouteContext {
 // Middleware to extract user from JWT token
 async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   const authHeader = request.headers.authorization
-  
+
   if (!authHeader?.startsWith('Bearer ')) {
     return reply.status(401).send({
       success: false,
@@ -54,11 +54,11 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
 
   // In production, verify JWT token and extract user info
   const token = authHeader.substring(7)
-  // const user = await verifyAccessToken(token)
-  // request.user = user
-  
-  // For now, simulate authenticated user
-  (request as any).user = {
+    // const user = await verifyAccessToken(token)
+    // request.user = user
+
+    // For now, simulate authenticated user
+    (request as any).user = {
     id: 'user-123',
     username: 'testuser',
     email: 'test@example.com'
@@ -77,7 +77,7 @@ export async function depositRoutes(
    */
   fastify.post<{
     Body: DepositRequest
-    Reply: { 
+    Reply: {
       success: boolean
       transaction?: any
       paymentUrl?: string
@@ -157,7 +157,7 @@ export async function depositRoutes(
     preHandler: [authenticateUser, async (request: FastifyRequest, reply: FastifyReply) => {
       // Rate limiting for deposit attempts
       const clientIp = request.ip
-      
+
       // In production, implement rate limiting here
       // Log deposit attempt for security monitoring
       fastify.log.info('Deposit attempt', {
@@ -168,16 +168,16 @@ export async function depositRoutes(
   }, async (request: FastifyRequest<{ Body: DepositRequest }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
-      
+
       // Validate request body
       const validationResult = depositRequestSchema.safeParse(request.body)
-      
+
       if (!validationResult.success) {
         const errors = validationResult.error.errors.map((err: any) => ({
           field: err.path.join('.'),
           message: err.message
         }))
-        
+
         return reply.status(400).send({
           success: false,
           error: 'Validation failed',
@@ -189,10 +189,10 @@ export async function depositRoutes(
 
       // Additional validation based on payment method
       if (depositData.paymentMethod === 'credit_card' || depositData.paymentMethod === 'debit_card') {
-        if (!depositData.paymentDetails?.cardNumber || 
-            !depositData.paymentDetails?.expiryMonth || 
-            !depositData.paymentDetails?.expiryYear || 
-            !depositData.paymentDetails?.cvv) {
+        if (!depositData.paymentDetails?.cardNumber ||
+          !depositData.paymentDetails?.expiryMonth ||
+          !depositData.paymentDetails?.expiryYear ||
+          !depositData.paymentDetails?.cvv) {
           return reply.status(400).send({
             success: false,
             error: 'Credit/debit card details are required'
@@ -200,8 +200,8 @@ export async function depositRoutes(
         }
 
         // Basic card number validation (Luhn algorithm would be used in production)
-        if (depositData.paymentDetails.cardNumber.length < 13 || 
-            depositData.paymentDetails.cardNumber.length > 19) {
+        if (depositData.paymentDetails.cardNumber.length < 13 ||
+          depositData.paymentDetails.cardNumber.length > 19) {
           return reply.status(400).send({
             success: false,
             error: 'Invalid card number'
@@ -210,8 +210,8 @@ export async function depositRoutes(
       }
 
       if (depositData.paymentMethod === 'crypto') {
-        if (!depositData.paymentDetails?.walletAddress || 
-            !depositData.paymentDetails?.currency) {
+        if (!depositData.paymentDetails?.walletAddress ||
+          !depositData.paymentDetails?.currency) {
           return reply.status(400).send({
             success: false,
             error: 'Crypto wallet address and currency are required'
@@ -240,12 +240,12 @@ export async function depositRoutes(
           response.paymentUrl = `crypto://deposit/${transaction.id}`
           response.qrCode = `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==` // Placeholder QR code
           break
-        
+
         case 'paypal':
         case 'skrill':
           response.paymentUrl = `https://demo-payment.example.com/redirect/${transaction.id}`
           break
-        
+
         case 'bank_transfer':
           response.bankDetails = {
             accountNumber: 'DEMO-BANK-123456',
@@ -270,8 +270,8 @@ export async function depositRoutes(
 
       // Handle specific error types
       if (error instanceof Error) {
-        if (error.message.includes('Minimum deposit') || 
-            error.message.includes('Maximum deposit')) {
+        if (error.message.includes('Minimum deposit') ||
+          error.message.includes('Maximum deposit')) {
           return reply.status(400).send({
             success: false,
             error: error.message
@@ -305,7 +305,7 @@ export async function depositRoutes(
    * Get available payment methods
    */
   fastify.get<{
-    Reply: { 
+    Reply: {
       success: boolean
       methods?: Array<{
         id: string
@@ -317,7 +317,7 @@ export async function depositRoutes(
         fees: number
         isEnabled: boolean
       }>
-      error?: string 
+      error?: string
     }
   }>('/deposit/methods', {
     schema: {
@@ -421,7 +421,7 @@ export async function depositRoutes(
 
     } catch (error) {
       fastify.log.error('Get payment methods error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve payment methods'
@@ -435,11 +435,11 @@ export async function depositRoutes(
    */
   fastify.get<{
     Querystring: { limit?: number; offset?: number; status?: string }
-    Reply: { 
+    Reply: {
       success: boolean
       deposits?: any[]
       pagination?: any
-      error?: string 
+      error?: string
     }
   }>('/deposit/history', {
     schema: {
@@ -498,8 +498,8 @@ export async function depositRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest<{ 
-    Querystring: { limit?: number; offset?: number; status?: string } 
+  }, async (request: FastifyRequest<{
+    Querystring: { limit?: number; offset?: number; status?: string }
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
@@ -522,7 +522,7 @@ export async function depositRoutes(
 
     } catch (error) {
       fastify.log.error('Get deposit history error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve deposit history'
@@ -536,7 +536,7 @@ export async function depositRoutes(
    */
   fastify.get<{
     Params: { id: string }
-    Reply: { 
+    Reply: {
       success: boolean
       deposit?: {
         id: string
@@ -550,7 +550,7 @@ export async function depositRoutes(
         paymentUrl?: string
         qrCode?: string
       }
-      error?: string 
+      error?: string
     }
   }>('/deposit/:id/status', {
     schema: {
@@ -601,7 +601,7 @@ export async function depositRoutes(
 
       // In production, fetch transaction from TransactionService
       // Verify it belongs to the user and is a deposit type
-      
+
       // For now, return mock data
       const mockDeposit = {
         id,
@@ -620,7 +620,7 @@ export async function depositRoutes(
 
     } catch (error) {
       fastify.log.error('Get deposit status error:', error)
-      
+
       return reply.status(500).send({
         success: false,
         error: 'Failed to retrieve deposit status'

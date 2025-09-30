@@ -7,11 +7,11 @@
 
 import { supabaseService } from '../../database/supabase'
 import { getRedisService } from '../cache/RedisService'
-import type { UserSession } from '@stake-games/shared'
+import type { UserSession } from '@yois-games/shared'
 
 export class SupabaseSessionRepository {
   private readonly CACHE_TTL = 3600 // 1 hour in seconds
-  
+
   /**
    * Get Redis service instance
    */
@@ -54,10 +54,10 @@ export class SupabaseSessionRepository {
       if (!redis) return
 
       const sessionData = JSON.stringify(session)
-      
+
       // Cache by ID
       await redis.set(this.getSessionCacheKey(session.id), sessionData, this.CACHE_TTL)
-      
+
       // Cache by token for fast token lookups
       await redis.set(this.getSessionTokenCacheKey(session.sessionToken), sessionData, this.CACHE_TTL)
     } catch (error) {
@@ -112,7 +112,7 @@ export class SupabaseSessionRepository {
       // Remove session cache
       await redis.del(this.getSessionCacheKey(session.id))
       await redis.del(this.getSessionTokenCacheKey(session.sessionToken))
-      
+
       // Invalidate user sessions list cache
       await redis.del(this.getUserSessionsCacheKey(session.userId))
     } catch (error) {
@@ -127,7 +127,7 @@ export class SupabaseSessionRepository {
   async create(sessionData: Omit<UserSession, 'id' | 'createdAt'>): Promise<UserSession> {
     try {
       console.log('🔧 SupabaseSessionRepository: Creating session for user:', sessionData.userId)
-      
+
       const { data: session, error } = await supabaseService
         .from('user_sessions')
         .insert({
@@ -183,7 +183,7 @@ export class SupabaseSessionRepository {
   async findById(id: string): Promise<UserSession | null> {
     try {
       console.log('🔍 SupabaseSessionRepository: Finding session by ID:', id)
-      
+
       const { data: session, error } = await supabaseService
         .from('user_sessions')
         .select('*')
@@ -225,7 +225,7 @@ export class SupabaseSessionRepository {
   async findByToken(sessionToken: string): Promise<UserSession | null> {
     try {
       console.log('🔍 SupabaseSessionRepository: Finding session by token')
-      
+
       const { data: session, error } = await supabaseService
         .from('user_sessions')
         .select('*')
@@ -269,9 +269,9 @@ export class SupabaseSessionRepository {
   async update(id: string, updateData: Partial<UserSession>): Promise<UserSession | null> {
     try {
       console.log('🔧 SupabaseSessionRepository: Updating session:', id)
-      
+
       const supabaseUpdateData: any = {}
-      
+
       if (updateData.sessionToken !== undefined) supabaseUpdateData.session_token = updateData.sessionToken
       if (updateData.refreshToken !== undefined) supabaseUpdateData.refresh_token = updateData.refreshToken
       if (updateData.deviceInfo !== undefined) supabaseUpdateData.device_info = updateData.deviceInfo
@@ -326,7 +326,7 @@ export class SupabaseSessionRepository {
   async delete(id: string): Promise<boolean> {
     try {
       console.log('🗑️ SupabaseSessionRepository: Deleting session:', id)
-      
+
       const { error } = await supabaseService
         .from('user_sessions')
         .delete()
@@ -338,7 +338,7 @@ export class SupabaseSessionRepository {
       } else {
         console.error('❌ Error deleting session:', error)
       }
-      
+
       return success
     } catch (error) {
       console.error('❌ Error deleting session:', error)
@@ -354,7 +354,7 @@ export class SupabaseSessionRepository {
   async findByUserId(userId: string): Promise<UserSession[]> {
     try {
       console.log('🔍 SupabaseSessionRepository: Finding sessions for user:', userId)
-      
+
       const { data: sessions, error } = await supabaseService
         .from('user_sessions')
         .select('*')
@@ -396,7 +396,7 @@ export class SupabaseSessionRepository {
   async deleteByUserId(userId: string): Promise<number> {
     try {
       console.log('🗑️ SupabaseSessionRepository: Deleting all sessions for user:', userId)
-      
+
       // First get the count of sessions to be deleted
       const { data: sessions, error: selectError } = await supabaseService
         .from('user_sessions')
@@ -436,9 +436,9 @@ export class SupabaseSessionRepository {
   async deleteExpired(): Promise<number> {
     try {
       console.log('🧹 SupabaseSessionRepository: Cleaning up expired sessions')
-      
+
       const now = new Date().toISOString()
-      
+
       // First count expired sessions
       const { data: expiredSessions, error: countError } = await supabaseService
         .from('user_sessions')

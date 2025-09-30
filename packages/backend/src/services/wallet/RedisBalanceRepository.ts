@@ -5,7 +5,7 @@
  */
 
 import { getRedisService } from '../cache/RedisService'
-import type { Balance } from '@stake-games/shared'
+import type { Balance } from '@yois-games/shared'
 
 interface BalanceRepository {
   getBalance(userId: string): Promise<Balance | null>
@@ -66,10 +66,10 @@ export class RedisBalanceRepository implements BalanceRepository {
   async getBalance(userId: string): Promise<Balance | null> {
     try {
       console.log(`🔍 RedisBalanceRepository: Getting balance for user ${userId}`)
-      
+
       const balanceKey = this.getBalanceKey(userId)
       const balanceData = await this.redis.hgetall<Balance>(balanceKey)
-      
+
       if (!balanceData || Object.keys(balanceData).length === 0) {
         console.log(`📝 RedisBalanceRepository: No balance found for user ${userId}`)
         return null
@@ -104,10 +104,10 @@ export class RedisBalanceRepository implements BalanceRepository {
   async updateBalance(userId: string, amount: number, transactionId: string): Promise<Balance> {
     try {
       console.log(`🔧 RedisBalanceRepository: Updating balance for user ${userId} by ${amount}`)
-      
+
       const balanceKey = this.getBalanceKey(userId)
       const currentBalance = await this.getBalance(userId)
-      
+
       if (!currentBalance) {
         throw new Error(`Balance not found for user ${userId}`)
       }
@@ -148,20 +148,20 @@ export class RedisBalanceRepository implements BalanceRepository {
   async lockBalance(userId: string): Promise<boolean> {
     try {
       console.log(`🔒 RedisBalanceRepository: Locking balance for user ${userId}`)
-      
+
       const lockKey = this.getBalanceLockKey(userId)
       const lockValue = `lock_${Date.now()}`
       const lockTTL = 30 // 30 seconds lock TTL
-      
+
       // Reason: Use SET with NX and EX for atomic lock acquisition
       const lockAcquired = await this.redis.set(lockKey, lockValue, lockTTL)
-      
+
       if (lockAcquired) {
         console.log(`✅ RedisBalanceRepository: Acquired balance lock for user ${userId}`)
       } else {
         console.log(`⚠️ RedisBalanceRepository: Failed to acquire balance lock for user ${userId}`)
       }
-      
+
       return lockAcquired
     } catch (error) {
       console.error(`❌ RedisBalanceRepository: Failed to lock balance for user ${userId}:`, error)
@@ -177,14 +177,14 @@ export class RedisBalanceRepository implements BalanceRepository {
   async unlockBalance(userId: string): Promise<boolean> {
     try {
       console.log(`🔓 RedisBalanceRepository: Unlocking balance for user ${userId}`)
-      
+
       const lockKey = this.getBalanceLockKey(userId)
       const deleted = await this.redis.delete(lockKey)
-      
+
       if (deleted) {
         console.log(`✅ RedisBalanceRepository: Released balance lock for user ${userId}`)
       }
-      
+
       return deleted
     } catch (error) {
       console.error(`❌ RedisBalanceRepository: Failed to unlock balance for user ${userId}:`, error)
@@ -201,7 +201,7 @@ export class RedisBalanceRepository implements BalanceRepository {
   async validateSufficientBalance(userId: string, amount: number): Promise<boolean> {
     try {
       console.log(`🔍 RedisBalanceRepository: Validating ${amount} balance for user ${userId}`)
-      
+
       const balance = await this.getBalance(userId)
       if (!balance) {
         console.log(`❌ RedisBalanceRepository: No balance found for user ${userId}`)
@@ -229,10 +229,10 @@ export class RedisBalanceRepository implements BalanceRepository {
   async createBalance(userId: string, initialAmount: number): Promise<Balance> {
     try {
       console.log(`🆕 RedisBalanceRepository: Creating balance for user ${userId} with ${initialAmount}`)
-      
+
       const balanceKey = this.getBalanceKey(userId)
       const now = new Date()
-      
+
       const balance: Balance = {
         id: `balance_${userId}`,
         userId,
@@ -272,10 +272,10 @@ export class RedisBalanceRepository implements BalanceRepository {
   async getBalanceHistory(userId: string, limit: number = 50): Promise<Balance[]> {
     try {
       console.log(`📚 RedisBalanceRepository: Getting balance history for user ${userId}, limit: ${limit}`)
-      
+
       const historyKey = this.getBalanceHistoryKey(userId)
       const historyEntries = await this.redis.keys(`${historyKey}:*`)
-      
+
       if (historyEntries.length === 0) {
         console.log(`📝 RedisBalanceRepository: No balance history found for user ${userId}`)
         return []
@@ -324,7 +324,7 @@ export class RedisBalanceRepository implements BalanceRepository {
   async freezeBalance(userId: string, amount: number, reason: string): Promise<boolean> {
     try {
       console.log(`🧊 RedisBalanceRepository: Freezing ${amount} balance for user ${userId}, reason: ${reason}`)
-      
+
       const frozenKey = this.getFrozenBalanceKey(userId)
       const currentFrozen = await this.getFrozenAmount(userId)
       const newFrozenAmount = currentFrozen + amount
@@ -350,10 +350,10 @@ export class RedisBalanceRepository implements BalanceRepository {
   async unfreezeBalance(userId: string, amount: number): Promise<boolean> {
     try {
       console.log(`🔥 RedisBalanceRepository: Unfreezing ${amount} balance for user ${userId}`)
-      
+
       const frozenKey = this.getFrozenBalanceKey(userId)
       const currentFrozen = await this.getFrozenAmount(userId)
-      
+
       if (currentFrozen < amount) {
         throw new Error('Cannot unfreeze more than frozen amount')
       }
@@ -400,7 +400,7 @@ export class RedisBalanceRepository implements BalanceRepository {
   private async addToBalanceHistory(userId: string, balance: Balance, transactionId: string): Promise<void> {
     try {
       const historyKey = `${this.getBalanceHistoryKey(userId)}:${Date.now()}`
-      
+
       await this.redis.hset(historyKey, 'id', balance.id || `balance_${userId}`)
       await this.redis.hset(historyKey, 'userId', userId)
       await this.redis.hset(historyKey, 'amount', balance.amount.toString())

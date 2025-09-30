@@ -5,10 +5,15 @@
     "rootDir": "./src",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "composite": true,
-    "lib": ["ES2022"],
-    "module": "ESNext",
+    "lib": [
+      "ES2022"
+    ],
+    "module": "commonjs",
     "target": "ES2022",
     "moduleResolution": "node",
+    "types": [
+      "node"
+    ],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
@@ -28,14 +33,30 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["*"],
-      "@/routes/*": ["routes/*"],
-      "@/services/*": ["services/*"],
-      "@/middleware/*": ["middleware/*"],
-      "@/database/*": ["database/*"],
-      "@/socket/*": ["socket/*"],
-      "@/utils/*": ["utils/*"],
-      "@/types/*": ["types/*"]
+      "@/*": [
+        "*"
+      ],
+      "@/routes/*": [
+        "routes/*"
+      ],
+      "@/services/*": [
+        "services/*"
+      ],
+      "@/middleware/*": [
+        "middleware/*"
+      ],
+      "@/database/*": [
+        "database/*"
+      ],
+      "@/socket/*": [
+        "socket/*"
+      ],
+      "@/utils/*": [
+        "utils/*"
+      ],
+      "@/types/*": [
+        "types/*"
+      ]
     }
   },
   "include": [
@@ -49,6 +70,8 @@
     "**/*.spec.ts"
   ],
   "references": [
-    { "path": "../shared" }
+    {
+      "path": "../shared"
+    }
   ]
 }

@@ -8,7 +8,7 @@
     "outputDirectory": "apps/web/.next",
     "rootDirectory": "."
   },
-  "buildCommand": "pnpm run build --filter=@stake-games/web",
+  "buildCommand": "pnpm run build --filter=@yois-games/web",
   "functions": {
     "apps/web/src/app/api/**/*.ts": {
       "runtime": "@vercel/node"
@@ -76,7 +76,10 @@
     "NEXT_PUBLIC_SUPABASE_URL": "@NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@NEXT_PUBLIC_SUPABASE_ANON_KEY"
   },
-  "regions": ["iad1", "sfo1"],
+  "regions": [
+    "iad1",
+    "sfo1"
+  ],
   "github": {
     "autoAlias": true,
     "autoJobCancelation": true

@@ -4,17 +4,17 @@
  * password handling, tokens, and sessions
  */
 
-import type { 
-  User, 
-  LoginRequest, 
-  RegisterRequest, 
+import type {
+  User,
+  LoginRequest,
+  RegisterRequest,
   AuthResponse,
   RefreshTokenRequest,
   RefreshTokenResponse,
   ChangePasswordRequest,
   UpdateProfileRequest,
   UserStats
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 import { PasswordService } from './PasswordService'
 import { TokenService } from './TokenService'
@@ -25,7 +25,7 @@ import type {
 import type {
   WelcomeEmailData,
   PasswordResetEmailData
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 // Reason: Interface for database operations, will be implemented with actual DB later
 interface UserRepository {
@@ -146,7 +146,7 @@ export class AuthService {
           email: user.email,
           loginUrl: `${process.env.FRONTEND_URL}/auth/login`
         }
-        
+
         const emailResult = await this.emailService.sendWelcomeEmail(welcomeData)
         if (!emailResult.success) {
           console.warn('⚠️ Failed to send welcome email:', emailResult.error)
@@ -575,12 +575,12 @@ export class AuthService {
         purpose: 'password-reset',
         exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
       }
-      
+
       const resetToken = await TokenService.createTokenPair(user, 'temp-session').then(t => t.accessToken)
-      
+
       // Create reset URL
       const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`
-      
+
       // Send password reset email
       const passwordResetData: PasswordResetEmailData = {
         username: user.username,
@@ -591,7 +591,7 @@ export class AuthService {
       }
 
       const emailResult = await this.emailService.sendPasswordResetEmail(passwordResetData)
-      
+
       if (emailResult.success) {
         await this.auditLogger.logSecurityEvent(user.id, 'password_reset_requested', {
           email: user.email,
@@ -696,12 +696,12 @@ export class AuthService {
         purpose: 'password-reset',
         exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
       }
-      
+
       const resetToken = await TokenService.createCustomToken(resetTokenData)
-      
+
       // Create reset URL
       const resetUrl = `${process.env.FRONTEND_URL}/auth/reset-password?token=${resetToken}`
-      
+
       // Send password reset email
       const passwordResetData: PasswordResetEmailData = {
         username: user.username,
@@ -712,7 +712,7 @@ export class AuthService {
       }
 
       const emailResult = await this.emailService.sendPasswordResetEmail(passwordResetData)
-      
+
       if (emailResult.success) {
         await this.auditLogger.logSecurityEvent(user.id, 'password_reset_requested', {
           email: user.email,

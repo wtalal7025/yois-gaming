@@ -6,7 +6,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import type { AuthService } from '../../services/auth/AuthService'
 import type { EmailService } from '../../services/email/EmailService'
-import type { PasswordResetEmailData } from '@stake-games/shared'
+import type { PasswordResetEmailData } from '@yois-games/shared'
 import { PasswordService } from '../../services/auth/PasswordService'
 import { TokenService } from '../../services/auth/TokenService'
 import { userRepository } from '../../services'
@@ -39,7 +39,7 @@ export async function passwordRoutes(
 
       // Find user by email
       const user = await userRepository.findByEmail(email)
-      
+
       if (!user) {
         // Don't reveal if user exists for security, but still return success
         console.log('Password reset requested for non-existent email:', email)
@@ -57,13 +57,13 @@ export async function passwordRoutes(
         sessionId: 'password-reset',
         exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
       }
-      
+
       const tokens = await TokenService.createTokenPair(user, 'password-reset')
       const resetToken = tokens.accessToken
-      
+
       // Create reset URL
       const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/reset-password?token=${resetToken}`
-      
+
       // Send password reset email
       const passwordResetData: PasswordResetEmailData = {
         username: user.username,
@@ -75,7 +75,7 @@ export async function passwordRoutes(
 
       try {
         const emailResult = await emailService.sendPasswordResetEmail(passwordResetData)
-        
+
         if (emailResult.success) {
           console.log('✅ Password reset email sent successfully to:', email)
         } else {
@@ -128,7 +128,7 @@ export async function passwordRoutes(
       // Verify the reset token
       try {
         const decoded = await TokenService.verifyAccessToken(token)
-        
+
         if (!decoded || !decoded.sub) {
           return reply.status(400).send({
             success: false,
@@ -147,17 +147,17 @@ export async function passwordRoutes(
 
         // Hash the new password
         const hashedPassword = await PasswordService.hashPassword(newPassword)
-        
+
         // Update user's password using the existing update method
         const updatedUser = await userRepository.update(user.id, { passwordHash: hashedPassword } as any)
-        
+
         if (!updatedUser) {
           return reply.status(500).send({
             success: false,
             error: 'Failed to update password'
           })
         }
-        
+
         console.log('✅ Password reset successful for user:', user.email)
 
         return reply.send({
