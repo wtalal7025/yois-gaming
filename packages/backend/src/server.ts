@@ -37,7 +37,11 @@ for (const envPath of envPaths) {
 }
 
 if (!envLoaded) {
-  console.error('🚨 Failed to load any .env file from attempted paths');
+  if (process.env.NODE_ENV === 'production') {
+    console.log('ℹ️  No .env file found - using environment variables from deployment platform (production mode)');
+  } else {
+    console.warn('⚠️  No .env file found - make sure to configure environment variables for development');
+  }
 }
 
 import Fastify from 'fastify';

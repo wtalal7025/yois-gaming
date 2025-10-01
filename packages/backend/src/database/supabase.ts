@@ -22,9 +22,12 @@ console.log('- Node Environment:', process.env.NODE_ENV)
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing required Supabase environment variables')
   console.error('📍 Expected variables: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY')
-  console.error('📂 Make sure .env file exists at:', process.cwd() + '/packages/backend/.env')
+  console.error('📂 In production: Configure these in your deployment platform dashboard')
+  console.error('📂 In development: Make sure .env file exists at:', process.cwd() + '/packages/backend/.env')
   console.error('🔄 Try restarting the development server to load new environment variables')
-  process.exit(1)
+
+  // Reason: Throw error instead of process.exit(1) for production-friendly error handling
+  throw new Error('Missing required Supabase environment variables: SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. Please configure these in your deployment platform or .env file.')
 }
 
 // Reason: Service role client for backend operations (bypasses RLS)
