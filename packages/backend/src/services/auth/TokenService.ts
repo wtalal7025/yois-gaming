@@ -142,7 +142,7 @@ export class TokenService {
       return null
     }
 
-    return parts[1]
+    return parts[1] || null
   }
 
   /**

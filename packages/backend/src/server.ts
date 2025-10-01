@@ -99,8 +99,8 @@ export async function createServer() {
     // Configure performance middleware with custom settings for production
     const performanceConfig = {
       ...defaultPerformanceConfig,
-      cache: {
-        ...defaultPerformanceConfig.cache,
+      caching: {
+        ...defaultPerformanceConfig.caching,
         enabled: true,
         defaultTTL: process.env.NODE_ENV === 'production' ? 300 : 60, // 5min prod, 1min dev
       },
@@ -164,10 +164,10 @@ export async function createServer() {
     // Register middleware in proper order
     // 1. Security middleware first (for request validation and headers)
     await registerSecurityMiddleware(server, securityConfig);
-    
+
     // 2. Performance middleware second (for request timing)
     await registerPerformanceMiddleware(server, performanceConfig);
-    
+
     // 3. Rate limiting middleware third (after performance tracking starts)
     await registerRateLimitingMiddleware(server, rateLimitConfig);
 
@@ -191,7 +191,7 @@ if (require.main === module) {
       const server = await createServer();
       const port = Number(process.env.PORT) || 3001;
       const host = process.env.HOST || 'localhost';
-      
+
       await server.listen({ port, host });
       server.log.info(`Server listening on http://${host}:${port}`);
     } catch (error) {

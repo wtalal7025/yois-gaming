@@ -151,11 +151,11 @@ export class PerformanceTestSuite {
 
     for (let i = 0; i < iterations; i++) {
       const startTime = Date.now();
-      
+
       try {
         const response = await this.makeRequest(test);
         const responseTime = Date.now() - startTime;
-        
+
         responseTimes.push(responseTime);
         results.push({
           success: response.ok,
@@ -188,7 +188,7 @@ export class PerformanceTestSuite {
       expectedThreshold: test.expectedMaxResponseTime,
       unit: 'ms',
       details: {
-        p95ResponseTime: Math.round(p95ResponseTime),
+        p95ResponseTime: Math.round(p95ResponseTime || 0),
         iterations,
         successRate: Math.round(successRate * 100) / 100
       }
@@ -259,7 +259,7 @@ export class PerformanceTestSuite {
       actualValue: setTime,
       expectedThreshold: 50,
       unit: 'ms',
-      recommendations: setTime > 50 ? ['Consider optimizing Redis connection', 'Check network latency'] : undefined
+      ...(setTime > 50 && { recommendations: ['Consider optimizing Redis connection', 'Check network latency'] })
     });
 
     // Test cache GET performance (hit)
@@ -289,7 +289,7 @@ export class PerformanceTestSuite {
   private async testCacheEffectiveness(): Promise<void> {
     const testRoute = '/api/test/effectiveness';
     const iterations = 100;
-    
+
     // Reset cache stats
     this.cacheService.resetStats();
 
@@ -348,18 +348,20 @@ export class PerformanceTestSuite {
 
     for (const queryTest of queryTests) {
       const executionTime = await this.simulateDatabaseQuery(queryTest.name);
-      
+
       this.results.push({
         testName: `Database ${queryTest.name} Performance`,
         passed: executionTime <= queryTest.expectedTime,
         actualValue: executionTime,
         expectedThreshold: queryTest.expectedTime,
         unit: 'ms',
-        recommendations: executionTime > queryTest.expectedTime ? [
-          'Consider adding database indexes',
-          'Optimize query structure',
-          'Check database connection pool'
-        ] : undefined
+        ...(executionTime > queryTest.expectedTime && {
+          recommendations: [
+            'Consider adding database indexes',
+            'Optimize query structure',
+            'Check database connection pool'
+          ]
+        })
       });
     }
   }
@@ -369,10 +371,10 @@ export class PerformanceTestSuite {
    */
   private async simulateDatabaseQuery(queryName: string): Promise<number> {
     const startTime = Date.now();
-    
+
     // Simulate database operation
     await new Promise(resolve => setTimeout(resolve, Math.random() * 150 + 25));
-    
+
     return Date.now() - startTime;
   }
 
@@ -384,7 +386,7 @@ export class PerformanceTestSuite {
 
     // Test Redis connection health
     const healthCheck = await this.redisService.healthCheck();
-    
+
     this.results.push({
       testName: 'Redis Connection Health',
       passed: healthCheck.status === 'connected',
@@ -521,11 +523,11 @@ export class PerformanceTestSuite {
    */
   private async performConcurrentRequest(index: number): Promise<{ success: boolean; responseTime: number }> {
     const startTime = Date.now();
-    
+
     try {
       // Simulate API request
       await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 50));
-      
+
       return {
         success: Math.random() > 0.05, // 95% success rate simulation
         responseTime: Date.now() - startTime
@@ -543,7 +545,7 @@ export class PerformanceTestSuite {
    */
   private printResults(): void {
     console.log('\n📊 Performance Test Results:\n');
-    
+
     const passed = this.results.filter(r => r.passed);
     const failed = this.results.filter(r => !r.passed);
 
@@ -568,11 +570,11 @@ export class PerformanceTestSuite {
     // Print passed tests summary
     console.log('✅ Passed Tests Summary:\n');
     const categories = ['API', 'Cache', 'Database', 'Redis', 'System', 'Concurrent'];
-    
+
     categories.forEach(category => {
       const categoryTests = this.results.filter(r => r.testName.includes(category));
       const categoryPassed = categoryTests.filter(r => r.passed).length;
-      
+
       if (categoryTests.length > 0) {
         console.log(`  ${category}: ${categoryPassed}/${categoryTests.length} passed`);
       }
@@ -602,14 +604,14 @@ export class PerformanceTestSuite {
   } {
     const passed = this.results.filter(r => r.passed).length;
     const failed = this.results.length - passed;
-    
+
     const categories = ['API', 'Cache', 'Database', 'Redis', 'System', 'Concurrent'];
     const categoryStats: Record<string, any> = {};
 
     categories.forEach(category => {
       const categoryTests = this.results.filter(r => r.testName.includes(category));
       const categoryPassed = categoryTests.filter(r => r.passed).length;
-      
+
       categoryStats[category] = {
         tests: categoryTests.length,
         passed: categoryPassed,
@@ -644,7 +646,7 @@ export class PerformanceTestSuite {
 export async function runQuickPerformanceTest(baseUrl?: string): Promise<boolean> {
   const testSuite = new PerformanceTestSuite(baseUrl);
   const results = await testSuite.runFullSuite();
-  
+
   return results.passed;
 }
 
@@ -658,7 +660,7 @@ export async function runPerformanceValidation(): Promise<{
   const testSuite = new PerformanceTestSuite();
   const results = await testSuite.runFullSuite();
   const report = testSuite.generateReport();
-  
+
   return {
     success: results.passed,
     report

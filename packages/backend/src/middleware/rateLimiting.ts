@@ -58,7 +58,7 @@ class RateLimiter {
 
   constructor(config: RateLimitConfig) {
     this.config = config;
-    
+
     // Clean up expired entries every 5 minutes
     setInterval(() => this.cleanup(), 5 * 60 * 1000);
   }
@@ -78,7 +78,7 @@ class RateLimiter {
       if (redisService.getConnectionStatus()) {
         const current = await redisService.get(key) as number | null;
         const count = (current || 0) + 1;
-        
+
         if (!current) {
           // New entry, set with TTL
           await redisService.set(key, count, Math.ceil(windowMs / 1000));
@@ -113,7 +113,7 @@ class RateLimiter {
     // New or expired entry
     const newEntry = { count: 1, resetTime: now + windowMs };
     this.memoryStore.set(key, newEntry);
-    
+
     return {
       totalHits: 1,
       totalHitsLeft: Math.max(0, limit - 1),
@@ -173,7 +173,7 @@ class RateLimiter {
       userId,
       timestamp: now,
       route: url,
-      userAgent: request.headers['user-agent']
+      userAgent: request.headers['user-agent'] || 'unknown'
     });
 
     // Check global rate limit
@@ -279,11 +279,11 @@ class RateLimiter {
     topRoutes: Array<{ route: string; count: number }>;
   } {
     const totalRequests = this.attempts.length;
-    
+
     // Count IPs
     const ipCounts = new Map<string, number>();
     const routeCounts = new Map<string, number>();
-    
+
     for (const attempt of this.attempts) {
       ipCounts.set(attempt.ip, (ipCounts.get(attempt.ip) || 0) + 1);
       routeCounts.set(attempt.route, (routeCounts.get(attempt.route) || 0) + 1);
@@ -352,16 +352,16 @@ export async function registerRateLimitingMiddleware(
   // Add rate limiting hook
   fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
     const result = await rateLimiter.checkRateLimit(request);
-    
+
     if (!result.allowed && result.info) {
       // Add rate limit headers
       reply.header('X-RateLimit-Limit', config.global.max);
       reply.header('X-RateLimit-Remaining', Math.max(0, result.info.totalHitsLeft));
       reply.header('X-RateLimit-Reset', result.info.resetTime.toISOString());
       reply.header('Retry-After', Math.ceil(result.info.timeLeft / 1000));
-      
+
       console.warn(`🚫 Rate limit exceeded: ${result.reason} for ${request.ip} on ${request.url}`);
-      
+
       return reply.code(429).send({
         error: 'Too Many Requests',
         message: result.reason || 'Rate limit exceeded',
@@ -390,7 +390,7 @@ export async function registerRateLimitingMiddleware(
   // Rate limit management endpoint
   fastify.delete('/api/rate-limit/clear', async (request: FastifyRequest, reply: FastifyReply) => {
     const { identifier, type } = request.query as { identifier?: string; type?: 'ip' | 'user' | 'all' };
-    
+
     if (!identifier && type !== 'all') {
       return reply.code(400).send({ error: 'Identifier required unless clearing all limits' });
     }

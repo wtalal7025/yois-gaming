@@ -146,7 +146,7 @@ class ResponseCacheManager {
   private isCacheableRequest(request: FastifyRequest): boolean {
     // Only cache GET requests
     if (request.method !== 'GET') return false;
-    
+
     // Check if route is cacheable
     if (!this.isCacheableRoute(request.url)) return false;
 
@@ -289,7 +289,7 @@ export async function registerPerformanceMiddleware(
 
   // Register compression middleware
   if (config.compression.enabled) {
-    await fastify.register(fastifyCompress, {
+    await fastify.register(fastifyCompress as any, {
       global: true,
       threshold: config.compression.threshold,
       brotliOptions: {
@@ -306,7 +306,7 @@ export async function registerPerformanceMiddleware(
       customTypes: /^application\/(json|javascript)|^text\//,
       removeContentLengthHeader: false, // Keep content-length for better caching
     });
-    
+
     console.log('✅ Compression middleware registered');
   }
 
@@ -332,7 +332,7 @@ export async function registerPerformanceMiddleware(
   // Post-response hook for caching and monitoring
   fastify.addHook('onResponse', async (request: FastifyRequest, reply: FastifyReply) => {
     const responseTime = Date.now() - (request.requestStartTime || Date.now());
-    
+
     // Record metrics if monitoring is enabled
     if (config.monitoring.enabled) {
       const metrics: RequestMetrics = {
@@ -341,7 +341,7 @@ export async function registerPerformanceMiddleware(
         statusCode: reply.statusCode,
         responseTime,
         timestamp: Date.now(),
-        userAgent: request.headers['user-agent'],
+        userAgent: request.headers['user-agent'] || 'unknown',
         ip: request.ip,
         cached: reply.getHeader('X-Cache-Status') === 'HIT',
       };
@@ -393,7 +393,7 @@ export async function registerPerformanceMiddleware(
   // Register cache management endpoints
   fastify.post('/api/performance/cache/invalidate', async (request: FastifyRequest, reply: FastifyReply) => {
     const { pattern } = request.body as { pattern?: string };
-    
+
     if (!pattern) {
       return reply.code(400).send({ error: 'Pattern is required' });
     }

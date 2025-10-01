@@ -137,7 +137,7 @@ export class MonitoringService {
     try {
       // Store in memory for immediate access
       this.metrics.push(fullMetric);
-      
+
       // Store in Redis for persistence
       const key = `metrics:performance:${Date.now()}:${Math.random()}`;
       await this.redis.set(key, JSON.stringify(fullMetric), 86400); // 1 day TTL
@@ -305,22 +305,22 @@ export class MonitoringService {
       const responseTimes = recentMetrics.map(m => m.responseTime);
       const errorCount = recentMetrics.filter(m => m.statusCode >= 400).length;
 
-      const avgResponseTime = responseTimes.length > 0 
-        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length 
+      const avgResponseTime = responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
         : 0;
 
       const p95ResponseTime = responseTimes.length > 0
         ? responseTimes.sort((a, b) => a - b)[Math.floor(responseTimes.length * 0.95)]
         : 0;
 
-      const errorRate = recentMetrics.length > 0 
-        ? (errorCount / recentMetrics.length) * 100 
+      const errorRate = recentMetrics.length > 0
+        ? (errorCount / recentMetrics.length) * 100
         : 0;
 
       // Error analysis
       const recentErrors = this.errors.filter(e => e.timestamp > cutoffTime);
       const criticalErrors = recentErrors.filter(e => e.level === 'critical').length;
-      
+
       const errorCounts = new Map<string, { message: string; count: number; fingerprint: string }>();
       recentErrors.forEach(error => {
         if (error.fingerprint) {
@@ -365,7 +365,7 @@ export class MonitoringService {
       // System health
       const activeAlerts = Array.from(this.activeAlerts.values()).filter(a => !a.resolved).length;
       const resolvedAlerts = Array.from(this.activeAlerts.values()).filter(a => a.resolved).length;
-      
+
       let systemHealth: 'healthy' | 'warning' | 'critical' = 'healthy';
       if (activeAlerts > 0) {
         const criticalAlerts = Array.from(this.activeAlerts.values())
@@ -378,7 +378,7 @@ export class MonitoringService {
           avgResponseTime: Math.round(avgResponseTime),
           requestCount: recentMetrics.length,
           errorRate: Math.round(errorRate * 100) / 100,
-          p95ResponseTime: Math.round(p95ResponseTime)
+          p95ResponseTime: Math.round(p95ResponseTime || 0)
         },
         errors: {
           totalErrors: recentErrors.length,
@@ -408,7 +408,7 @@ export class MonitoringService {
   async getSystemMetrics(): Promise<SystemMetrics> {
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
-    
+
     // Calculate metrics from recent data
     const recentMetrics = this.metrics.filter(m => m.timestamp > oneMinuteAgo);
     const requestsPerSecond = recentMetrics.length / 60;
@@ -510,7 +510,7 @@ export class MonitoringService {
     if (recentMetrics.length >= 10) {
       const errorCount = recentMetrics.filter(m => m.statusCode >= 400).length;
       const errorRate = (errorCount / recentMetrics.length) * 100;
-      
+
       if (errorRate > this.config.performanceThresholds.errorRate) {
         await this.createAlert({
           type: 'performance',
@@ -535,7 +535,7 @@ export class MonitoringService {
       error.route || 'unknown',
       (error.stack || '').split('\n')[0] // First line of stack trace
     ];
-    
+
     return Buffer.from(components.join('|')).toString('base64').substring(0, 16);
   }
 
@@ -567,20 +567,20 @@ export class MonitoringService {
    */
   private async cleanup(): Promise<void> {
     const now = Date.now();
-    
+
     try {
       // Clean up metrics older than retention period
       const metricsRetention = now - (this.config.retention.metrics * 24 * 60 * 60 * 1000);
       this.metrics = this.metrics.filter(m => m.timestamp > metricsRetention);
-      
+
       // Clean up errors
       const errorsRetention = now - (this.config.retention.errors * 24 * 60 * 60 * 1000);
       this.errors = this.errors.filter(e => e.timestamp > errorsRetention);
-      
+
       // Clean up analytics
       const analyticsRetention = now - (this.config.retention.analytics * 24 * 60 * 60 * 1000);
       this.analytics = this.analytics.filter(a => a.timestamp > analyticsRetention);
-      
+
       // Clean up resolved alerts older than 7 days
       const alertRetention = now - (7 * 24 * 60 * 60 * 1000);
       for (const [id, alert] of this.activeAlerts.entries()) {
@@ -588,7 +588,7 @@ export class MonitoringService {
           this.activeAlerts.delete(id);
         }
       }
-      
+
       console.log('🧹 Monitoring cleanup completed');
     } catch (error) {
       console.error('❌ Monitoring cleanup failed:', error);
@@ -616,7 +616,7 @@ export class MonitoringService {
 
     // Update in Redis
     await this.redis.set(`alert:${alertId}`, JSON.stringify(alert), 86400 * 7);
-    
+
     return true;
   }
 }

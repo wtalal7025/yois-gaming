@@ -391,7 +391,7 @@ export class BalanceService {
         frozenBalance: 0, // Would be calculated from frozen balance records
         totalCredits: 0, // Would be calculated from transaction history
         totalDebits: 0, // Would be calculated from transaction history
-        lastUpdated: balance.updatedAt
+        lastUpdated: balance.updatedAt ? new Date(balance.updatedAt) : new Date()
       }
     } catch (error) {
       await this.auditLogger.logBalanceError(userId, 'balance_stats_failed', {

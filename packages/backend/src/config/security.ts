@@ -297,7 +297,7 @@ export interface SecurityAuditLog {
 
 export class SecurityAuditor {
   private logs: SecurityAuditLog[] = [];
-  
+
   logSecurityEvent(
     event: string,
     severity: 'low' | 'medium' | 'high' | 'critical',
@@ -312,33 +312,33 @@ export class SecurityAuditor {
       severity,
       source,
       details,
-      userId,
-      sessionId,
+      ...(userId && { userId }),
+      ...(sessionId && { sessionId }),
     };
-    
+
     this.logs.push(logEntry);
-    
+
     // In production, this would send to external logging service
     if (severity === 'critical' || severity === 'high') {
       console.warn('High-priority security event:', logEntry);
     }
-    
+
     // Rotate logs to prevent memory issues
     if (this.logs.length > 10000) {
       this.logs = this.logs.slice(-5000);
     }
   }
-  
+
   getRecentLogs(count: number = 100): SecurityAuditLog[] {
     return this.logs.slice(-count);
   }
-  
+
   getLogsByUser(userId: string, count: number = 50): SecurityAuditLog[] {
     return this.logs
       .filter(log => log.userId === userId)
       .slice(-count);
   }
-  
+
   getLogsBySeverity(severity: 'low' | 'medium' | 'high' | 'critical'): SecurityAuditLog[] {
     return this.logs.filter(log => log.severity === severity);
   }
@@ -351,34 +351,34 @@ export const securityAuditor = new SecurityAuditor();
 export class EncryptionManager {
   private algorithm: string;
   private key: Buffer;
-  
+
   constructor(config: SecurityConfig) {
     this.algorithm = config.encryption.algorithm;
     this.key = Buffer.from(process.env.ENCRYPTION_KEY || 'default-key-change-in-production', 'hex');
   }
-  
+
   encrypt(text: string): { encrypted: string; iv: string } {
     const crypto = require('crypto');
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipher(this.algorithm, this.key, iv);
-    
+
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    
+
     return {
       encrypted,
       iv: iv.toString('hex'),
     };
   }
-  
+
   decrypt(encryptedData: string, ivHex: string): string {
     const crypto = require('crypto');
     const iv = Buffer.from(ivHex, 'hex');
     const decipher = crypto.createDecipher(this.algorithm, this.key, iv);
-    
+
     let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 }
@@ -386,17 +386,17 @@ export class EncryptionManager {
 // Password hashing utilities
 export class PasswordManager {
   private saltRounds: number = 12;
-  
+
   async hashPassword(password: string): Promise<string> {
     const bcrypt = require('bcrypt');
     return await bcrypt.hash(password, this.saltRounds);
   }
-  
+
   async verifyPassword(password: string, hash: string): Promise<boolean> {
     const bcrypt = require('bcrypt');
     return await bcrypt.compare(password, hash);
   }
-  
+
   generateSecureToken(length: number = 32): string {
     const crypto = require('crypto');
     return crypto.randomBytes(length).toString('hex');
