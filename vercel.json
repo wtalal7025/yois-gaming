@@ -69,8 +69,7 @@
     "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@NEXT_PUBLIC_SUPABASE_ANON_KEY"
   },
   "regions": [
-    "iad1",
-    "sfo1"
+    "iad1"
   ],
   "github": {
     "autoAlias": true,
