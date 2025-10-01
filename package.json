@@ -12,7 +12,9 @@
   },
   "packageManager": "pnpm@9.0.0",
   "scripts": {
-    "build": "turbo build",
+    "build": "pnpm build:shared && turbo build",
+    "build:shared": "pnpm --filter @yois-games/shared run build",
+    "build:backend": "pnpm build:shared && pnpm --filter @yois-games/backend run build",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
