@@ -4,10 +4,11 @@
  */
 
 // Export all types
-export * from './types';
+// Reason: Using explicit file imports with .js extension for Node.js ES module compatibility
+export * from './types/index.js';
 
 // Export all utilities
-export * from './utils';
+export * from './utils/index.js';
 
 // Export all constants
-export * from './constants';
+export * from './constants/index.js';
