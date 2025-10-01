@@ -1,14 +1,6 @@
 {
   "version": 2,
   "name": "stake-games",
-  "projectSettings": {
-    "buildCommand": "cd apps/web && pnpm run build",
-    "devCommand": "cd apps/web && pnpm run dev",
-    "installCommand": "pnpm install --frozen-lockfile",
-    "outputDirectory": "apps/web/.next",
-    "rootDirectory": "."
-  },
-  "buildCommand": "pnpm run build --filter=@yois-games/web",
   "functions": {
     "apps/web/src/app/api/**/*.ts": {
       "runtime": "@vercel/node"
