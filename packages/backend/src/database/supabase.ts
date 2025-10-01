@@ -11,13 +11,24 @@ const supabaseUrl = process.env.SUPABASE_URL || ''
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || ''
 
-// DEBUG: Log environment variable status
+// DEBUG: Enhanced environment variable debugging for Render
 console.log('🔍 Environment Variables Check:')
 console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing')
 console.log('- SUPABASE_SERVICE_ROLE_KEY:', supabaseServiceKey ? '✅ Set' : '❌ Missing')
 console.log('- SUPABASE_ANON_KEY:', supabaseAnonKey ? '✅ Set' : '❌ Missing')
 console.log('- Working Directory:', process.cwd())
 console.log('- Node Environment:', process.env.NODE_ENV)
+console.log('🔍 Enhanced Debug Info:')
+console.log('- Total env vars count:', Object.keys(process.env).length)
+console.log('- Platform detected:', process.platform)
+console.log('- Render environment variables matching SUPABASE:')
+Object.keys(process.env)
+  .filter(key => key.includes('SUPABASE'))
+  .forEach(key => console.log(`  * ${key}: ${process.env[key] ? '✅ Set' : '❌ Missing'}`))
+console.log('- Sample of other env vars (first 5):')
+Object.keys(process.env).slice(0, 5).forEach(key =>
+  console.log(`  * ${key}: ${process.env[key] ? 'Set' : 'Missing'}`)
+)
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing required Supabase environment variables')
