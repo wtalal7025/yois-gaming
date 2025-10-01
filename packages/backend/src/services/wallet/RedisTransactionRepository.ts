@@ -64,6 +64,7 @@ export class RedisTransactionRepository {
       userId: serviceTransaction.userId,
       type: serviceTransaction.type,
       amount: serviceTransaction.amount,
+      currency: (serviceTransaction.metadata?.currency as string) || 'USD', // Default currency
       balanceBefore: (serviceTransaction.metadata?.balanceBefore as number) || 0,
       balanceAfter: (serviceTransaction.metadata?.balanceAfter as number) || 0,
       gameType: serviceTransaction.metadata?.gameType as string,

@@ -53,13 +53,13 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const tokenParts = (authHeader || "").split(" ")
-  const token = tokenParts.length > 1 ? tokenParts[1] : ""
-    // const user = await verifyAccessToken(token)
-    // request.user = user
+  const tokenParts = (authHeader || "").split(" ");
+  const token = tokenParts.length > 1 ? String(tokenParts[1]) : "";
+  // const user = await verifyAccessToken(token)
+  // request.user = user
 
-    // For now, simulate authenticated user
-    (request as any).user = {
+  // For now, simulate authenticated user
+  (request as any).user = {
     id: 'user-123',
     username: 'testuser',
     email: 'test@example.com'

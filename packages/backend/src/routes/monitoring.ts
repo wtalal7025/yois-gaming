@@ -94,7 +94,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
               properties: {
                 activeAlerts: { type: 'number' },
                 resolvedAlerts: { type: 'number' },
-                systemHealth: { 
+                systemHealth: {
                   type: 'string',
                   enum: ['healthy', 'warning', 'critical']
                 }
@@ -108,10 +108,10 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       const { timeRange = '24h' } = request.query as { timeRange?: '1h' | '24h' | '7d' | '30d' };
       const dashboardData = await monitoringService.getDashboardData(timeRange);
-      
+
       return dashboardData;
     } catch (error) {
-      reply.status(500).send({ 
+      return reply.status(500 as any).send({
         error: 'Failed to fetch dashboard data',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -144,7 +144,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
       const systemMetrics = await monitoringService.getSystemMetrics();
       return systemMetrics;
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to fetch system metrics',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -167,11 +167,11 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
             properties: {
               id: { type: 'string' },
               timestamp: { type: 'number' },
-              type: { 
+              type: {
                 type: 'string',
                 enum: ['performance', 'error', 'system', 'security']
               },
-              severity: { 
+              severity: {
                 type: 'string',
                 enum: ['low', 'medium', 'high', 'critical']
               },
@@ -191,7 +191,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
       const alerts = monitoringService.getActiveAlerts();
       return alerts;
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to fetch alerts',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -227,7 +227,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       const { alertId } = request.params as { alertId: string };
       const resolved = await monitoringService.resolveAlert(alertId);
-      
+
       if (resolved) {
         return { success: true, message: 'Alert resolved successfully' };
       } else {
@@ -235,7 +235,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         return { success: false, message: 'Alert not found or already resolved' };
       }
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to resolve alert',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -269,7 +269,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
       const cacheInfo = await cacheService.getCacheInfo();
       return cacheInfo;
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to fetch cache stats',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -307,9 +307,9 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
   }, async (request, reply) => {
     try {
       const { tags } = request.query as { tags?: string };
-      
+
       let clearedCount = 0;
-      
+
       if (tags) {
         const tagList = tags.split(',').map(t => t.trim());
         clearedCount = await cacheService.invalidateByTags(tagList);
@@ -323,7 +323,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         message: `Cleared ${clearedCount} cache entries`
       };
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to clear cache',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -342,7 +342,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         200: {
           type: 'object',
           properties: {
-            status: { 
+            status: {
               type: 'string',
               enum: ['connected', 'disconnected']
             },
@@ -356,14 +356,14 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
   }, async (request, reply) => {
     try {
       const healthStatus = await redisService.healthCheck();
-      
+
       if (healthStatus.status === 'disconnected') {
         reply.status(503);
       }
-      
+
       return healthStatus;
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to check Redis health',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -418,7 +418,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
       // For now, return a placeholder response
       const { route } = request.params as { route: string };
       const { timeRange = '24h' } = request.query as { timeRange?: string };
-      
+
       return {
         route: decodeURIComponent(route),
         requestCount: 0,
@@ -429,7 +429,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         message: 'Route-specific metrics not implemented yet'
       };
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to fetch route metrics',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -465,7 +465,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
     try {
       // Run cache cleanup
       const cleanedCache = await cacheService.cleanup();
-      
+
       return {
         success: true,
         message: 'Cleanup completed successfully',
@@ -475,7 +475,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       };
     } catch (error) {
-      reply.status(500).send({ 
+      reply.status(500).send({
         error: 'Failed to run cleanup',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
