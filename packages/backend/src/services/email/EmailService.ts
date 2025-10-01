@@ -17,12 +17,25 @@ import type {
 } from '@yois-games/shared'
 
 export class EmailService {
-  private resend: Resend
+  private resend: Resend | null
   private config: EmailConfig
 
   constructor(config: EmailConfig) {
     this.config = config
-    this.resend = new Resend(config.apiKey)
+
+    // Reason: Handle missing RESEND_API_KEY gracefully for production deployment
+    if (!config.apiKey) {
+      console.warn('⚠️ EmailService initialized without API key - email functionality disabled')
+      this.resend = null
+    } else {
+      try {
+        this.resend = new Resend(config.apiKey)
+        console.log('✅ EmailService initialized successfully')
+      } catch (error) {
+        console.error('❌ Failed to initialize EmailService:', error)
+        this.resend = null
+      }
+    }
   }
 
   /**
@@ -47,6 +60,12 @@ export class EmailService {
         reply_to: this.config.replyToEmail,
         tags: ['welcome', 'onboarding', ...(options?.tags || [])],
         ...this.buildResendOptions(options)
+      }
+
+      // Reason: Handle disabled email service gracefully when API key is missing
+      if (!this.resend) {
+        console.warn('📧 Email service disabled - welcome email not sent to:', data.email)
+        return { success: false, error: 'Email service disabled - missing API key' }
       }
 
       const result = await this.resend.emails.send(emailData)
@@ -104,6 +123,12 @@ export class EmailService {
         ...this.buildResendOptions(options)
       }
 
+      // Reason: Handle disabled email service gracefully when API key is missing
+      if (!this.resend) {
+        console.warn('📧 Email service disabled - password reset email not sent to:', data.email)
+        return { success: false, error: 'Email service disabled - missing API key' }
+      }
+
       const result = await this.resend.emails.send(emailData)
 
       if (result.error) {
@@ -159,6 +184,12 @@ export class EmailService {
         ...this.buildResendOptions(options)
       }
 
+      // Reason: Handle disabled email service gracefully when API key is missing
+      if (!this.resend) {
+        console.warn('📧 Email service disabled - email verification not sent to:', data.email)
+        return { success: false, error: 'Email service disabled - missing API key' }
+      }
+
       const result = await this.resend.emails.send(emailData)
 
       if (result.error) {
@@ -212,6 +243,12 @@ export class EmailService {
         reply_to: this.config.replyToEmail,
         tags: ['transaction', 'notification', data.transactionType, ...(options?.tags || [])],
         ...this.buildResendOptions(options)
+      }
+
+      // Reason: Handle disabled email service gracefully when API key is missing
+      if (!this.resend) {
+        console.warn('📧 Email service disabled - transaction notification not sent to:', data.email)
+        return { success: false, error: 'Email service disabled - missing API key' }
       }
 
       const result = await this.resend.emails.send(emailData)
@@ -580,6 +617,12 @@ Gaming Platform Team
    */
   async testConnection(): Promise<EmailResult> {
     try {
+      // Reason: Handle disabled email service gracefully when API key is missing
+      if (!this.resend) {
+        console.warn('📧 Email service disabled - cannot test connection')
+        return { success: false, error: 'Email service disabled - missing API key' }
+      }
+
       // Reason: Test connection by sending a simple email to verify Resend API key works
       const result = await this.resend.emails.send({
         from: `${this.config.fromName} <${this.config.fromEmail}>`,
