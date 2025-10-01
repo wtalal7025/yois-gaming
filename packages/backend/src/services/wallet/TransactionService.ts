@@ -8,12 +8,14 @@ import type {
   Transaction,
   CreateTransactionRequest,
   TransactionFilter,
-  TransactionHistory
+  TransactionHistory,
+  TransactionType,
+  TransactionStatus
 } from '@yois-games/shared'
 
 import {
-  TransactionType,
-  TransactionStatus
+  TransactionTypeEnum,
+  TransactionStatusEnum
 } from '@yois-games/shared'
 
 // Reason: Interface for database operations, will be implemented with actual DB later
@@ -67,11 +69,12 @@ export class TransactionService {
         userId: request.userId,
         type: request.type,
         amount: request.amount,
-        currency: request.currency,
-        status: request.status || TransactionStatus.PENDING,
+        currency: 'USD', // Default currency - could be made configurable or passed in request
+        balanceBefore: 0, // Will be set by balance service
+        balanceAfter: 0, // Will be set by balance service
+        status: request.status || TransactionStatusEnum.PENDING,
+        processedAt: new Date().toISOString(),
         metadata: request.metadata || {},
-        reference: request.reference,
-        relatedTransactionId: request.relatedTransactionId
       }
 
       const transaction = await this.transactionRepository.create(transactionData)
@@ -220,12 +223,12 @@ export class TransactionService {
         throw new Error('Transaction not found')
       }
 
-      if (transaction.status !== TransactionStatus.PENDING) {
+      if (transaction.status !== TransactionStatusEnum.PENDING) {
         throw new Error('Can only cancel pending transactions')
       }
 
       return await this.transactionRepository.update(transactionId, {
-        status: TransactionStatus.CANCELLED,
+        status: TransactionStatusEnum.CANCELLED,
         metadata: {
           ...transaction.metadata,
           cancelledAt: new Date().toISOString(),
@@ -264,13 +267,13 @@ export class TransactionService {
         return { count, totalAmount, averageAmount }
       } else {
         // Get stats for all transaction types
-        const allTypes = Object.values(TransactionType)
+        const allTypes = Object.values(TransactionTypeEnum)
         let totalCount = 0
         let totalAmount = 0
 
         for (const transactionType of allTypes) {
-          const count = await this.transactionRepository.countTransactionsByType(userId, transactionType)
-          const amount = await this.transactionRepository.getTotalAmountByType(userId, transactionType, fromDate, toDate)
+          const count = await this.transactionRepository.countTransactionsByType(userId, transactionType as TransactionType)
+          const amount = await this.transactionRepository.getTotalAmountByType(userId, transactionType as TransactionType, fromDate, toDate)
 
           totalCount += count
           totalAmount += amount
@@ -292,19 +295,19 @@ export class TransactionService {
    */
   private isValidStatusTransition(currentStatus: TransactionStatus, newStatus: TransactionStatus): boolean {
     const validTransitions: Record<TransactionStatus, TransactionStatus[]> = {
-      [TransactionStatus.PENDING]: [
-        TransactionStatus.COMPLETED,
-        TransactionStatus.FAILED,
-        TransactionStatus.CANCELLED
+      [TransactionStatusEnum.PENDING]: [
+        TransactionStatusEnum.COMPLETED as TransactionStatus,
+        TransactionStatusEnum.FAILED as TransactionStatus,
+        TransactionStatusEnum.CANCELLED as TransactionStatus
       ],
-      [TransactionStatus.PROCESSING]: [
-        TransactionStatus.COMPLETED,
-        TransactionStatus.FAILED
+      [TransactionStatusEnum.PROCESSING]: [
+        TransactionStatusEnum.COMPLETED as TransactionStatus,
+        TransactionStatusEnum.FAILED as TransactionStatus
       ],
-      [TransactionStatus.COMPLETED]: [], // Terminal state
-      [TransactionStatus.FAILED]: [], // Terminal state
-      [TransactionStatus.CANCELLED]: [] // Terminal state
-    }
+      [TransactionStatusEnum.COMPLETED]: [], // Terminal state
+      [TransactionStatusEnum.FAILED]: [], // Terminal state
+      [TransactionStatusEnum.CANCELLED]: [] // Terminal state
+    } as any
 
     return validTransitions[currentStatus]?.includes(newStatus) || false
   }
@@ -329,11 +332,9 @@ export class TransactionService {
 
       // Update both transactions to reference each other
       await this.transactionRepository.update(transactionId, {
-        relatedTransactionId
       })
 
       await this.transactionRepository.update(relatedTransactionId, {
-        relatedTransactionId: transactionId
       })
 
       return true

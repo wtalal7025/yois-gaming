@@ -58,17 +58,18 @@ export function createPerformanceMonitoring(options: MonitoringOptions = {}) {
 
       const responseTime = Date.now() - startTime;
       const route = request.routeOptions?.url || request.url;
-      
+
       // Record performance metric
-      await monitoringService.recordPerformanceMetric({
+      const performanceMetric = {
         route: route,
         method: request.method,
         responseTime: responseTime,
         statusCode: reply.statusCode,
         userId: (request as any).user?.id,
-        userAgent: includeUserAgent ? request.headers['user-agent'] : undefined,
-        ip: request.ip
-      });
+        ip: request.ip,
+        ...(includeUserAgent && request.headers['user-agent'] && { userAgent: request.headers['user-agent'] })
+      };
+      await monitoringService.recordPerformanceMetric(performanceMetric);
 
       // Record error if status code indicates failure
       if (reply.statusCode >= 400) {
@@ -116,7 +117,7 @@ export function createAnalyticsTracking() {
         event: eventName,
         gameType: properties.gameType,
         properties: properties,
-        value: value
+        ...(typeof value === 'number' && { value })
       });
     }
   };
@@ -143,7 +144,7 @@ export function createDatabaseMonitoring() {
 
       try {
         const result = await query();
-        
+
         // Try to determine row count
         if (Array.isArray(result)) {
           rowCount = result.length;
@@ -162,9 +163,9 @@ export function createDatabaseMonitoring() {
           operation: operation,
           table: table,
           executionTime: executionTime,
-          rowCount: rowCount,
-          query: queryString,
-          error: error
+          ...(typeof rowCount === 'number' && { rowCount }),
+          ...(queryString && { query: queryString }),
+          ...(error && { error })
         });
       }
     }
@@ -186,8 +187,8 @@ export function createErrorTracking() {
 
       // Determine error level
       let level: 'error' | 'warn' | 'critical' = 'error';
-      if (error.message.toLowerCase().includes('critical') || 
-          error.message.toLowerCase().includes('security')) {
+      if (error.message.toLowerCase().includes('critical') ||
+        error.message.toLowerCase().includes('security')) {
         level = 'critical';
       } else if (error.message.toLowerCase().includes('warn')) {
         level = 'warn';
@@ -196,7 +197,7 @@ export function createErrorTracking() {
       await monitoringService.recordError({
         level: level,
         message: error.message,
-        stack: error.stack,
+        ...(error.stack && { stack: error.stack }),
         route: route,
         userId: user?.id,
         context: {
@@ -282,9 +283,9 @@ export const MonitoringHooks = {
    * Track game result
    */
   trackGameResult: async (
-    request: FastifyRequest, 
-    gameType: string, 
-    result: 'win' | 'loss', 
+    request: FastifyRequest,
+    gameType: string,
+    result: 'win' | 'loss',
     amount: number
   ) => {
     const analytics = createAnalyticsTracking();

@@ -32,7 +32,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const token = authHeader.substring(7)
+  const tokenParts = (authHeader || "").split(" ")
+  const token = tokenParts.length > 1 ? tokenParts[1] : ""
     // const user = await verifyAccessToken(token)
     // request.user = user
 
@@ -58,7 +59,6 @@ export async function balanceRoutes(
     Reply: { success: boolean; balance?: Balance; error?: string }
   }>('/balance', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -102,7 +102,7 @@ export async function balanceRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get balance error:', error)
+      fastify.log.error({ error }, 'Get balance error')
 
       return reply.status(500).send({
         success: false,
@@ -120,7 +120,6 @@ export async function balanceRoutes(
     Reply: { success: boolean; history?: Balance[]; pagination?: any; error?: string }
   }>('/balance/history', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -196,7 +195,7 @@ export async function balanceRoutes(
 
       // Get balance history (this would need to be implemented in the service)
       // For now, return a placeholder response
-      const history = [] // await walletService.getBalanceHistory(userId, limit, offset)
+      const history: any[] = [] // await walletService.getBalanceHistory(userId, limit, offset)
 
       return reply.send({
         success: true,
@@ -210,7 +209,7 @@ export async function balanceRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get balance history error:', error)
+      fastify.log.error({ error }, 'Get balance history error')
 
       return reply.status(500).send({
         success: false,
@@ -227,7 +226,6 @@ export async function balanceRoutes(
     Reply: { success: boolean; stats?: WalletStats; error?: string }
   }>('/balance/stats', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -265,7 +263,7 @@ export async function balanceRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get wallet stats error:', error)
+      fastify.log.error({ error }, 'Get wallet stats error')
 
       return reply.status(500).send({
         success: false,
@@ -283,7 +281,6 @@ export async function balanceRoutes(
     Reply: { valid: boolean; currentBalance?: number; error?: string }
   }>('/balance/validate', {
     schema: {
-      security: [{ bearerAuth: [] }],
       body: {
         type: 'object',
         required: ['amount'],
@@ -330,7 +327,7 @@ export async function balanceRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Balance validation error:', error)
+      fastify.log.error({ error }, 'Balance validation error')
 
       return reply.send({
         valid: false,
@@ -359,7 +356,6 @@ export async function balanceRoutes(
     }
   }>('/balance/summary', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -434,7 +430,7 @@ export async function balanceRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Balance summary error:', error)
+      fastify.log.error({ error }, 'Balance summary error')
 
       return reply.status(500).send({
         success: false,

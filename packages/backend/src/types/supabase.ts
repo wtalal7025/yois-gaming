@@ -29,6 +29,7 @@ export interface Database {
           games_played: number
           is_active: boolean
           is_verified: boolean
+          role: string
           last_login_at: string | null
           created_at: string
           updated_at: string
@@ -47,6 +48,7 @@ export interface Database {
           games_played?: number
           is_active?: boolean
           is_verified?: boolean
+          role?: string
           last_login_at?: string | null
           created_at?: string
           updated_at?: string
@@ -65,6 +67,7 @@ export interface Database {
           games_played?: number
           is_active?: boolean
           is_verified?: boolean
+          role?: string
           last_login_at?: string | null
           created_at?: string
           updated_at?: string

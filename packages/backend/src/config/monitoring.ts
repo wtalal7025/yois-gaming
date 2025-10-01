@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import * as Sentry from '@sentry/node';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { ProfilingIntegration } from '@sentry/profiling-node';
 
 // Monitoring configuration interface
 interface MonitoringConfig {
@@ -106,7 +106,7 @@ export function initializeSentry(config: MonitoringConfig): void {
     tracesSampleRate: config.sentry.tracesSampleRate,
     profilesSampleRate: config.sentry.profilesSampleRate,
     integrations: [
-      nodeProfilingIntegration(),
+      new ProfilingIntegration(),
     ],
     // Performance monitoring
     beforeSend(event) {
@@ -137,25 +137,25 @@ export interface LoggerOptions {
 // Create structured logger
 export function createLogger(options: LoggerOptions) {
   const winston = require('winston');
-  
+
   const transports: any[] = [];
-  
+
   // Console transport
   if (options.enableConsole) {
     transports.push(new winston.transports.Console({
-      format: options.format === 'json' 
+      format: options.format === 'json'
         ? winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.json()
-          )
+          winston.format.timestamp(),
+          winston.format.json()
+        )
         : winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.colorize(),
-            winston.format.simple()
-          ),
+          winston.format.timestamp(),
+          winston.format.colorize(),
+          winston.format.simple()
+        ),
     }));
   }
-  
+
   // File transport for production
   if (options.enableFile && options.filePath) {
     transports.push(new winston.transports.File({
@@ -166,7 +166,7 @@ export function createLogger(options: LoggerOptions) {
       ),
     }));
   }
-  
+
   return winston.createLogger({
     level: options.level,
     transports,
@@ -197,7 +197,7 @@ export interface Metrics {
 export class MetricsCollector {
   private metrics: Metrics;
   private startTime: number;
-  
+
   constructor() {
     this.metrics = {
       requests: {
@@ -219,7 +219,7 @@ export class MetricsCollector {
     };
     this.startTime = Date.now();
   }
-  
+
   // Record request metrics
   recordRequest(responseTime: number, success: boolean): void {
     this.metrics.requests.total++;
@@ -228,31 +228,31 @@ export class MetricsCollector {
     } else {
       this.metrics.requests.error++;
     }
-    
+
     // Update average response time
     const totalTime = this.metrics.requests.avgResponseTime * (this.metrics.requests.total - 1) + responseTime;
     this.metrics.requests.avgResponseTime = totalTime / this.metrics.requests.total;
   }
-  
+
   // Update game metrics
   updateGameMetrics(activeGames: number, totalPlayers: number): void {
     this.metrics.games.activeGames = activeGames;
     this.metrics.games.totalPlayers = totalPlayers;
   }
-  
+
   // Record game completion
   recordGameCompletion(): void {
     this.metrics.games.gamesPlayed++;
   }
-  
+
   // Get current metrics
   getMetrics(): Metrics {
     this.metrics.system.uptime = Date.now() - this.startTime;
     this.metrics.system.memoryUsage = process.memoryUsage();
-    
+
     return { ...this.metrics };
   }
-  
+
   // Reset metrics (useful for testing)
   reset(): void {
     this.metrics = {
@@ -273,7 +273,7 @@ export async function performHealthCheck(timeout: number = 5000): Promise<{
   checks: Record<string, { status: 'pass' | 'fail'; message: string; responseTime?: number }>;
 }> {
   const checks: Record<string, { status: 'pass' | 'fail'; message: string; responseTime?: number }> = {};
-  
+
   // Database health check
   try {
     const dbStart = Date.now();
@@ -291,7 +291,7 @@ export async function performHealthCheck(timeout: number = 5000): Promise<{
       message: `Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-  
+
   // Redis health check
   try {
     const redisStart = Date.now();
@@ -308,7 +308,7 @@ export async function performHealthCheck(timeout: number = 5000): Promise<{
       message: `Redis connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-  
+
   // External services health check
   try {
     const extStart = Date.now();
@@ -325,10 +325,10 @@ export async function performHealthCheck(timeout: number = 5000): Promise<{
       message: `External services check failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
     };
   }
-  
+
   // Overall health status
   const allPassed = Object.values(checks).every(check => check.status === 'pass');
-  
+
   return {
     status: allPassed ? 'healthy' : 'unhealthy',
     checks,
@@ -341,7 +341,7 @@ export function registerMonitoringRoutes(fastify: FastifyInstance, config: Monit
   if (config.healthCheck.enabled) {
     fastify.get(config.healthCheck.path, async (request, reply) => {
       const healthResult = await performHealthCheck(config.healthCheck.timeout);
-      
+
       reply.code(healthResult.status === 'healthy' ? 200 : 503);
       return {
         status: healthResult.status,
@@ -351,24 +351,24 @@ export function registerMonitoringRoutes(fastify: FastifyInstance, config: Monit
       };
     });
   }
-  
+
   // Metrics endpoint
   if (config.metrics.enabled) {
     fastify.get(config.metrics.endpoint, async (request, reply) => {
       const metrics = metricsCollector.getMetrics();
-      
+
       return {
         timestamp: new Date().toISOString(),
         ...metrics,
       };
     });
   }
-  
+
   // Ready endpoint for Kubernetes-style readiness probes
   fastify.get('/ready', async (request, reply) => {
     return { status: 'ready', timestamp: new Date().toISOString() };
   });
-  
+
   // Live endpoint for Kubernetes-style liveness probes
   fastify.get('/live', async (request, reply) => {
     return { status: 'alive', timestamp: new Date().toISOString() };

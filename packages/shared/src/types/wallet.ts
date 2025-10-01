@@ -8,6 +8,7 @@ export interface Transaction {
   userId: string
   type: TransactionType
   amount: number
+  currency: string
   balanceBefore: number
   balanceAfter: number
   gameType?: string
@@ -92,12 +93,12 @@ export interface PaymentMethod {
   isDefault: boolean
 }
 
-export type PaymentMethodType = 
-  | 'credit_card' 
-  | 'debit_card' 
-  | 'bank_transfer' 
-  | 'crypto' 
-  | 'e_wallet' 
+export type PaymentMethodType =
+  | 'credit_card'
+  | 'debit_card'
+  | 'bank_transfer'
+  | 'crypto'
+  | 'e_wallet'
   | 'demo' // For demo/development
 
 export interface WithdrawalMethod {
@@ -109,10 +110,10 @@ export interface WithdrawalMethod {
   isDefault: boolean
 }
 
-export type WithdrawalMethodType = 
-  | 'bank_transfer' 
-  | 'crypto' 
-  | 'e_wallet' 
+export type WithdrawalMethodType =
+  | 'bank_transfer'
+  | 'crypto'
+  | 'e_wallet'
   | 'demo' // For demo/development
 
 export interface GameTransaction {

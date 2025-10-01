@@ -53,7 +53,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const token = authHeader.substring(7)
+  const tokenParts = (authHeader || "").split(" ")
+  const token = tokenParts.length > 1 ? tokenParts[1] : ""
     // const user = await verifyAccessToken(token)
     // request.user = user
 
@@ -86,7 +87,6 @@ export async function depositRoutes(
     }
   }>('/deposit', {
     schema: {
-      security: [{ bearerAuth: [] }],
       body: {
         type: 'object',
         required: ['amount', 'paymentMethod'],
@@ -160,10 +160,10 @@ export async function depositRoutes(
 
       // In production, implement rate limiting here
       // Log deposit attempt for security monitoring
-      fastify.log.info('Deposit attempt', {
+      fastify.log.info({
         ip: clientIp,
         timestamp: new Date().toISOString()
-      })
+      }, 'Deposit attempt')
     }]
   }, async (request: FastifyRequest<{ Body: DepositRequest }>, reply: FastifyReply) => {
     try {
@@ -219,8 +219,23 @@ export async function depositRoutes(
         }
       }
 
+      // Transform data to match DepositRequest interface from shared types
+      const depositRequest = {
+        amount: depositData.amount,
+        currency: 'USD', // Default currency - could be made configurable
+        paymentMethod: {
+          id: `${depositData.paymentMethod}_${Date.now()}`, // Generate a unique ID
+          type: depositData.paymentMethod as any, // Cast to PaymentMethodType
+          name: depositData.paymentMethod.replace('_', ' ').toUpperCase(),
+          details: depositData.paymentDetails || {},
+          isActive: true,
+          isDefault: false
+        },
+        ...(depositData.paymentDetails && { paymentDetails: depositData.paymentDetails })
+      }
+
       // Process deposit
-      const transaction = await walletService.processDeposit(userId, depositData)
+      const transaction = await walletService.processDeposit(userId, depositRequest)
 
       // Generate response based on payment method
       let response: any = {
@@ -255,18 +270,18 @@ export async function depositRoutes(
           break
       }
 
-      fastify.log.info('Deposit processed', {
+      fastify.log.info({
         userId,
         transactionId: transaction.id,
         amount: depositData.amount,
         paymentMethod: depositData.paymentMethod,
         timestamp: new Date().toISOString()
-      })
+      }, 'Deposit processed')
 
       return reply.send(response)
 
     } catch (error) {
-      fastify.log.error('Deposit processing error:', error)
+      fastify.log.error({ error }, 'Deposit processing error')
 
       // Handle specific error types
       if (error instanceof Error) {
@@ -321,7 +336,6 @@ export async function depositRoutes(
     }
   }>('/deposit/methods', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -420,7 +434,7 @@ export async function depositRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get payment methods error:', error)
+      fastify.log.error({ error }, 'Get payment methods error')
 
       return reply.status(500).send({
         success: false,
@@ -443,7 +457,6 @@ export async function depositRoutes(
     }
   }>('/deposit/history', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -521,7 +534,7 @@ export async function depositRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get deposit history error:', error)
+      fastify.log.error({ error }, 'Get deposit history error')
 
       return reply.status(500).send({
         success: false,
@@ -554,7 +567,6 @@ export async function depositRoutes(
     }
   }>('/deposit/:id/status', {
     schema: {
-      security: [{ bearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -619,7 +631,7 @@ export async function depositRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get deposit status error:', error)
+      fastify.log.error({ error }, 'Get deposit status error')
 
       return reply.status(500).send({
         success: false,

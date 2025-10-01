@@ -7,13 +7,15 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import type {
   Transaction,
-  TransactionFilter,
-  TransactionHistory
+  TransactionFilters,
+  TransactionHistory,
+  TransactionType,
+  TransactionStatus
 } from '@yois-games/shared'
 
 import {
-  TransactionType,
-  TransactionStatus
+  TransactionTypeEnum,
+  TransactionStatusEnum
 } from '@yois-games/shared'
 
 import { TransactionService } from '../../services/wallet/TransactionService'
@@ -22,8 +24,8 @@ import { TransactionService } from '../../services/wallet/TransactionService'
 const transactionFilterSchema = z.object({
   limit: z.number().min(1).max(100).optional().default(50),
   offset: z.number().min(0).optional().default(0),
-  type: z.nativeEnum(TransactionType).optional(),
-  status: z.nativeEnum(TransactionStatus).optional(),
+  type: z.nativeEnum(TransactionTypeEnum).optional(),
+  status: z.nativeEnum(TransactionStatusEnum).optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   gameId: z.string().optional(),
@@ -47,7 +49,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const token = authHeader.substring(7)
+  const tokenParts = (authHeader || "").split(" ")
+  const token = tokenParts.length > 1 ? tokenParts[1] : ""
     // const user = await verifyAccessToken(token)
     // request.user = user
 
@@ -89,7 +92,6 @@ export async function transactionRoutes(
     }
   }>('/transactions', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -106,11 +108,11 @@ export async function transactionRoutes(
           },
           type: {
             type: 'string',
-            enum: Object.values(TransactionType)
+            enum: Object.values(TransactionTypeEnum)
           },
           status: {
             type: 'string',
-            enum: Object.values(TransactionStatus)
+            enum: Object.values(TransactionStatusEnum)
           },
           startDate: {
             type: 'string',
@@ -199,12 +201,18 @@ export async function transactionRoutes(
       const filters = validationResult.data
       const { limit, offset } = filters
 
-      // Build transaction filter
-      const transactionFilter: TransactionFilter = {
+      // Build transaction filter - omit undefined properties for exactOptionalPropertyTypes
+      const transactionFilter: TransactionFilters = {
         userId,
-        ...filters,
-        startDate: filters.startDate ? new Date(filters.startDate) : undefined,
-        endDate: filters.endDate ? new Date(filters.endDate) : undefined
+        limit: filters.limit,
+        offset: filters.offset,
+        ...(filters.type && { type: [filters.type as TransactionType] }),
+        ...(filters.status && { status: [filters.status as TransactionStatus] }),
+        ...(filters.gameId && { gameType: [filters.gameId] }),
+        ...(filters.minAmount !== undefined && { minAmount: filters.minAmount }),
+        ...(filters.maxAmount !== undefined && { maxAmount: filters.maxAmount }),
+        ...(filters.startDate && { fromDate: filters.startDate }),
+        ...(filters.endDate && { toDate: filters.endDate })
       }
 
       // Get filtered transactions
@@ -222,7 +230,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get transactions error:', error)
+      fastify.log.error({ error }, 'Get transactions error')
 
       return reply.status(500).send({
         success: false,
@@ -240,7 +248,6 @@ export async function transactionRoutes(
     Reply: { success: boolean; transaction?: Transaction; error?: string }
   }>('/transactions/:id', {
     schema: {
-      security: [{ bearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -308,7 +315,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get transaction error:', error)
+      fastify.log.error({ error }, 'Get transaction error')
 
       return reply.status(500).send({
         success: false,
@@ -326,7 +333,6 @@ export async function transactionRoutes(
     Reply: { success: boolean; history?: TransactionHistory; error?: string }
   }>('/transactions/history', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -391,7 +397,7 @@ export async function transactionRoutes(
       const { period = 'month', groupBy = 'day' } = request.query
 
       // Build filter based on period
-      const filter: TransactionFilter = {
+      const filter: TransactionFilters = {
         userId
       }
 
@@ -399,16 +405,16 @@ export async function transactionRoutes(
       const now = new Date()
       switch (period) {
         case 'day':
-          filter.startDate = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+          filter.fromDate = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
           break
         case 'week':
-          filter.startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          filter.fromDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
           break
         case 'month':
-          filter.startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          filter.fromDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
           break
         case 'year':
-          filter.startDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
+          filter.fromDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString()
           break
         // 'all' case doesn't set startDate
       }
@@ -421,7 +427,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get transaction history error:', error)
+      fastify.log.error({ error }, 'Get transaction history error')
 
       return reply.status(500).send({
         success: false,
@@ -438,7 +444,6 @@ export async function transactionRoutes(
     Reply: { success: boolean; transactions?: Transaction[]; error?: string }
   }>('/transactions/pending', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -475,7 +480,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get pending transactions error:', error)
+      fastify.log.error({ error }, 'Get pending transactions error')
 
       return reply.status(500).send({
         success: false,
@@ -493,7 +498,6 @@ export async function transactionRoutes(
     Reply: { success: boolean; transaction?: Transaction; error?: string }
   }>('/transactions/:id/cancel', {
     schema: {
-      security: [{ bearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -551,11 +555,11 @@ export async function transactionRoutes(
         })
       }
 
-      fastify.log.info('Transaction cancelled', {
+      fastify.log.info({
         userId,
         transactionId: id,
         timestamp: new Date().toISOString()
-      })
+      }, 'Transaction cancelled')
 
       return reply.send({
         success: true,
@@ -563,7 +567,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Cancel transaction error:', error)
+      fastify.log.error({ error }, 'Cancel transaction error')
 
       if (error instanceof Error) {
         if (error.message.includes('Can only cancel pending')) {
@@ -601,7 +605,6 @@ export async function transactionRoutes(
     }
   }>('/transactions/stats', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -664,7 +667,7 @@ export async function transactionRoutes(
 
       // Get stats by type
       const byType: Record<string, { count: number; amount: number }> = {}
-      for (const type of Object.values(TransactionType)) {
+      for (const type of Object.values(TransactionTypeEnum)) {
         const typeStats = await transactionService.getTransactionStats(userId, type, fromDate)
         byType[type] = {
           count: typeStats.count,
@@ -674,13 +677,13 @@ export async function transactionRoutes(
 
       // Mock status distribution and trends for now
       const byStatus = {
-        [TransactionStatus.COMPLETED]: 85,
-        [TransactionStatus.PENDING]: 10,
-        [TransactionStatus.FAILED]: 3,
-        [TransactionStatus.CANCELLED]: 2
+        [TransactionStatusEnum.COMPLETED]: 85,
+        [TransactionStatusEnum.PENDING]: 10,
+        [TransactionStatusEnum.FAILED]: 3,
+        [TransactionStatusEnum.CANCELLED]: 2
       }
 
-      const trends = [] // Would be calculated from historical data
+      const trends: any[] = [] // Would be calculated from historical data
 
       return reply.send({
         success: true,
@@ -695,7 +698,7 @@ export async function transactionRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get transaction stats error:', error)
+      fastify.log.error({ error }, 'Get transaction stats error')
 
       return reply.status(500).send({
         success: false,

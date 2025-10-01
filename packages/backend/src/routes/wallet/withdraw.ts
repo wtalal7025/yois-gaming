@@ -49,7 +49,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const token = authHeader.substring(7)
+  const tokenParts = (authHeader || "").split(" ")
+  const token = tokenParts.length > 1 ? tokenParts[1] : ""
     // const user = await verifyAccessToken(token)
     // request.user = user
 
@@ -82,7 +83,6 @@ export async function withdrawRoutes(
     }
   }>('/withdraw', {
     schema: {
-      security: [{ bearerAuth: [] }],
       body: {
         type: 'object',
         required: ['amount', 'paymentMethod'],
@@ -152,10 +152,10 @@ export async function withdrawRoutes(
       // - Check withdrawal limits and cooling periods
       // - Implement additional 2FA verification
 
-      fastify.log.info('Withdrawal attempt', {
+      fastify.log.info({
         ip: clientIp,
         timestamp: new Date().toISOString()
-      })
+      }, 'Withdrawal attempt')
     }]
   }, async (request: FastifyRequest<{ Body: WithdrawRequest }>, reply: FastifyReply) => {
     try {
@@ -264,17 +264,32 @@ export async function withdrawRoutes(
         })
       }
 
-      // Process withdrawal
-      const transaction = await walletService.processWithdrawal(userId, withdrawData)
+      // Transform data to match WithdrawalRequest interface from shared types
+      const withdrawalRequest = {
+        amount: withdrawData.amount,
+        currency: 'USD', // Default currency - could be made configurable
+        withdrawalMethod: {
+          id: `${withdrawData.paymentMethod}_${Date.now()}`, // Generate a unique ID
+          type: withdrawData.paymentMethod as any, // Cast to withdrawal method type
+          name: withdrawData.paymentMethod.replace('_', ' ').toUpperCase(),
+          details: withdrawData.paymentDetails || {},
+          isActive: true,
+          isDefault: false
+        },
+        withdrawalDetails: withdrawData.paymentDetails || {}
+      }
 
-      fastify.log.info('Withdrawal processed', {
+      // Process withdrawal
+      const transaction = await walletService.processWithdrawal(userId, withdrawalRequest)
+
+      fastify.log.info({
         userId,
         transactionId: transaction.id,
         amount: withdrawData.amount,
         fees,
         paymentMethod: withdrawData.paymentMethod,
         timestamp: new Date().toISOString()
-      })
+      }, 'Withdrawal processed')
 
       return reply.send({
         success: true,
@@ -290,7 +305,7 @@ export async function withdrawRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Withdrawal processing error:', error)
+      fastify.log.error({ error }, 'Withdrawal processing error')
 
       // Handle specific error types
       if (error instanceof Error) {
@@ -352,7 +367,6 @@ export async function withdrawRoutes(
     }
   }>('/withdraw/methods', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -452,7 +466,7 @@ export async function withdrawRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get withdrawal methods error:', error)
+      fastify.log.error({ error }, 'Get withdrawal methods error')
 
       return reply.status(500).send({
         success: false,
@@ -485,7 +499,6 @@ export async function withdrawRoutes(
     }
   }>('/withdraw/limits', {
     schema: {
-      security: [{ bearerAuth: [] }],
       response: {
         200: {
           type: 'object',
@@ -537,7 +550,7 @@ export async function withdrawRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get withdrawal limits error:', error)
+      fastify.log.error({ error }, 'Get withdrawal limits error')
 
       return reply.status(500).send({
         success: false,
@@ -560,7 +573,6 @@ export async function withdrawRoutes(
     }
   }>('/withdraw/history', {
     schema: {
-      security: [{ bearerAuth: [] }],
       querystring: {
         type: 'object',
         properties: {
@@ -639,7 +651,7 @@ export async function withdrawRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get withdrawal history error:', error)
+      fastify.log.error({ error }, 'Get withdrawal history error')
 
       return reply.status(500).send({
         success: false,
@@ -672,7 +684,6 @@ export async function withdrawRoutes(
     }
   }>('/withdraw/:id/status', {
     schema: {
-      security: [{ bearerAuth: [] }],
       params: {
         type: 'object',
         properties: {
@@ -738,7 +749,7 @@ export async function withdrawRoutes(
       })
 
     } catch (error) {
-      fastify.log.error('Get withdrawal status error:', error)
+      fastify.log.error({ error }, 'Get withdrawal status error')
 
       return reply.status(500).send({
         success: false,

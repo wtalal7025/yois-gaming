@@ -32,6 +32,7 @@ for (const envPath of envPaths) {
 import { supabaseService } from '../database/supabase'
 import { PasswordService } from '../services/auth/PasswordService'
 import type { User } from '@yois-games/shared'
+import type { Database } from '../types/supabase'
 
 interface CreateUserData {
   username: string
@@ -60,17 +61,18 @@ class AdminUserCreator {
 
     try {
       // Check if admin user already exists
-      const { data: existingUser } = await supabaseService
+      const { data: existingUser, error: queryError } = await supabaseService
         .from('users')
         .select('id, email, username')
         .eq('email', 'admin@stake-gaming.com')
         .single()
 
-      if (existingUser) {
+      if (existingUser && !queryError) {
+        const user = existingUser as any
         console.log('✅ Admin user already exists:', {
-          id: existingUser.id,
-          email: existingUser.email,
-          username: existingUser.username
+          id: user.id,
+          email: user.email,
+          username: user.username
         })
         return
       }
@@ -79,7 +81,7 @@ class AdminUserCreator {
       const hashedPassword = await PasswordService.hashPassword('admin123!@#')
 
       // Create admin user
-      const { data: adminUser, error } = await supabaseService
+      const { data: adminUser, error } = await (supabaseService as any)
         .from('users')
         .insert({
           username: 'admin',
@@ -101,11 +103,12 @@ class AdminUserCreator {
         throw new Error(`Failed to create admin user: ${error.message}`)
       }
 
+      const admin = adminUser as any
       console.log('✅ Admin user created successfully:', {
-        id: adminUser.id,
-        username: adminUser.username,
-        email: adminUser.email,
-        balance: adminUser.balance
+        id: admin.id,
+        username: admin.username,
+        email: admin.email,
+        balance: admin.balance
       })
 
     } catch (error) {
@@ -129,10 +132,11 @@ class AdminUserCreator {
         .single()
 
       if (existingUser) {
+        const user = existingUser as any
         console.log('✅ Test user already exists:', {
-          id: existingUser.id,
-          email: existingUser.email,
-          username: existingUser.username
+          id: user.id,
+          email: user.email,
+          username: user.username
         })
         return
       }
@@ -141,7 +145,7 @@ class AdminUserCreator {
       const hashedPassword = await PasswordService.hashPassword('test123')
 
       // Create test user
-      const { data: testUser, error } = await supabaseService
+      const { data: testUser, error } = await (supabaseService as any)
         .from('users')
         .insert({
           username: 'testuser',
@@ -163,11 +167,12 @@ class AdminUserCreator {
         throw new Error(`Failed to create test user: ${error.message}`)
       }
 
+      const test = testUser as any
       console.log('✅ Test user created successfully:', {
-        id: testUser.id,
-        username: testUser.username,
-        email: testUser.email,
-        balance: testUser.balance
+        id: test.id,
+        username: test.username,
+        email: test.email,
+        balance: test.balance
       })
 
     } catch (error) {
