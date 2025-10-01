@@ -106,7 +106,7 @@ class SecurityMonitor {
   }
 
   isBlockedUserAgent(userAgent: string): boolean {
-    return this.config.requestValidation.blockedUserAgents.some(pattern => 
+    return this.config.requestValidation.blockedUserAgents.some(pattern =>
       pattern.test(userAgent)
     );
   }
@@ -119,7 +119,7 @@ class SecurityMonitor {
       existing.count++;
       existing.lastSeen = now;
       existing.violations.push(violation);
-      
+
       // Keep only recent violations
       existing.violations = existing.violations.slice(-10);
     } else {
@@ -131,7 +131,7 @@ class SecurityMonitor {
     }
 
     const ipData = this.suspiciousIPs.get(ip)!;
-    
+
     // Alert if suspicious activity threshold exceeded
     if (ipData.count > 10 && this.config.monitoring.alertOnSuspiciousActivity) {
       console.warn(`🚨 Suspicious activity from IP ${ip}: ${ipData.count} violations`, {
@@ -147,7 +147,7 @@ class SecurityMonitor {
   trackRapidRequests(ip: string): boolean {
     const now = Date.now();
     const windowStart = now - 1000; // 1 second window
-    
+
     const existing = this.requestCounts.get(ip);
     if (!existing || existing.window < windowStart) {
       this.requestCounts.set(ip, { count: 1, window: now });
@@ -155,7 +155,7 @@ class SecurityMonitor {
     }
 
     existing.count++;
-    
+
     if (existing.count > this.config.monitoring.suspiciousThresholds.rapidRequests) {
       this.trackSuspiciousActivity(ip, 'rapid_requests');
       return true;
@@ -187,7 +187,7 @@ class SecurityMonitor {
       const isAllowed = this.config.requestValidation.allowedContentTypes.some(type =>
         contentType.includes(type)
       );
-      
+
       if (!isAllowed) {
         this.stats.malformedRequests++;
         this.trackSuspiciousActivity(ip, 'invalid_content_type');
@@ -261,12 +261,12 @@ export async function registerSecurityMiddleware(
   if (config.requestValidation.enabled) {
     fastify.addHook('preHandler', async (request: FastifyRequest, reply: FastifyReply) => {
       const validation = securityMonitor.validateRequest(request);
-      
+
       if (!validation.valid) {
         if (config.monitoring.logFailedRequests) {
           console.warn(`🛡️ Security block: ${validation.reason} from ${request.ip} on ${request.url}`);
         }
-        
+
         return reply.code(400).send({
           error: 'Bad Request',
           message: 'Request validation failed'
@@ -297,15 +297,15 @@ export async function registerSecurityMiddleware(
       // Other security headers
       reply.header('Referrer-Policy', config.headers.referrerPolicy);
       reply.header('X-Frame-Options', config.headers.frameOptions);
-      
+
       if (config.headers.contentTypeOptions) {
         reply.header('X-Content-Type-Options', 'nosniff');
       }
-      
+
       if (config.headers.xssProtection) {
         reply.header('X-XSS-Protection', '1; mode=block');
       }
-      
+
       if (config.headers.permissionsPolicy) {
         reply.header('Permissions-Policy', config.headers.permissionsPolicy);
       }
@@ -315,7 +315,7 @@ export async function registerSecurityMiddleware(
   }
 
   // Security stats endpoint
-  fastify.get('/api/security/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/api/security/stats', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const stats = securityMonitor.getStats();
     return {
       ...stats,
@@ -324,7 +324,7 @@ export async function registerSecurityMiddleware(
   });
 
   // Security management endpoint
-  fastify.post('/api/security/reset-stats', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/api/security/reset-stats', async (_request: FastifyRequest, _reply: FastifyReply) => {
     securityMonitor.resetStats();
     return { message: 'Security stats reset successfully' };
   });

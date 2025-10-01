@@ -139,7 +139,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const systemMetrics = await monitoringService.getSystemMetrics();
       return systemMetrics;
@@ -186,7 +186,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const alerts = monitoringService.getActiveAlerts();
       return alerts;
@@ -264,7 +264,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const cacheInfo = await cacheService.getCacheInfo();
       return cacheInfo;
@@ -353,7 +353,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       const healthStatus = await redisService.healthCheck();
 
@@ -417,7 +417,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
       // This would require additional implementation in MonitoringService
       // For now, return a placeholder response
       const { route } = request.params as { route: string };
-      const { timeRange = '24h' } = request.query as { timeRange?: string };
+      const { timeRange: _timeRange = '24h' } = request.query as { timeRange?: string };
 
       return {
         route: decodeURIComponent(route),
@@ -461,7 +461,7 @@ const monitoringRoutes: FastifyPluginAsync = async (fastify) => {
         }
       }
     }
-  }, async (request, reply) => {
+  }, async (_request, reply) => {
     try {
       // Run cache cleanup
       const cleanedCache = await cacheService.cleanup();

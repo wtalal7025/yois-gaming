@@ -135,12 +135,12 @@ export async function registerRoutes(
         }
       }
     },
-    preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: async (_request: FastifyRequest, _reply: FastifyReply) => {
       // Rate limiting for registration attempts
       // This would be implemented with fastify-rate-limit plugin
 
       // Basic IP rate limiting (simplified)
-      const clientIp = request.ip
+      // const _unusedClientIp = request.ip // Commented out - unused
       // In production, implement proper rate limiting here
     }
   }, async (request: FastifyRequest<{ Body: RegisterRequest }>, reply: FastifyReply) => {

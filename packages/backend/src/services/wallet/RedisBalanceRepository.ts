@@ -397,7 +397,7 @@ export class RedisBalanceRepository implements BalanceRepository {
    * @param balance - Balance record
    * @param transactionId - Associated transaction ID
    */
-  private async addToBalanceHistory(userId: string, balance: Balance, transactionId: string): Promise<void> {
+  private async addToBalanceHistory(userId: string, balance: Balance, _transactionId: string): Promise<void> {
     try {
       const historyKey = `${this.getBalanceHistoryKey(userId)}:${Date.now()}`
 

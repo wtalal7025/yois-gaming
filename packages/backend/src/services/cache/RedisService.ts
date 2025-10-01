@@ -38,7 +38,7 @@ class RedisOperationError extends Error {
     this.name = 'RedisOperationError'
     this.operationName = operationName
     this.originalError = originalError
-    
+
     // Reason: Maintain proper stack trace in V8
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, RedisOperationError)
@@ -51,7 +51,7 @@ export class RedisService {
   private isConnected: boolean = false
   private retryAttempts: number = 3
   private retryDelay: number = 1000
-  
+
   constructor(config: RedisConfig) {
     try {
       this.redis = new Redis({
@@ -60,10 +60,10 @@ export class RedisService {
         // Reason: Configure automatic retries for network issues
         automaticDeserialization: true,
       })
-      
+
       this.retryAttempts = config.retry.attempts
       this.retryDelay = config.retry.delay
-      
+
       console.log('🔧 RedisService: Initialized with Upstash configuration')
     } catch (error) {
       console.error('❌ RedisService: Initialization failed:', error)
@@ -375,12 +375,12 @@ export class RedisService {
     return this.withRetry(async () => {
       try {
         const pipeline = this.redis.pipeline()
-        
+
         // Reason: Build pipeline with dynamic operations
         operations.forEach(({ command, args }) => {
           (pipeline as any)[command](...args)
         })
-        
+
         const results = await pipeline.exec()
         console.log(`🚀 RedisService: Executed pipeline with ${operations.length} operations`)
         return results
@@ -413,7 +413,7 @@ export class RedisService {
   async info(): Promise<string> {
     return this.withRetry(async () => {
       try {
-        const result = await this.redis.ping() // Upstash doesn't support INFO, use ping as health check
+        await this.redis.ping() // Upstash doesn't support INFO, use ping as health check
         return 'Upstash Redis connection active'
       } catch (error) {
         console.error('❌ RedisService: Failed to get Redis info:', error)
@@ -435,28 +435,28 @@ export class RedisService {
     operationName: string = 'unknown'
   ): Promise<T> {
     let lastError: Error | null = null
-    
+
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
         return await operation()
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error))
-        
+
         // Check if it's a connection error
         const isConnectionError = this.isConnectionError(lastError)
-        
+
         if (attempt === this.retryAttempts) {
           console.error(`❌ RedisService: ${operationName} failed after ${this.retryAttempts} attempts:`, lastError)
-          
+
           // Try fallback for read operations if Redis is unavailable
           if (allowFallback && isConnectionError) {
             console.warn(`⚠️ RedisService: Using fallback for ${operationName}`)
             return this.getFallbackValue(operationName) as T
           }
-          
+
           break
         }
-        
+
         // Only retry on connection errors or temporary failures
         if (isConnectionError || lastError.message.includes('timeout')) {
           const backoffDelay = this.retryDelay * Math.pow(2, attempt - 1) // Exponential backoff
@@ -469,7 +469,7 @@ export class RedisService {
         }
       }
     }
-    
+
     throw new RedisOperationError(`Redis ${operationName} failed after ${this.retryAttempts} attempts`, operationName, lastError)
   }
 
@@ -489,7 +489,7 @@ export class RedisService {
       'network timeout',
       'connection reset'
     ]
-    
+
     return connectionErrorMessages.some(message =>
       error.message.toLowerCase().includes(message.toLowerCase())
     )
@@ -523,7 +523,7 @@ export class RedisService {
       const startTime = Date.now()
       await this.redis.ping()
       const latency = Date.now() - startTime
-      
+
       this.isConnected = true
       return {
         status: 'connected',
@@ -534,7 +534,7 @@ export class RedisService {
     } catch (error) {
       this.isConnected = false
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      
+
       return {
         status: 'disconnected',
         error: errorMessage,
@@ -630,11 +630,11 @@ export function getRedisService(config?: RedisConfig): RedisService {
   if (!redisServiceInstance && config) {
     redisServiceInstance = new RedisService(config)
   }
-  
+
   if (!redisServiceInstance) {
     throw new Error('Redis service not initialized. Call with config first.')
   }
-  
+
   return redisServiceInstance
 }
 
@@ -647,11 +647,11 @@ export async function initializeRedisService(config: RedisConfig): Promise<Redis
   try {
     const redisService = getRedisService(config)
     const isConnected = await redisService.testConnection()
-    
+
     if (!isConnected) {
       throw new Error('Failed to establish Redis connection')
     }
-    
+
     console.log('✅ RedisService: Successfully initialized and connected')
     return redisService
   } catch (error) {

@@ -104,7 +104,7 @@ export async function loginRoutes(
         }
       }
     },
-    preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: async (request: FastifyRequest, _reply: FastifyReply) => {
       // Rate limiting for login attempts
       const clientIp = request.ip
       const userAgent = request.headers['user-agent']
@@ -300,7 +300,7 @@ export async function loginRoutes(
 
       // In production, verify JWT token and extract user info
       // For now, we'll simulate this
-      const token = authHeader.substring(7)
+      // const _unusedToken = authHeader.substring(7) // Commented out - unused
       // request.user = await verifyAccessToken(token)
     }
   }, async (request: FastifyRequest<{ Body: { allDevices?: boolean } }>, reply: FastifyReply) => {

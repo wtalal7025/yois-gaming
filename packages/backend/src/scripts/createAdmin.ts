@@ -31,18 +31,19 @@ for (const envPath of envPaths) {
 
 import { supabaseService } from '../database/supabase'
 import { PasswordService } from '../services/auth/PasswordService'
-import type { User } from '@yois-games/shared'
-import type { Database } from '../types/supabase'
+// import type { User } from '@yois-games/shared'
+// import type { Database } from '../types/supabase'
 
-interface CreateUserData {
-  username: string
-  email: string
-  password: string
-  role?: 'user' | 'admin'
-  balance?: number
-  level?: number
-  isVerified?: boolean
-}
+// interface CreateUserData {
+// interface _UnusedCreateUserData { // Commented out - unused interface
+//   username: string
+//   email: string
+//   password: string
+//   role?: 'user' | 'admin'
+//   balance?: number
+//   level?: number
+//   isVerified?: boolean
+// }
 
 /**
  * Admin User Creator using Supabase

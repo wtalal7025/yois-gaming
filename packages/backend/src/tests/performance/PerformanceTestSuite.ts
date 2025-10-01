@@ -17,11 +17,12 @@ interface PerformanceTestResult {
   recommendations?: string[];
 }
 
-interface LoadTestConfig {
-  concurrent: number;
-  duration: number; // seconds
-  rampUp: number; // seconds
-}
+// interface _LoadTestConfig { // Commented out - unused interface
+// interface _UnusedLoadTestConfig {
+//   concurrent: number;
+//   duration: number; // seconds
+//   rampUp: number; // seconds
+// }
 
 interface ApiEndpointTest {
   endpoint: string;
@@ -36,11 +37,11 @@ export class PerformanceTestSuite {
   private monitoringService = getMonitoringService();
   private cacheService = getApiCacheService();
   private redisService = getRedisService();
-  private baseUrl: string;
+  // private baseUrl: string; // Commented out - unused property
   private results: PerformanceTestResult[] = [];
 
-  constructor(baseUrl: string = 'http://localhost:3001') {
-    this.baseUrl = baseUrl;
+  constructor(_baseUrl: string = 'http://localhost:3001') {
+    // this.baseUrl = baseUrl; // Commented out - unused property assignment
   }
 
   /**
@@ -212,7 +213,7 @@ export class PerformanceTestSuite {
    * Make HTTP request for testing
    */
   private async makeRequest(test: ApiEndpointTest): Promise<any> {
-    const url = `${this.baseUrl}${test.endpoint}`;
+    // const _url = `${this.baseUrl}${test.endpoint}`; // Commented out - unused
     const options: any = {
       method: test.method,
       headers: {
@@ -369,7 +370,7 @@ export class PerformanceTestSuite {
   /**
    * Simulate database query for testing
    */
-  private async simulateDatabaseQuery(queryName: string): Promise<number> {
+  private async simulateDatabaseQuery(_queryName: string): Promise<number> {
     const startTime = Date.now();
 
     // Simulate database operation
@@ -521,7 +522,7 @@ export class PerformanceTestSuite {
   /**
    * Perform single concurrent request
    */
-  private async performConcurrentRequest(index: number): Promise<{ success: boolean; responseTime: number }> {
+  private async performConcurrentRequest(_index: number): Promise<{ success: boolean; responseTime: number }> {
     const startTime = Date.now();
 
     try {

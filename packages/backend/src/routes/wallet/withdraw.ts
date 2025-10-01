@@ -49,8 +49,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const tokenParts = (authHeader || "").split(" ");
-  const token = tokenParts.length > 1 ? String(tokenParts[1]) : "";
+  // const tokenParts = (authHeader || "").split(" "); // Commented out - unused
+  // const _token = tokenParts.length > 1 ? String(tokenParts[1]) : ""; // Commented out - unused
   // const user = await verifyAccessToken(token)
   // request.user = user
 
@@ -142,9 +142,9 @@ export async function withdrawRoutes(
         }
       }
     },
-    preHandler: [authenticateUser, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authenticateUser, async (request: FastifyRequest, _reply: FastifyReply) => {
       // Enhanced security checks for withdrawals
-      const clientIp = request.ip
+      const _clientIp = request.ip
 
       // In production, implement additional security measures:
       // - Check for suspicious withdrawal patterns
@@ -153,7 +153,7 @@ export async function withdrawRoutes(
       // - Implement additional 2FA verification
 
       fastify.log.info({
-        ip: clientIp,
+        ip: _clientIp,
         timestamp: new Date().toISOString()
       }, 'Withdrawal attempt')
     }]
@@ -397,7 +397,7 @@ export async function withdrawRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       // In production, this would be fetched from database/config
       const methods = [
@@ -525,9 +525,9 @@ export async function withdrawRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
+      // const _userId = (request as any).user.id // Commented out - unused
 
       // In production, calculate based on user's KYC status, tier, and withdrawal history
       const limits = {
@@ -632,8 +632,8 @@ export async function withdrawRoutes(
     Querystring: { limit?: number; offset?: number; status?: string }
   }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
-      const { limit = 20, offset = 0, status } = request.query
+      // const _userId = (request as any).user.id // Commented out - unused
+      const { limit = 20, offset = 0, status: _status } = request.query
 
       // In production, fetch from TransactionService with withdrawal filter
       // For now, return mock data
@@ -725,7 +725,7 @@ export async function withdrawRoutes(
     preHandler: authenticateUser
   }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
+      // const userId = (request as any).user.id // Commented out - unused
       const { id } = request.params
 
       // In production, fetch transaction from TransactionService

@@ -49,8 +49,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const tokenParts = (authHeader || "").split(" ");
-  const token = tokenParts.length > 1 ? String(tokenParts[1]) : "";
+  // const tokenParts = (authHeader || "").split(" "); // Commented out - unused
+  // const _token = tokenParts.length > 1 ? String(tokenParts[1]) : ""; // Commented out - unused
   // const user = await verifyAccessToken(token)
   // request.user = user
 
@@ -394,7 +394,7 @@ export async function transactionRoutes(
   }>, reply: FastifyReply) => {
     try {
       const userId = (request as any).user.id
-      const { period = 'month', groupBy = 'day' } = request.query
+      const { period = 'month', groupBy: _groupBy = 'day' } = request.query
 
       // Build filter based on period
       const filter: TransactionFilters = {

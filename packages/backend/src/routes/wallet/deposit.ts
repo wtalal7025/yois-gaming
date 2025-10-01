@@ -53,8 +53,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const tokenParts = (authHeader || "").split(" ");
-  const token = tokenParts.length > 1 ? String(tokenParts[1]) : "";
+  // const tokenParts = (authHeader || "").split(" "); // Commented out - unused
+  // const _token = tokenParts.length > 1 ? String(tokenParts[1]) : ""; // Commented out - unused
   // const user = await verifyAccessToken(token)
   // request.user = user
 
@@ -154,14 +154,14 @@ export async function depositRoutes(
         }
       }
     },
-    preHandler: [authenticateUser, async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: [authenticateUser, async (request: FastifyRequest, _reply: FastifyReply) => {
       // Rate limiting for deposit attempts
-      const clientIp = request.ip
+      const _clientIp = request.ip
 
       // In production, implement rate limiting here
       // Log deposit attempt for security monitoring
       fastify.log.info({
-        ip: clientIp,
+        ip: _clientIp,
         timestamp: new Date().toISOString()
       }, 'Deposit attempt')
     }]
@@ -362,7 +362,7 @@ export async function depositRoutes(
       }
     },
     preHandler: authenticateUser
-  }, async (request: FastifyRequest, reply: FastifyReply) => {
+  }, async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       // In production, this would be fetched from database/config
       const methods = [
@@ -515,8 +515,8 @@ export async function depositRoutes(
     Querystring: { limit?: number; offset?: number; status?: string }
   }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
-      const { limit = 20, offset = 0, status } = request.query
+      // const _userId = (request as any).user.id // Commented out - unused
+      const { limit = 20, offset = 0, status: _status } = request.query
 
       // In production, fetch from TransactionService with deposit filter
       // For now, return mock data
@@ -608,7 +608,7 @@ export async function depositRoutes(
     preHandler: authenticateUser
   }, async (request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
+      // const _userId = (request as any).user.id // Commented out - unused
       const { id } = request.params
 
       // In production, fetch transaction from TransactionService

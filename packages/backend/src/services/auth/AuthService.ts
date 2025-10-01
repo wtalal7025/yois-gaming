@@ -569,12 +569,12 @@ export class AuthService {
       }
 
       // Generate reset token (using JWT with short expiry)
-      const resetTokenData = {
-        sub: user.id,
-        email: user.email,
-        purpose: 'password-reset',
-        exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
-      }
+      // const _resetTokenData = { // Commented out - unused
+      //   sub: user.id,
+      //   email: user.email,
+      //   purpose: 'password-reset',
+      //   exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
+      // }
 
       const resetToken = await TokenService.createTokenPair(user, 'temp-session').then(t => t.accessToken)
 

@@ -29,7 +29,7 @@ export function createPerformanceMonitoring(options: MonitoringOptions = {}) {
 
   return {
     // Pre-handler to start timing
-    preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
+    preHandler: async (request: FastifyRequest, _reply: FastifyReply) => {
       // Check if route should be excluded
       if (excludeRoutes.some(route => request.url.startsWith(route))) {
         return;
@@ -181,7 +181,7 @@ export function createErrorTracking() {
 
   return {
     // Error handler
-    errorHandler: async (error: Error, request: FastifyRequest, reply: FastifyReply) => {
+    errorHandler: async (error: Error, request: FastifyRequest, _reply: FastifyReply) => {
       const route = request.routeOptions?.url || request.url;
       const user = (request as any).user;
 

@@ -5,14 +5,14 @@
 
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { StorageService } from '../../services/storage/StorageService'
-import { z } from 'zod'
+// import { z } from 'zod' // Commented out - unused import
 
 // Validation schemas
-const UploadAvatarSchema = z.object({
-  fileName: z.string().min(1),
-  fileType: z.string().min(1),
-  fileSize: z.number().positive()
-})
+// const _UnusedUploadAvatarSchema = z.object({ // Commented out - unused interface
+//   fileName: z.string().min(1),
+//   fileType: z.string().min(1),
+//   fileSize: z.number().positive()
+// })
 
 /**
  * Context for storage routes
@@ -72,10 +72,10 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
       // Validate file
       const buffer = await data.toBuffer()
       const fileName = data.filename || 'avatar.jpg'
-      
+
       // Generate storage path
       const storagePath = StorageService.generateAvatarPath(userId, fileName)
-      
+
       // Upload to Supabase Storage
       const result = await storageService.uploadBuffer(
         buffer,
@@ -129,7 +129,7 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
   }, async (request: FastifyRequest, reply: FastifyReply) => {
     try {
       // TODO: Add admin authentication middleware
-      
+
       // Handle multipart form data
       const data = await request.file()
       if (!data) {
@@ -141,10 +141,10 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
 
       const buffer = await data.toBuffer()
       const fileName = data.filename || 'game-asset.jpg'
-      
+
       // Generate storage path
       const storagePath = StorageService.generateGameAssetPath(fileName)
-      
+
       // Upload to Supabase Storage
       const result = await storageService.uploadBuffer(
         buffer,
@@ -205,7 +205,7 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
     try {
       const { bucket } = request.params
       const filePath = request.params['*']
-      
+
       if (!bucket || !filePath) {
         return reply.status(400).send({
           success: false,
@@ -214,7 +214,7 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
       }
 
       const url = storageService.getPublicUrl(bucket, filePath)
-      
+
       return reply.send({
         success: true,
         url
@@ -257,10 +257,10 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
   }, async (request: FastifyRequest<{ Params: { bucket: string, '*': string } }>, reply: FastifyReply) => {
     try {
       // TODO: Add authentication and authorization middleware
-      
+
       const { bucket } = request.params
       const filePath = request.params['*']
-      
+
       if (!bucket || !filePath) {
         return reply.status(400).send({
           success: false,
@@ -269,7 +269,7 @@ export async function uploadRoutes(fastify: FastifyInstance, context: StorageCon
       }
 
       const result = await storageService.deleteFile(bucket, filePath)
-      
+
       if (!result.success) {
         return reply.status(400).send({
           success: false,

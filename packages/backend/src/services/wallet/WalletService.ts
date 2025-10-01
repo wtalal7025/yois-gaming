@@ -144,7 +144,7 @@ export class WalletService {
         return completedTransaction!
       } else {
         // Update transaction status to failed
-        const failedTransaction = await this.transactionService.updateTransactionStatus(
+        await this.transactionService.updateTransactionStatus(
           transaction.id,
           TransactionStatusEnum.FAILED,
           { error: paymentResult.error }

@@ -268,7 +268,7 @@ export class MetricsCollector {
 export const metricsCollector = new MetricsCollector();
 
 // Health check function
-export async function performHealthCheck(timeout: number = 5000): Promise<{
+export async function performHealthCheck(_timeout: number = 5000): Promise<{
   status: 'healthy' | 'unhealthy';
   checks: Record<string, { status: 'pass' | 'fail'; message: string; responseTime?: number }>;
 }> {
@@ -339,7 +339,7 @@ export async function performHealthCheck(timeout: number = 5000): Promise<{
 export function registerMonitoringRoutes(fastify: FastifyInstance, config: MonitoringConfig): void {
   // Health check endpoint
   if (config.healthCheck.enabled) {
-    fastify.get(config.healthCheck.path, async (request, reply) => {
+    fastify.get(config.healthCheck.path, async (_request, reply) => {
       const healthResult = await performHealthCheck(config.healthCheck.timeout);
 
       reply.code(healthResult.status === 'healthy' ? 200 : 503);
@@ -354,7 +354,7 @@ export function registerMonitoringRoutes(fastify: FastifyInstance, config: Monit
 
   // Metrics endpoint
   if (config.metrics.enabled) {
-    fastify.get(config.metrics.endpoint, async (request, reply) => {
+    fastify.get(config.metrics.endpoint, async (_request, _reply) => {
       const metrics = metricsCollector.getMetrics();
 
       return {
@@ -365,12 +365,12 @@ export function registerMonitoringRoutes(fastify: FastifyInstance, config: Monit
   }
 
   // Ready endpoint for Kubernetes-style readiness probes
-  fastify.get('/ready', async (request, reply) => {
+  fastify.get('/ready', async (_request, _reply) => {
     return { status: 'ready', timestamp: new Date().toISOString() };
   });
 
   // Live endpoint for Kubernetes-style liveness probes
-  fastify.get('/live', async (request, reply) => {
+  fastify.get('/live', async (_request, _reply) => {
     return { status: 'alive', timestamp: new Date().toISOString() };
   });
 }

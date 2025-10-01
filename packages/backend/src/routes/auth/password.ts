@@ -20,7 +20,7 @@ export async function passwordRoutes(
   fastify: FastifyInstance,
   context: PasswordRouteContext
 ) {
-  const { authService, emailService } = context
+  const { authService: _authService, emailService } = context
 
   /**
    * POST /auth/forgot-password
@@ -50,13 +50,13 @@ export async function passwordRoutes(
       }
 
       // Generate reset token using existing TokenService
-      const tokenData = {
-        sub: user.id,
-        username: user.username,
-        email: user.email,
-        sessionId: 'password-reset',
-        exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
-      }
+      // const _unusedTokenData = { // Commented out - unused
+      //   sub: user.id,
+      //   username: user.username,
+      //   email: user.email,
+      //   sessionId: 'password-reset',
+      //   exp: Math.floor(Date.now() / 1000) + (60 * 60) // 1 hour expiry
+      // }
 
       const tokens = await TokenService.createTokenPair(user, 'password-reset')
       const resetToken = tokens.accessToken

@@ -20,7 +20,7 @@ export async function profileRoutes(
    * GET /auth/profile
    * Get current user profile
    */
-  fastify.get('/profile', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/profile', async (_request: FastifyRequest, reply: FastifyReply) => {
     try {
       // TODO: Extract user from JWT token (would be done by auth middleware)
       const userId = 'mock-user-id' // Placeholder

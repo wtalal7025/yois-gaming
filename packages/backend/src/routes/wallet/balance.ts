@@ -32,8 +32,8 @@ async function authenticateUser(request: FastifyRequest, reply: FastifyReply) {
   }
 
   // In production, verify JWT token and extract user info
-  const tokenParts = (authHeader || "").split(" ");
-  const token = tokenParts.length > 1 ? String(tokenParts[1]) : "";
+  // const tokenParts = (authHeader || "").split(" "); // Commented out - unused
+  // const _token = tokenParts.length > 1 ? String(tokenParts[1]) : ""; // Commented out - unused
   // const user = await verifyAccessToken(token)
   // request.user = user
 
@@ -179,7 +179,7 @@ export async function balanceRoutes(
     Querystring: { limit?: number; offset?: number; startDate?: string; endDate?: string }
   }>, reply: FastifyReply) => {
     try {
-      const userId = (request as any).user.id
+      // const _userId = (request as any).user.id // Commented out - unused
 
       // Validate query parameters
       const validationResult = balanceHistorySchema.safeParse(request.query)
@@ -411,7 +411,7 @@ export async function balanceRoutes(
       const balance = await walletService.getBalance(userId)
 
       // Get wallet stats
-      const stats = await walletService.getWalletStats(userId)
+      // const _stats = await walletService.getWalletStats(userId) // Commented out - unused
 
       // In production, this would fetch recent transactions, pending operations, etc.
       const summary = {

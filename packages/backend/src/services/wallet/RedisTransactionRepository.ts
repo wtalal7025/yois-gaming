@@ -78,42 +78,43 @@ export class RedisTransactionRepository {
     }
   }
 
-  /**
-   * Convert shared Transaction to internal service transaction
-   */
-  private toServiceTransaction(transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & {
-    currency?: string,
-    reference?: string,
-    relatedTransactionId?: string
-  }): Omit<ServiceTransaction, 'id' | 'createdAt' | 'updatedAt'> {
-    const result: any = {
-      userId: transaction.userId,
-      type: transaction.type,
-      amount: transaction.amount,
-      currency: transaction.currency || 'USD',
-      status: transaction.status,
-      metadata: {
-        ...transaction.metadata,
-        gameType: transaction.gameType,
-        gameSessionId: transaction.gameSessionId,
-        description: transaction.description,
-        balanceBefore: transaction.balanceBefore,
-        balanceAfter: transaction.balanceAfter
-      }
-    }
+  // /**
+  //  * Convert shared Transaction to internal service transaction
+  //  */
+  // // private _toServiceTransaction(transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & { // Commented out - unused method
+  // private _unusedToServiceTransaction(transaction: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & {
+  //   currency?: string,
+  //   reference?: string,
+  //   relatedTransactionId?: string
+  // }): Omit<ServiceTransaction, 'id' | 'createdAt' | 'updatedAt'> {
+  //   const result: any = {
+  //     userId: transaction.userId,
+  //     type: transaction.type,
+  //     amount: transaction.amount,
+  //     currency: transaction.currency || 'USD',
+  //     status: transaction.status,
+  //     metadata: {
+  //       ...transaction.metadata,
+  //       gameType: transaction.gameType,
+  //       gameSessionId: transaction.gameSessionId,
+  //       description: transaction.description,
+  //       balanceBefore: transaction.balanceBefore,
+  //       balanceAfter: transaction.balanceAfter
+  //     }
+  //   }
 
-    // Only include optional properties if they have values
-    const reference = transaction.referenceId || transaction.reference
-    if (reference) {
-      result.reference = reference
-    }
+  //   // Only include optional properties if they have values
+  //   const reference = transaction.referenceId || transaction.reference
+  //   if (reference) {
+  //     result.reference = reference
+  //   }
 
-    if (transaction.relatedTransactionId) {
-      result.relatedTransactionId = transaction.relatedTransactionId
-    }
+  //   if (transaction.relatedTransactionId) {
+  //     result.relatedTransactionId = transaction.relatedTransactionId
+  //   }
 
-    return result as Omit<ServiceTransaction, 'id' | 'createdAt' | 'updatedAt'>
-  }
+  //   return result as Omit<ServiceTransaction, 'id' | 'createdAt' | 'updatedAt'>
+  // }
 
   /**
    * Create a new transaction

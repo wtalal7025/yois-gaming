@@ -375,7 +375,7 @@ export async function registerPerformanceMiddleware(
   });
 
   // Register performance stats endpoint
-  fastify.get('/api/performance/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/api/performance/stats', async (_request: FastifyRequest, reply: FastifyReply) => {
     if (!config.monitoring.enabled) {
       return reply.code(404).send({ error: 'Performance monitoring disabled' });
     }

@@ -379,7 +379,7 @@ export async function registerRateLimitingMiddleware(
   });
 
   // Rate limit stats endpoint
-  fastify.get('/api/rate-limit/stats', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.get('/api/rate-limit/stats', async (_request: FastifyRequest, _reply: FastifyReply) => {
     const stats = rateLimiter.getStats();
     return {
       ...stats,

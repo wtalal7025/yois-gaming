@@ -39,7 +39,7 @@ export class SessionService {
     ipAddress?: string,
     userAgent?: string
   ): Promise<UserSession> {
-    const sessionId = TokenService.generateSessionId()
+    // const _sessionId = TokenService.generateSessionId() // Commented out - unused
     const sessionToken = TokenService.generateSecureToken(64)
     const refreshToken = TokenService.generateSecureToken(64)
 

@@ -6,119 +6,123 @@
  */
 
 import { supabaseService } from '../../database/supabase'
-import { getRedisService } from '../cache/RedisService'
+// import { getRedisService } from '../cache/RedisService' // Commented out - unused import
 import type { UserSession } from '@yois-games/shared'
 
 export class SupabaseSessionRepository {
-  private readonly CACHE_TTL = 3600 // 1 hour in seconds
+  // private readonly CACHE_TTL = 3600 // 1 hour in seconds // Commented out - unused constant
 
-  /**
-   * Get Redis service instance
-   */
-  private getRedis() {
-    try {
-      return getRedisService()
-    } catch (error) {
-      console.warn('⚠️ Redis not available, using Supabase only:', error)
-      return null
-    }
-  }
+  // /**
+  //  * Get Redis service instance
+  //  */
+  // private getRedis() {
+  //   try {
+  //     return getRedisService()
+  //   } catch (error) {
+  //     console.warn('⚠️ Redis not available, using Supabase only:', error)
+  //     return null
+  //   }
+  // }
 
-  /**
-   * Generate cache key for session
-   */
-  private getSessionCacheKey(id: string): string {
-    return `session:${id}`
-  }
+  // /**
+  //  * Generate cache key for session
+  //  */
+  // private getSessionCacheKey(id: string): string {
+  //   return `session:${id}`
+  // }
 
-  /**
-   * Generate cache key for session by token
-   */
-  private getSessionTokenCacheKey(token: string): string {
-    return `session_token:${token}`
-  }
+  // /**
+  //  * Generate cache key for session by token
+  //  */
+  // private getSessionTokenCacheKey(token: string): string {
+  //   return `session_token:${token}`
+  // }
 
-  /**
-   * Generate cache key for user sessions
-   */
-  private getUserSessionsCacheKey(userId: string): string {
-    return `user_sessions:${userId}`
-  }
+  // /**
+  //  * Generate cache key for user sessions
+  //  */
+  // private getUserSessionsCacheKey(userId: string): string {
+  //   return `user_sessions:${userId}`
+  // }
 
   /**
    * Cache session data
    */
-  private async cacheSession(session: UserSession): Promise<void> {
-    try {
-      const redis = this.getRedis()
-      if (!redis) return
+  // // private async _cacheSession(session: UserSession): Promise<void> { // Commented out - unused method
+  // private async _unusedCacheSession(session: UserSession): Promise<void> {
+  //   try {
+  //     const redis = this.getRedis()
+  //     if (!redis) return
 
-      const sessionData = JSON.stringify(session)
+  //     const sessionData = JSON.stringify(session)
 
-      // Cache by ID
-      await redis.set(this.getSessionCacheKey(session.id), sessionData, this.CACHE_TTL)
+  //     // Cache by ID
+  //     await redis.set(this.getSessionCacheKey(session.id), sessionData, this.CACHE_TTL)
 
-      // Cache by token for fast token lookups
-      await redis.set(this.getSessionTokenCacheKey(session.sessionToken), sessionData, this.CACHE_TTL)
-    } catch (error) {
-      console.warn('⚠️ Failed to cache session:', error)
-    }
-  }
+  //     // Cache by token for fast token lookups
+  //     await redis.set(this.getSessionTokenCacheKey(session.sessionToken), sessionData, this.CACHE_TTL)
+  //   } catch (error) {
+  //     console.warn('⚠️ Failed to cache session:', error)
+  //   }
+  // }
 
-  /**
-   * Get cached session by ID
-   */
-  private async getCachedSession(id: string): Promise<UserSession | null> {
-    try {
-      const redis = this.getRedis()
-      if (!redis) return null
+  // /**
+  //  * Get cached session by ID
+  //  */
+  // // private async _getCachedSession(id: string): Promise<UserSession | null> { // Commented out - unused method
+  // private async _unusedGetCachedSession(id: string): Promise<UserSession | null> {
+  //   try {
+  //     const redis = this.getRedis()
+  //     if (!redis) return null
 
-      const data = await redis.get(this.getSessionCacheKey(id))
-      if (!data) return null
+  //     const data = await redis.get(this.getSessionCacheKey(id))
+  //     if (!data) return null
 
-      return JSON.parse(data as string) as UserSession
-    } catch (error) {
-      console.warn('⚠️ Failed to get cached session:', error)
-      return null
-    }
-  }
+  //     return JSON.parse(data as string) as UserSession
+  //   } catch (error) {
+  //     console.warn('⚠️ Failed to get cached session:', error)
+  //     return null
+  //   }
+  // }
 
-  /**
-   * Get cached session by token
-   */
-  private async getCachedSessionByToken(token: string): Promise<UserSession | null> {
-    try {
-      const redis = this.getRedis()
-      if (!redis) return null
+  // /**
+  //  * Get cached session by token
+  //  */
+  // // private async _getCachedSessionByToken(token: string): Promise<UserSession | null> { // Commented out - unused method
+  // private async _unusedGetCachedSessionByToken(token: string): Promise<UserSession | null> {
+  //   try {
+  //     const redis = this.getRedis()
+  //     if (!redis) return null
 
-      const data = await redis.get(this.getSessionTokenCacheKey(token))
-      if (!data) return null
+  //     const data = await redis.get(this.getSessionTokenCacheKey(token))
+  //     if (!data) return null
 
-      return JSON.parse(data as string) as UserSession
-    } catch (error) {
-      console.warn('⚠️ Failed to get cached session by token:', error)
-      return null
-    }
-  }
+  //     return JSON.parse(data as string) as UserSession
+  //   } catch (error) {
+  //     console.warn('⚠️ Failed to get cached session by token:', error)
+  //     return null
+  //   }
+  // }
 
-  /**
-   * Invalidate session caches
-   */
-  private async invalidateSessionCache(session: UserSession): Promise<void> {
-    try {
-      const redis = this.getRedis()
-      if (!redis) return
+  // /**
+  //  * Invalidate session caches
+  //  */
+  // // private async _invalidateSessionCache(session: UserSession): Promise<void> { // Commented out - unused method
+  // private async _unusedInvalidateSessionCache(session: UserSession): Promise<void> {
+  //   try {
+  //     const redis = this.getRedis()
+  //     if (!redis) return
 
-      // Remove session cache
-      await redis.del(this.getSessionCacheKey(session.id))
-      await redis.del(this.getSessionTokenCacheKey(session.sessionToken))
+  //     // Remove session cache
+  //     await redis.del(this.getSessionCacheKey(session.id))
+  //     await redis.del(this.getSessionTokenCacheKey(session.sessionToken))
 
-      // Invalidate user sessions list cache
-      await redis.del(this.getUserSessionsCacheKey(session.userId))
-    } catch (error) {
-      console.warn('⚠️ Failed to invalidate session cache:', error)
-    }
-  }
+  //     // Invalidate user sessions list cache
+  //     await redis.del(this.getUserSessionsCacheKey(session.userId))
+  //   } catch (error) {
+  //     console.warn('⚠️ Failed to invalidate session cache:', error)
+  //   }
+  // }
   /**
    * Create a new session in the database
    * @param sessionData Session data without id and createdAt

@@ -287,7 +287,7 @@ export class SupabaseUserRepository {
     console.log('📝 Resetting login attempts for:', email)
   }
 
-  async isBlocked(email: string): Promise<boolean> {
+  async isBlocked(_email: string): Promise<boolean> {
     // TODO: Implement account blocking logic in Supabase
     return false
   }

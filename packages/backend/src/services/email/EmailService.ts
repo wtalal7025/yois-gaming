@@ -13,7 +13,7 @@ import type {
   EmailVerificationData,
   TransactionNotificationData,
   EmailOptions,
-  EmailTemplateType
+  // EmailTemplateType
 } from '@yois-games/shared'
 
 export class EmailService {
