@@ -8,10 +8,10 @@
 import React, { useMemo } from 'react'
 import { Card, CardBody, CardHeader, Chip, Progress } from '@heroui/react'
 import { motion } from 'framer-motion'
-import type { 
+import type {
   DragonTowerGameState,
   DragonTowerDifficulty
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 /**
  * Props for MultiplierTracker component
@@ -32,7 +32,7 @@ const DIFFICULTY_MULTIPLIERS = {
     maxLevel: 9
   },
   medium: {
-    name: 'Medium', 
+    name: 'Medium',
     color: 'warning',
     baseMultiplier: 2,
     maxLevel: 9
@@ -57,7 +57,7 @@ const DIFFICULTY_MULTIPLIERS = {
 const calculateLevelMultiplier = (level: number, difficulty: DragonTowerDifficulty): number => {
   const baseMultiplier = DIFFICULTY_MULTIPLIERS[difficulty].baseMultiplier
   if (level <= 0) return 1
-  
+
   // Progressive multiplier system: baseMultiplier^level * 0.97 (house edge)
   const multiplier = Math.pow(baseMultiplier, level) * 0.97
   return Math.round(multiplier * 10000) / 10000
@@ -81,13 +81,13 @@ const getMultiplierProgression = (difficulty: DragonTowerDifficulty) => {
 /**
  * Level row component for multiplier display
  */
-const LevelRow = React.memo(({ 
-  level, 
-  multiplier, 
-  payout, 
-  isActive, 
+const LevelRow = React.memo(({
+  level,
+  multiplier,
+  payout,
+  isActive,
   isCompleted,
-  isCurrent 
+  isCurrent
 }: {
   level: number
   multiplier: number
@@ -127,19 +127,19 @@ const LevelRow = React.memo(({
         {isCompleted && <span className="text-success text-sm">✓</span>}
         {isCurrent && <span className="text-primary text-sm animate-bounce">◄</span>}
       </div>
-      
+
       <div className="flex items-center gap-4">
         <div className={`text-right ${getTextStyle()}`}>
           <div className="font-semibold">
-            {multiplier.toLocaleString('en-US', { 
+            {multiplier.toLocaleString('en-US', {
               minimumFractionDigits: 2,
-              maximumFractionDigits: 2 
+              maximumFractionDigits: 2
             })}x
           </div>
           <div className="text-xs opacity-75">
-            ${payout.toLocaleString('en-US', { 
+            ${payout.toLocaleString('en-US', {
               minimumFractionDigits: 2,
-              maximumFractionDigits: 2 
+              maximumFractionDigits: 2
             })}
           </div>
         </div>
@@ -157,7 +157,7 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
   // Generate multiplier progression based on current settings
   const progression = useMemo(() => {
     if (!gameState) return []
-    
+
     return getMultiplierProgression(gameState.difficulty).map(item => ({
       ...item,
       payout: betAmount * item.multiplier
@@ -202,29 +202,29 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
                 {difficultyInfo.name} Mode
               </Chip>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="text-2xl font-bold text-primary">
-                  {currentMultiplier.toLocaleString('en-US', { 
+                  {currentMultiplier.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2 
+                    maximumFractionDigits: 2
                   })}x
                 </div>
                 <div className="text-sm text-default-600">Current Multiplier</div>
               </div>
-              
+
               <div>
                 <div className="text-2xl font-bold text-success">
-                  ${potentialPayout.toLocaleString('en-US', { 
+                  ${potentialPayout.toLocaleString('en-US', {
                     minimumFractionDigits: 2,
-                    maximumFractionDigits: 2 
+                    maximumFractionDigits: 2
                   })}
                 </div>
                 <div className="text-sm text-default-600">Potential Payout</div>
               </div>
             </div>
-            
+
             <div className="mt-3">
               <div className="flex justify-between text-sm text-default-600 mb-1">
                 <span>Progress</span>
@@ -256,7 +256,7 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
               const isCompleted = item.level <= completedLevels
               const isCurrent = item.level === currentLevel
               const isActive = item.level <= currentLevel + 1
-              
+
               return (
                 <LevelRow
                   key={item.level}
@@ -281,7 +281,7 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
               <div className="text-sm font-medium text-warning mb-2">
                 Next Level Risk Assessment
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <div className="font-semibold">
@@ -289,7 +289,7 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
                   </div>
                   <div className="text-default-600">Success Rate</div>
                 </div>
-                
+
                 <div>
                   <div className="font-semibold">
                     {Math.round((1 - (1 / (gameState.levels[0]?.tiles?.length || 2))) * 100)}%
@@ -297,7 +297,7 @@ export function MultiplierTracker({ gameState, betAmount }: MultiplierTrackerPro
                   <div className="text-default-600">Risk</div>
                 </div>
               </div>
-              
+
               {currentLevel < 9 && (
                 <div className="mt-3 pt-3 border-t border-warning/20">
                   <div className="text-xs text-default-600">

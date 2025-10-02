@@ -7,7 +7,7 @@ import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { GamePageWrapper } from './GamePageWrapper'
 import { getGameInfo } from '../../../lib/gameRegistry'
-import type { GameType } from '@stake-games/shared'
+import type { GameType } from '@yois-games/shared'
 
 interface GamePageProps {
   params: {

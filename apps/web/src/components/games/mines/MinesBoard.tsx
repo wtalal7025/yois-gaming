@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import type { MinesGameState, MinesTile } from '@stake-games/shared'
+import type { MinesGameState, MinesTile } from '@yois-games/shared'
 
 /**
  * Props for MinesBoard component
@@ -34,7 +34,7 @@ function Tile({ tile, onReveal, disabled }: TileProps) {
 
   const getTileClass = () => {
     const baseClass = "w-12 h-12 border-2 rounded-lg flex items-center justify-center text-sm font-semibold transition-all duration-200 cursor-pointer hover:scale-105"
-    
+
     if (tile.isRevealed) {
       if (tile.hasMine) {
         return `${baseClass} bg-red-500 border-red-600 text-white cursor-not-allowed hover:scale-100`
@@ -42,15 +42,15 @@ function Tile({ tile, onReveal, disabled }: TileProps) {
         return `${baseClass} bg-green-500 border-green-600 text-white cursor-not-allowed hover:scale-100`
       }
     }
-    
+
     if (tile.isFlagged) {
       return `${baseClass} bg-yellow-500 border-yellow-600 text-white cursor-pointer`
     }
-    
+
     if (disabled) {
       return `${baseClass} bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed hover:scale-100`
     }
-    
+
     return `${baseClass} bg-gray-800 border-gray-600 text-white hover:bg-gray-700`
   }
 
@@ -64,11 +64,11 @@ function Tile({ tile, onReveal, disabled }: TileProps) {
         return '✓'
       }
     }
-    
+
     if (tile.isFlagged) {
       return '🚩'
     }
-    
+
     return ''
   }
 

@@ -7,15 +7,15 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Card, CardBody, CardHeader, Button, Spinner, Chip } from '@heroui/react'
-import type { 
-  LimboGameState, 
-  LimboConfig, 
+import type {
+  LimboGameState,
+  LimboConfig,
   LimboResult,
   LimboAction,
   LimboAutoBettingConfig,
-  GameStatus 
-} from '@stake-games/shared'
-import { LIMBO_CONSTANTS } from '@stake-games/shared'
+  GameStatus
+} from '@yois-games/shared'
+import { LIMBO_CONSTANTS } from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { MultiplierInput } from './MultiplierInput'
@@ -72,7 +72,7 @@ export function LimboGame({
   // Game parameters
   const [betAmount, setBetAmount] = useState<number>(1.0)
   const [targetMultiplier, setTargetMultiplier] = useState<number>(2.0)
-  
+
   // Game results and history
   const [currentResult, setCurrentResult] = useState<LimboResult | null>(null)
   const [gameHistory, setGameHistory] = useState<GameHistoryEntry[]>([])
@@ -119,13 +119,13 @@ export function LimboGame({
   const generateMultiplier = useCallback((): number => {
     // Reason: Simple random generation for demo - would use proper provably fair in production
     const randomValue = Math.random()
-    const rawMultiplier = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR / 
-                          (randomValue * LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR + 1)
+    const rawMultiplier = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR /
+      (randomValue * LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR + 1)
     const adjustedMultiplier = rawMultiplier * (1 - gameConfig.houseEdge)
     const finalMultiplier = Math.max(1.0, adjustedMultiplier)
-    
-    return Math.round(finalMultiplier * Math.pow(10, gameConfig.multiplierPrecision)) / 
-           Math.pow(10, gameConfig.multiplierPrecision)
+
+    return Math.round(finalMultiplier * Math.pow(10, gameConfig.multiplierPrecision)) /
+      Math.pow(10, gameConfig.multiplierPrecision)
   }, [gameConfig.houseEdge, gameConfig.multiplierPrecision])
 
   /**
@@ -150,13 +150,13 @@ export function LimboGame({
     }
 
     // Validate target multiplier
-    if (currentTarget < gameConfig.minTargetMultiplier || 
-        currentTarget > gameConfig.maxTargetMultiplier) {
+    if (currentTarget < gameConfig.minTargetMultiplier ||
+      currentTarget > gameConfig.maxTargetMultiplier) {
       return
     }
 
     setGameStatus('loading')
-    
+
     try {
       // Place bet through wallet store
       const betResult = await bet(currentBet, 'limbo')
@@ -169,7 +169,7 @@ export function LimboGame({
 
       // Generate multiplier
       const generatedMultiplier = generateMultiplier()
-      
+
       // Determine win/loss
       const isWin = generatedMultiplier >= currentTarget
       const payout = isWin ? currentBet * currentTarget : 0
@@ -244,10 +244,10 @@ export function LimboGame({
       // Handle auto-betting continuation
       if (isAutoBetting && autoBetRemaining > 1) {
         setAutoBetRemaining(prev => prev - 1)
-        
+
         // Check stop conditions
         let shouldStop = false
-        
+
         if (autoBetSettings.stopOnWin && isWin) shouldStop = true
         if (autoBetSettings.stopOnLoss && !isWin) shouldStop = true
         if (autoBetSettings.winAmount > 0 && profit >= autoBetSettings.winAmount) shouldStop = true
@@ -298,17 +298,17 @@ export function LimboGame({
       setGameStatus('idle')
     }
   }, [
-    betAmount, 
-    targetMultiplier, 
-    minBet, 
-    maxBet, 
-    gameConfig, 
-    generateMultiplier, 
-    calculateWinProbability, 
-    calculatePotentialPayout, 
-    onGameResult, 
-    isAutoBetting, 
-    autoBetRemaining, 
+    betAmount,
+    targetMultiplier,
+    minBet,
+    maxBet,
+    gameConfig,
+    generateMultiplier,
+    calculateWinProbability,
+    calculatePotentialPayout,
+    onGameResult,
+    isAutoBetting,
+    autoBetRemaining,
     autoBetSettings,
     isAuthenticated,
     user?.id,
@@ -327,7 +327,7 @@ export function LimboGame({
     isAutoBettingRef.current = true
     setAutoBetRemaining(autoBetSettings.numberOfBets)
     setGameStatus('loading')
-    
+
     // Start first auto-bet immediately
     playRound()
   }, [isAutoBetting, autoBetSettings, playRound, isAuthenticated])
@@ -396,7 +396,7 @@ export function LimboGame({
                 <p className="text-sm text-default-500">Balance</p>
                 <p className="text-lg font-semibold">${balance.toFixed(2)}</p>
               </div>
-              <Chip 
+              <Chip
                 color={gameStatus === 'win' ? 'success' : gameStatus === 'loss' ? 'danger' : 'default'}
                 variant="flat"
               >
@@ -420,7 +420,7 @@ export function LimboGame({
             config={gameConfig}
             disabled={gameStatus === 'loading' || isAutoBetting || !isAuthenticated}
           />
-          
+
           <LimboControls
             betAmount={betAmount}
             onBetChange={handleBetChange}
@@ -452,13 +452,12 @@ export function LimboGame({
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
                     <p className="text-sm text-default-500">Generated Multiplier</p>
-                    <div className={`text-4xl font-bold ${
-                      currentResult.isWin ? 'text-success' : 'text-danger'
-                    }`}>
+                    <div className={`text-4xl font-bold ${currentResult.isWin ? 'text-success' : 'text-danger'
+                      }`}>
                       {currentResult.generatedMultiplier.toFixed(2)}x
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <p className="text-sm text-default-500">Target Multiplier</p>
                     <div className="text-2xl font-semibold text-default-700">

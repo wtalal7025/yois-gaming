@@ -9,7 +9,7 @@ import React, { Suspense, lazy } from 'react'
 import { ErrorBoundary } from 'react-error-boundary'
 import { Spinner } from '@heroui/react'
 import { GameContainer } from './GameContainer'
-import type { GameType } from '@stake-games/shared'
+import type { GameType } from '@yois-games/shared'
 
 /**
  * Props for GamePageWrapper component

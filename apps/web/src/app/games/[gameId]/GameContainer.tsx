@@ -6,22 +6,22 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { 
-  Card, 
-  CardBody, 
-  Button, 
-  Dropdown, 
-  DropdownTrigger, 
-  DropdownMenu, 
+import {
+  Card,
+  CardBody,
+  Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
   DropdownItem,
   Chip,
-  Divider 
+  Divider
 } from '@heroui/react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { 
-  ArrowLeftIcon, 
-  SpeakerWaveIcon, 
+import {
+  ArrowLeftIcon,
+  SpeakerWaveIcon,
   SpeakerXMarkIcon,
   ArrowsPointingOutIcon,
   QuestionMarkCircleIcon,
@@ -29,7 +29,7 @@ import {
   Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 import { getGameInfo } from '../../../lib/gameRegistry'
-import type { GameType } from '@stake-games/shared'
+import type { GameType } from '@yois-games/shared'
 
 /**
  * Props for GameContainer component
@@ -87,10 +87,10 @@ export function GameContainer({ gameId, children, className = '' }: GameContaine
     const newSoundState = !soundEnabled
     setSoundEnabled(newSoundState)
     localStorage.setItem('game-sound-enabled', newSoundState.toString())
-    
+
     // Dispatch custom event for games to listen to
-    window.dispatchEvent(new CustomEvent('game-sound-toggle', { 
-      detail: { enabled: newSoundState } 
+    window.dispatchEvent(new CustomEvent('game-sound-toggle', {
+      detail: { enabled: newSoundState }
     }))
   }
 
@@ -126,9 +126,9 @@ export function GameContainer({ gameId, children, className = '' }: GameContaine
                   Back to Games
                 </Button>
               </Link>
-              
+
               <Divider orientation="vertical" className="h-6" />
-              
+
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-sm font-bold">
                   {gameInfo.title.charAt(0)}
@@ -240,7 +240,7 @@ export function GameContainer({ gameId, children, className = '' }: GameContaine
                   ))}
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Bet Range</h4>
                 <p className="text-foreground-600">
@@ -250,7 +250,7 @@ export function GameContainer({ gameId, children, className = '' }: GameContaine
                   Volatility: <span className="capitalize">{gameInfo.volatility}</span>
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold text-foreground mb-2">About This Game</h4>
                 <p className="text-foreground-600 text-xs leading-relaxed line-clamp-3">

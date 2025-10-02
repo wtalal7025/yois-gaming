@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import type { BarsPayline, BarsPaylineWin, BarsReel } from '@stake-games/shared'
+import type { BarsPayline, BarsPaylineWin, BarsReel } from '@yois-games/shared'
 
 /**
  * Props for PaylineDisplay component
@@ -47,14 +47,14 @@ const PaylineIndicator: React.FC<PaylineIndicatorProps> = ({
   const isActive = payline.isActive
 
   return (
-    <div 
+    <div
       className={`
         flex items-center justify-between px-2 py-1 rounded-md text-xs font-medium
         transition-all duration-200
         ${isActive ? 'opacity-100' : 'opacity-50'}
         ${isWinning ? 'animate-pulse shadow-lg scale-105' : ''}
       `}
-      style={{ 
+      style={{
         backgroundColor: isActive ? `${color}20` : `${color}10`,
         borderColor: color,
         borderWidth: isWinning ? '2px' : '1px',
@@ -63,7 +63,7 @@ const PaylineIndicator: React.FC<PaylineIndicatorProps> = ({
     >
       {/* Payline Info */}
       <div className="flex items-center space-x-2">
-        <div 
+        <div
           className="w-3 h-3 rounded-full border border-white"
           style={{ backgroundColor: color }}
         />
@@ -118,7 +118,7 @@ const PaylinePath: React.FC<PaylinePathProps> = ({ payline, isWinning }) => {
     }
 
     const [start, middle, end] = positions.map(getCoords)
-    
+
     return `M ${start[0]} ${start[1]} L ${middle[0]} ${middle[1]} L ${end[0]} ${end[1]}`
   }
 
@@ -144,7 +144,7 @@ const PaylinePath: React.FC<PaylinePathProps> = ({ payline, isWinning }) => {
           className="animate-pulse"
         />
       )}
-      
+
       {/* Main payline path */}
       <path
         d={pathString}
@@ -155,14 +155,14 @@ const PaylinePath: React.FC<PaylinePathProps> = ({ payline, isWinning }) => {
         strokeLinejoin="round"
         className={isWinning ? 'animate-pulse' : ''}
       />
-      
+
       {/* Payline markers at each position */}
       {payline.positions.map((pos, index) => {
         const row = Math.floor(pos / 3)
         const col = pos % 3
         const x = col * 100 + 50
         const y = row * 100 + 50
-        
+
         return (
           <circle
             key={`${payline.id}-${index}`}
@@ -235,10 +235,10 @@ export const PaylineDisplay: React.FC<PaylineDisplayProps> = ({
           <div className="space-y-1">
             {paylines.map(payline => (
               <div key={payline.id} className="flex items-center space-x-1">
-                <div 
+                <div
                   className="w-2 h-2 rounded-full"
-                  style={{ 
-                    backgroundColor: ['', 'rgb(239, 68, 68)', 'rgb(59, 130, 246)', 'rgb(34, 197, 94)', 'rgb(251, 191, 36)', 'rgb(168, 85, 247)'][payline.id] 
+                  style={{
+                    backgroundColor: ['', 'rgb(239, 68, 68)', 'rgb(59, 130, 246)', 'rgb(34, 197, 94)', 'rgb(251, 191, 36)', 'rgb(168, 85, 247)'][payline.id]
                   }}
                 />
                 <span className="text-xs">{payline.id}</span>
@@ -253,7 +253,7 @@ export const PaylineDisplay: React.FC<PaylineDisplayProps> = ({
         <h4 className="text-sm font-semibold text-gray-700">
           Active Paylines ({paylines.filter(p => p.isActive).length}/5)
         </h4>
-        
+
         <div className="space-y-1">
           {paylines.map(payline => (
             <PaylineIndicator

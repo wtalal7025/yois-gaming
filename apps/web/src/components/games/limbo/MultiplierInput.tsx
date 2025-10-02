@@ -7,12 +7,12 @@
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { Card, CardBody, CardHeader, Button, Input, Slider, Chip, Divider } from '@heroui/react'
-import type { 
-  LimboConfig, 
+import type {
+  LimboConfig,
   MultiplierValidation,
-  MultiplierPreset 
-} from '@stake-games/shared'
-import { LIMBO_CONSTANTS } from '@stake-games/shared'
+  MultiplierPreset
+} from '@yois-games/shared'
+import { LIMBO_CONSTANTS } from '@yois-games/shared'
 
 /**
  * Props for MultiplierInput component
@@ -47,16 +47,16 @@ export function MultiplierInput({
    */
   const validateMultiplier = useCallback((multiplier: number): MultiplierValidation => {
     const errors: string[] = []
-    
+
     // Check multiplier bounds
     if (multiplier < config.minTargetMultiplier) {
       errors.push(`Minimum multiplier is ${config.minTargetMultiplier}x`)
     }
-    
+
     if (multiplier > config.maxTargetMultiplier) {
       errors.push(`Maximum multiplier is ${config.maxTargetMultiplier.toLocaleString()}x`)
     }
-    
+
     // Check precision
     const decimalPlaces = (multiplier.toString().split('.')[1] || '').length
     if (decimalPlaces > config.multiplierPrecision) {
@@ -75,7 +75,7 @@ export function MultiplierInput({
 
     const calculatedWinProbability = LIMBO_CONSTANTS.WIN_PROBABILITY_NUMERATOR / multiplier * (1 - config.houseEdge)
     const calculatedPayout = betAmount * multiplier
-    
+
     // Add warnings for extreme multipliers
     let warning: string | undefined
     if (multiplier > 100) {
@@ -90,11 +90,11 @@ export function MultiplierInput({
       winProbability: calculatedWinProbability,
       potentialPayout: calculatedPayout
     }
-    
+
     if (warning) {
       result.warning = warning
     }
-    
+
     return result
   }, [config, betAmount])
 
@@ -115,9 +115,9 @@ export function MultiplierInput({
    */
   const handleSliderChange = useCallback((sliderValue: number | number[]) => {
     const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue
-    const rounded = Math.round(newValue * Math.pow(10, config.multiplierPrecision)) / 
-                   Math.pow(10, config.multiplierPrecision)
-    
+    const rounded = Math.round(newValue * Math.pow(10, config.multiplierPrecision)) /
+      Math.pow(10, config.multiplierPrecision)
+
     setInputValue(rounded.toString())
     onChange(rounded)
   }, [onChange, config.multiplierPrecision])
@@ -127,7 +127,7 @@ export function MultiplierInput({
    */
   const handleInputChange = useCallback((newValue: string) => {
     setInputValue(newValue)
-    
+
     const numValue = parseFloat(newValue)
     if (!isNaN(numValue) && numValue > 0) {
       const validation = validateMultiplier(numValue)
@@ -149,7 +149,7 @@ export function MultiplierInput({
    */
   const handleInputBlur = useCallback(() => {
     setIsEditing(false)
-    
+
     const numValue = parseFloat(inputValue)
     if (isNaN(numValue) || numValue <= 0) {
       setInputValue(value.toString())

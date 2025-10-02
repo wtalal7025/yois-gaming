@@ -6,12 +6,12 @@
 'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
-import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Button, 
-  Select, 
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Select,
   SelectItem,
   Input,
   Slider,
@@ -20,11 +20,11 @@ import {
   Chip,
   Progress
 } from '@heroui/react'
-import type { 
+import type {
   DragonTowerConfig,
   DragonTowerGameState,
   DragonTowerDifficulty
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 /**
  * Props for DragonTowerControls component
@@ -55,21 +55,21 @@ const DIFFICULTY_INFO = {
     maxMultiplier: '38.44x'
   },
   medium: {
-    color: 'warning', 
+    color: 'warning',
     description: '3 tiles per level',
     winChance: '33.33%',
     maxMultiplier: '13,122x'
   },
   hard: {
     color: 'danger',
-    description: '4 tiles per level', 
+    description: '4 tiles per level',
     winChance: '25%',
     maxMultiplier: '2,730x'
   },
   expert: {
     color: 'secondary',
     description: '5 tiles per level',
-    winChance: '20%', 
+    winChance: '20%',
     maxMultiplier: '10,416x'
   }
 } as const
@@ -101,15 +101,15 @@ export function DragonTowerControls({
   // Calculate potential payout and next level info
   const nextLevelInfo = useMemo(() => {
     if (!gameState || gameState.gameStatus !== 'climbing') return null
-    
+
     const currentLevel = gameState.currentLevel
     const nextLevel = gameState.levels.find(l => l.id === currentLevel + 1)
     if (!nextLevel) return null
-    
+
     const difficultyInfo = DIFFICULTY_INFO[gameState.difficulty]
     const nextMultiplier = nextLevel.multiplier
     const nextPayout = gameState.betAmount * nextMultiplier
-    
+
     return {
       level: nextLevel.id,
       multiplier: nextMultiplier,
@@ -208,7 +208,7 @@ export function DragonTowerControls({
                 </SelectItem>
               ))}
             </Select>
-            
+
             {/* Difficulty Info Display */}
             <div className="mt-2 p-3 bg-default-50 rounded-lg">
               <div className="grid grid-cols-2 gap-4 text-sm">
@@ -247,7 +247,7 @@ export function DragonTowerControls({
                 </Button>
               }
             />
-            
+
             {/* Bet Presets */}
             <div className="flex flex-wrap gap-2 mt-2">
               {BET_PRESETS.filter(preset => preset <= effectiveMaxBet).map((preset) => (

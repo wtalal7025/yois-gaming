@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import type { MinesResult, MinesGameState } from '@stake-games/shared'
+import type { MinesResult, MinesGameState } from '@yois-games/shared'
 
 /**
  * Props for MinesStats component
@@ -33,18 +33,16 @@ function GameHistoryEntry({ game, index }: GameHistoryEntryProps) {
     <div className="flex items-center justify-between p-2 bg-gray-700 rounded text-sm">
       <div className="flex items-center space-x-2">
         <span className="text-gray-400">#{index + 1}</span>
-        <span className={`px-2 py-1 rounded text-xs ${
-          isWin ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-        }`}>
+        <span className={`px-2 py-1 rounded text-xs ${isWin ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+          }`}>
           {isWin ? 'WIN' : 'LOSS'}
         </span>
       </div>
       <div className="flex items-center space-x-2 text-xs">
         <span className="text-gray-300">{game.config.mineCount}m</span>
         <span className="text-gray-300">{game.revealedSafeTiles}t</span>
-        <span className={`font-semibold ${
-          profit >= 0 ? 'text-green-400' : 'text-red-400'
-        }`}>
+        <span className={`font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'
+          }`}>
           {profit >= 0 ? '+' : ''}${profit.toFixed(2)}
         </span>
       </div>
@@ -71,7 +69,7 @@ export function MinesStats({ gameHistory, currentBalance, currentGame }: MinesSt
     return profit > max ? profit : max
   }, 0)
 
-  const averageMultiplier = wonGames > 0 
+  const averageMultiplier = wonGames > 0
     ? gameHistory.filter(game => game.status === 'win').reduce((sum, game) => sum + game.multiplier, 0) / wonGames
     : 0
 
@@ -127,9 +125,8 @@ export function MinesStats({ gameHistory, currentBalance, currentGame }: MinesSt
           </div>
           <div>
             <span className="text-gray-400">Net Profit:</span>
-            <div className={`text-lg font-semibold ${
-              netProfit >= 0 ? 'text-green-400' : 'text-red-400'
-            }`}>
+            <div className={`text-lg font-semibold ${netProfit >= 0 ? 'text-green-400' : 'text-red-400'
+              }`}>
               {netProfit >= 0 ? '+' : ''}${netProfit.toFixed(2)}
             </div>
           </div>

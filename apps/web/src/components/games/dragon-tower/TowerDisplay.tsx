@@ -8,12 +8,12 @@
 import React, { useMemo } from 'react'
 import { Card, CardBody, Button, Chip } from '@heroui/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { 
-  DragonTowerGameState, 
+import type {
+  DragonTowerGameState,
   DragonTowerLevel,
   DragonTowerTile,
-  DragonTowerDifficulty 
-} from '@stake-games/shared'
+  DragonTowerDifficulty
+} from '@yois-games/shared'
 
 /**
  * Props for TowerDisplay component
@@ -29,19 +29,19 @@ interface TowerDisplayProps {
  */
 const getTileColors = (tile: DragonTowerTile, isActive: boolean) => {
   if (!tile.isRevealed) {
-    return isActive 
+    return isActive
       ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 cursor-pointer transform hover:scale-105'
       : 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed opacity-60'
   }
-  
+
   if (tile.state === 'safe') {
     return 'bg-gradient-to-r from-green-500 to-emerald-600 cursor-not-allowed'
   }
-  
+
   if (tile.state === 'egg') {
     return 'bg-gradient-to-r from-red-500 to-red-700 cursor-not-allowed'
   }
-  
+
   return 'bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed'
 }
 
@@ -52,26 +52,26 @@ const getTileIcon = (tile: DragonTowerTile) => {
   if (!tile.isRevealed) {
     return '?'
   }
-  
+
   if (tile.state === 'safe') {
     return '💎' // Diamond for safe tiles
   }
-  
+
   if (tile.state === 'egg') {
     return '🥚' // Egg for danger tiles
   }
-  
+
   return '?'
 }
 
 /**
  * Individual tower level component
  */
-const TowerLevel = React.memo(({ 
-  level, 
-  isActive, 
-  onTileSelect, 
-  disabled 
+const TowerLevel = React.memo(({
+  level,
+  isActive,
+  onTileSelect,
+  disabled
 }: {
   level: DragonTowerLevel
   isActive: boolean
@@ -92,14 +92,13 @@ const TowerLevel = React.memo(({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: (9 - level.id) * 0.1 }}
     >
-      <Card 
-        className={`mb-2 border-2 ${
-          isActive 
-            ? 'border-primary bg-primary/5' 
-            : level.isCompleted 
-              ? 'border-success bg-success/5' 
+      <Card
+        className={`mb-2 border-2 ${isActive
+            ? 'border-primary bg-primary/5'
+            : level.isCompleted
+              ? 'border-success bg-success/5'
               : 'border-default-200'
-        }`}
+          }`}
       >
         <CardBody className="p-4">
           <div className="flex items-center justify-between mb-3">
@@ -131,7 +130,7 @@ const TowerLevel = React.memo(({
               </div>
             </div>
           </div>
-          
+
           <div className="flex gap-2 justify-center">
             {level.tiles.map((tile) => (
               <motion.div
@@ -175,7 +174,7 @@ export function TowerDisplay({ gameState, onTileSelect, disabled = false }: Towe
   const getDifficultyColor = (difficulty: DragonTowerDifficulty) => {
     switch (difficulty) {
       case 'easy': return 'success'
-      case 'medium': return 'warning' 
+      case 'medium': return 'warning'
       case 'hard': return 'danger'
       case 'expert': return 'secondary'
       default: return 'default'
@@ -191,7 +190,7 @@ export function TowerDisplay({ gameState, onTileSelect, disabled = false }: Towe
             <div>
               <h2 className="text-xl font-bold">Dragon Tower</h2>
               <div className="flex items-center gap-2 mt-1">
-                <Chip 
+                <Chip
                   color={getDifficultyColor(gameState.difficulty)}
                   variant="flat"
                   size="sm"

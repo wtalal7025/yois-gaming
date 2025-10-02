@@ -7,13 +7,13 @@
 
 import React, { useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Spinner } from '@heroui/react'
-import type { 
-  DragonTowerGameState, 
-  DragonTowerConfig, 
-  DragonTowerMove, 
+import type {
+  DragonTowerGameState,
+  DragonTowerConfig,
+  DragonTowerMove,
   DragonTowerResult,
   DragonTowerDifficulty
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { TowerDisplay } from './TowerDisplay'
@@ -54,10 +54,10 @@ const calculateLevelMultiplier = (level: number, difficulty: DragonTowerDifficul
     hard: 2.67,
     expert: 3.33
   }
-  
+
   const baseMultiplier = baseMultipliers[difficulty]
   if (level <= 0) return 1
-  
+
   // Progressive multiplier system: baseMultiplier^level * 0.97 (house edge)
   const multiplier = Math.pow(baseMultiplier, level) * 0.97
   return Math.round(multiplier * 10000) / 10000
@@ -66,10 +66,10 @@ const calculateLevelMultiplier = (level: number, difficulty: DragonTowerDifficul
 /**
  * Main Dragon Tower game component
  */
-export function DragonTowerGame({ 
-  onGameResult, 
-  minBet = 0.01, 
-  maxBet = 1000 
+export function DragonTowerGame({
+  onGameResult,
+  minBet = 0.01,
+  maxBet = 1000
 }: DragonTowerGameProps) {
   // Wallet and auth integration
   const { bet, win, canAfford } = useWalletStore()
@@ -118,14 +118,14 @@ export function DragonTowerGame({
       // Create initial game state
       const gameId = `dragon_tower_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const tileCount = DIFFICULTY_TILE_COUNTS[gameConfig.difficulty]
-      
+
       // Generate levels with tiles
       const levels = []
       for (let levelId = 1; levelId <= 9; levelId++) {
         // For demo, randomly determine safe tile position
         const safeTileId = Math.floor(Math.random() * tileCount)
         const tiles = []
-        
+
         for (let tileId = 0; tileId < tileCount; tileId++) {
           tiles.push({
             id: tileId,
@@ -136,7 +136,7 @@ export function DragonTowerGame({
             isSelected: false
           })
         }
-        
+
         levels.push({
           id: levelId,
           tiles,
@@ -195,7 +195,7 @@ export function DragonTowerGame({
 
       const newGameState = { ...gameState }
       const level = newGameState.levels.find((l) => l.id === levelId)
-      
+
       if (!level || !level.isActive) {
         setGameStatus('playing')
         return
@@ -219,14 +219,14 @@ export function DragonTowerGame({
         newGameState.completedLevels++
         newGameState.currentMultiplier = level.multiplier
         newGameState.potentialPayout = newGameState.betAmount * newGameState.currentMultiplier
-        
+
         if (levelId >= 9) {
           // Reached the top of the tower - maximum win
           newGameState.gameStatus = 'won'
           newGameState.endTime = new Date()
           newGameState.canCashOut = false
           setGameStatus('finished')
-          
+
           // Handle winnings through wallet store
           await win(newGameState.potentialPayout, newGameState.gameId)
         } else {
@@ -246,7 +246,7 @@ export function DragonTowerGame({
         newGameState.endTime = new Date()
         newGameState.canCashOut = false
         setGameStatus('finished')
-        
+
         // Reveal all tiles on current level to show where the safe tile was
         level.tiles.forEach((t) => {
           if (!t.isRevealed) {
@@ -279,7 +279,7 @@ export function DragonTowerGame({
           hitEgg: newGameState.gameStatus === 'lost',
           eggPositions: [] // Would be provided by server
         }
-        
+
         setGameHistory((prev: DragonTowerResult[]) => [...prev, result])
         onGameResult?.(result)
       }
@@ -298,11 +298,11 @@ export function DragonTowerGame({
 
     try {
       setGameStatus('loading')
-      
+
       const newGameState = { ...gameState }
       newGameState.gameStatus = 'cashed-out'
       newGameState.endTime = new Date()
-      
+
       // Handle winnings through wallet store
       await win(newGameState.potentialPayout, newGameState.gameId)
       setGameStatus('finished')
@@ -328,7 +328,7 @@ export function DragonTowerGame({
         cashOutMultiplier: newGameState.currentMultiplier,
         eggPositions: []
       }
-      
+
       setGameHistory((prev: DragonTowerResult[]) => [...prev, result])
       onGameResult?.(result)
       setGameState(newGameState)
@@ -450,10 +450,10 @@ export function DragonTowerGame({
               <div>
                 <h4 className="font-semibold mb-2">🎯 Objective</h4>
                 <p className="text-default-600 mb-4">
-                  Climb the 9-level tower by selecting the correct tile on each level. 
+                  Climb the 9-level tower by selecting the correct tile on each level.
                   Each correct choice advances you to the next level with a higher multiplier.
                 </p>
-                
+
                 <h4 className="font-semibold mb-2">⚡ Difficulty Modes</h4>
                 <ul className="text-default-600 space-y-1">
                   <li><strong>Easy:</strong> 2 tiles (50% chance)</li>
@@ -462,7 +462,7 @@ export function DragonTowerGame({
                   <li><strong>Expert:</strong> 5 tiles (20% chance)</li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">💰 Strategy</h4>
                 <ul className="text-default-600 space-y-1">

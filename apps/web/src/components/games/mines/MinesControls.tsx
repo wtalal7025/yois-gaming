@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import type { MinesConfig, MinesGameState } from '@stake-games/shared'
+import type { MinesConfig, MinesGameState } from '@yois-games/shared'
 
 /**
  * Props for MinesControls component
@@ -43,7 +43,7 @@ export function MinesControls({
   onCashOut,
   onNewGame
 }: MinesControlsProps) {
-  
+
   const handleMineCountChange = (count: number) => {
     if (count >= 1 && count <= 24) {
       onConfigChange({ mineCount: count })
@@ -71,7 +71,7 @@ export function MinesControls({
   return (
     <div className="bg-gray-800 rounded-lg p-6 space-y-6">
       <h3 className="text-xl font-semibold text-white mb-4">Game Controls</h3>
-      
+
       {/* Balance Display */}
       <div className="bg-gray-700 rounded-lg p-4">
         <div className="text-sm text-gray-400">Balance</div>
@@ -222,7 +222,7 @@ export function MinesControls({
       {/* Auto Settings */}
       <div className="space-y-3">
         <div className="text-sm font-medium text-gray-300">Auto Settings</div>
-        
+
         <div className="flex items-center space-x-2">
           <input
             type="checkbox"
@@ -243,8 +243,8 @@ export function MinesControls({
               type="checkbox"
               id="autoCashout"
               checked={config.autoCashout?.enabled || false}
-              onChange={(e) => onConfigChange({ 
-                autoCashout: e.target.checked 
+              onChange={(e) => onConfigChange({
+                autoCashout: e.target.checked
                   ? { enabled: true, multiplier: config.autoCashout?.multiplier || 2 }
                   : { enabled: false, multiplier: 2 }
               })}

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react'
 import { Card, CardBody, CardHeader, Chip, Progress, Divider } from '@heroui/react'
-import type { CrashResult, CrashGameState } from '@stake-games/shared'
+import type { CrashResult, CrashGameState } from '@yois-games/shared'
 
 interface CrashHistoryProps {
   gameHistory: CrashResult[]
@@ -45,13 +45,13 @@ export function CrashHistory({
     const totalWon = gameHistory.reduce((sum, game) => sum + game.payout, 0)
     const wins = gameHistory.filter(game => game.status === 'win')
     const losses = gameHistory.filter(game => game.status === 'loss')
-    
+
     // Calculate streaks
     let currentWinStreak = 0
     let currentLossStreak = 0
     let longestWinStreak = 0
     let longestLossStreak = 0
-    
+
     gameHistory.forEach((game, index) => {
       if (game.status === 'win') {
         currentWinStreak++
@@ -197,9 +197,8 @@ export function CrashHistory({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-default-600">Net Profit:</span>
-                  <span className={`font-semibold ${
-                    statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
-                  }`}>
+                  <span className={`font-semibold ${statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
+                    }`}>
                     {statistics.netProfit >= 0 ? '+' : ''}{formatCurrency(statistics.netProfit)}
                   </span>
                 </div>
@@ -370,9 +369,8 @@ export function CrashHistory({
           {statistics.netProfit !== 0 && (
             <div className="flex justify-between items-center text-sm mt-1">
               <span className="text-default-600">Session P&L:</span>
-              <span className={`font-semibold ${
-                statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
-              }`}>
+              <span className={`font-semibold ${statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
+                }`}>
                 {statistics.netProfit >= 0 ? '+' : ''}{formatCurrency(statistics.netProfit)}
               </span>
             </div>

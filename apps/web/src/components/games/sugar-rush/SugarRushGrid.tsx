@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { SugarRushGameState, SugarRushCell, SugarRushSymbol } from '@stake-games/shared'
+import type { SugarRushGameState, SugarRushCell, SugarRushSymbol } from '@yois-games/shared'
 
 /**
  * Props for SugarRushGrid component
@@ -32,7 +32,7 @@ const SugarRushSymbolComponent = ({ symbol, cell, cascadeAnimation, disabled }: 
   const getSymbolEmoji = (symbol: SugarRushSymbol): string => {
     const symbols = {
       'red-candy': '🍎',
-      'orange-candy': '🍊', 
+      'orange-candy': '🍊',
       'yellow-candy': '🍌',
       'green-candy': '🍏',
       'blue-candy': '🫐',
@@ -47,7 +47,7 @@ const SugarRushSymbolComponent = ({ symbol, cell, cascadeAnimation, disabled }: 
     const colors = {
       'red-candy': 'from-red-400 to-red-600',
       'orange-candy': 'from-orange-400 to-orange-600',
-      'yellow-candy': 'from-yellow-400 to-yellow-600', 
+      'yellow-candy': 'from-yellow-400 to-yellow-600',
       'green-candy': 'from-green-400 to-green-600',
       'blue-candy': 'from-blue-400 to-blue-600',
       'purple-candy': 'from-purple-400 to-purple-600',
@@ -75,14 +75,14 @@ const SugarRushSymbolComponent = ({ symbol, cell, cascadeAnimation, disabled }: 
     <motion.div
       className={`${baseClasses} ${stateClasses[cell.state]} ${disabled ? 'pointer-events-none' : ''}`}
       initial={{ scale: 0, opacity: 0 }}
-      animate={{ 
-        scale: cell.state === 'matched' && cascadeAnimation ? 0 : 1, 
-        opacity: cell.state === 'matched' && cascadeAnimation ? 0 : 1 
+      animate={{
+        scale: cell.state === 'matched' && cascadeAnimation ? 0 : 1,
+        opacity: cell.state === 'matched' && cascadeAnimation ? 0 : 1
       }}
       exit={{ scale: 0, opacity: 0 }}
-      transition={{ 
-        type: "spring", 
-        stiffness: 260, 
+      transition={{
+        type: "spring",
+        stiffness: 260,
         damping: 20,
         duration: cell.state === 'falling' ? 0.8 : 0.3
       }}
@@ -92,7 +92,7 @@ const SugarRushSymbolComponent = ({ symbol, cell, cascadeAnimation, disabled }: 
       <span className="drop-shadow-lg filter">
         {getSymbolEmoji(symbol)}
       </span>
-      
+
       {cell.isMatched && !cascadeAnimation && (
         <motion.div
           className="absolute inset-0 bg-yellow-400/30 rounded-xl"
@@ -105,7 +105,7 @@ const SugarRushSymbolComponent = ({ symbol, cell, cascadeAnimation, disabled }: 
       {symbol === 'wild' && (
         <motion.div
           className="absolute inset-0 border-2 border-yellow-400 rounded-xl"
-          animate={{ 
+          animate={{
             boxShadow: [
               '0 0 5px rgba(250, 204, 21, 0.5)',
               '0 0 20px rgba(250, 204, 21, 0.8)',
@@ -141,7 +141,7 @@ export function SugarRushGrid({ gameState, cascadeAnimation, disabled = false }:
               initial={{ y: -100, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ scale: 0, opacity: 0 }}
-              transition={{ 
+              transition={{
                 type: "spring",
                 stiffness: 300,
                 damping: 30,

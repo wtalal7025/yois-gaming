@@ -7,13 +7,13 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import { Card, CardBody, CardHeader, Button, Spinner } from '@heroui/react'
-import type { 
-  MinesGameState, 
-  MinesConfig, 
-  MinesMove, 
+import type {
+  MinesGameState,
+  MinesConfig,
+  MinesMove,
   MinesResult,
-  MinesTile 
-} from '@stake-games/shared'
+  MinesTile
+} from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { MinesBoard } from './MinesBoard'
@@ -37,10 +37,10 @@ interface MinesGameProps {
 /**
  * Main Mines game component
  */
-export function MinesGame({ 
-  onGameResult, 
-  minBet = 0.01, 
-  maxBet = 1000 
+export function MinesGame({
+  onGameResult,
+  minBet = 0.01,
+  maxBet = 1000
 }: MinesGameProps) {
   // Wallet and auth integration
   const { bet, win, canAfford } = useWalletStore()
@@ -89,7 +89,7 @@ export function MinesGame({
       // Create initial game state
       const gameId = `mines_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const tiles: MinesTile[] = []
-      
+
       // Initialize 5x5 grid (25 tiles)
       for (let i = 0; i < 25; i++) {
         tiles.push({
@@ -144,7 +144,7 @@ export function MinesGame({
       // For demo: randomly determine if tile is safe or mine
       // Reason: In production, this would be determined by server using provably fair system
       const isMine = Math.random() < (gameConfig.mineCount / (25 - gameState.revealedTiles.length))
-      
+
       const move: MinesMove = {
         type: 'reveal',
         tileId,
@@ -153,7 +153,7 @@ export function MinesGame({
 
       const newGameState = { ...gameState }
       const tile = newGameState.tiles.find(t => t.id === tileId)
-      
+
       if (!tile || tile.isRevealed) {
         setGameStatus('playing')
         return
@@ -168,7 +168,7 @@ export function MinesGame({
         newGameState.gameStatus = 'lost'
         newGameState.endTime = new Date()
         setGameStatus('finished')
-        
+
         // Create game result
         const result: MinesResult = {
           gameId: newGameState.gameId,
@@ -188,29 +188,29 @@ export function MinesGame({
           hitMine: true,
           minePositions: [tileId]
         }
-        
+
         setGameHistory((prev: MinesResult[]) => [...prev, result])
         onGameResult?.(result)
-        
+
       } else {
         // Safe tile revealed
         newGameState.revealedTiles.push(tileId)
         const revealedCount = newGameState.revealedTiles.length
-        
+
         // Calculate multiplier (simplified formula)
         const totalSafeTiles = 25 - gameConfig.mineCount
         newGameState.currentMultiplier = 1 + (revealedCount * 0.1 * gameConfig.mineCount)
         newGameState.potentialPayout = currentBet * newGameState.currentMultiplier
-        
+
         tile.multiplier = newGameState.currentMultiplier
         newGameState.canCashOut = revealedCount >= 1
-        
+
         // Check if all safe tiles revealed
         if (revealedCount >= totalSafeTiles) {
           newGameState.gameStatus = 'won'
           newGameState.endTime = new Date()
           setGameStatus('finished')
-          
+
           // Handle winnings through wallet store
           await win(newGameState.potentialPayout, newGameState.gameId)
         } else {
@@ -234,11 +234,11 @@ export function MinesGame({
 
     try {
       setGameStatus('loading')
-      
+
       const newGameState = { ...gameState }
       newGameState.gameStatus = 'won'
       newGameState.endTime = new Date()
-      
+
       // Handle winnings through wallet store
       await win(newGameState.potentialPayout, newGameState.gameId)
       setGameStatus('finished')
@@ -262,7 +262,7 @@ export function MinesGame({
         cashOutMultiplier: newGameState.currentMultiplier,
         minePositions: []
       }
-      
+
       setGameHistory((prev: MinesResult[]) => [...prev, result])
       onGameResult?.(result)
       setGameState(newGameState)

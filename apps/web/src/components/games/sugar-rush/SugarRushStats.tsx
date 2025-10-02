@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { Card, CardBody, CardHeader, Progress, Chip, Divider } from '@heroui/react'
-import type { SugarRushGameState, SugarRushResult } from '@stake-games/shared'
+import type { SugarRushGameState, SugarRushResult } from '@yois-games/shared'
 
 /**
  * Props for SugarRushStats component
@@ -22,7 +22,7 @@ interface SugarRushStatsProps {
  * Sugar Rush statistics component
  */
 export function SugarRushStats({ gameHistory, currentBalance, currentGame }: SugarRushStatsProps) {
-  
+
   // Calculate statistics from game history
   const totalGames = gameHistory.length
   const gamesWon = gameHistory.filter(game => game.status === 'win').length
@@ -31,7 +31,7 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
   const totalWon = gameHistory.reduce((sum, game) => sum + game.payout, 0)
   const netProfit = totalWon - totalWagered
   const biggestWin = Math.max(...gameHistory.map(game => game.payout), 0)
-  const averageMultiplier = gamesWon > 0 
+  const averageMultiplier = gamesWon > 0
     ? gameHistory.filter(game => game.status === 'win').reduce((sum, game) => sum + game.multiplier, 0) / gamesWon
     : 0
 
@@ -39,7 +39,7 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
   let currentWinStreak = 0
   let longestWinStreak = 0
   let tempStreak = 0
-  
+
   for (let i = gameHistory.length - 1; i >= 0; i--) {
     if (gameHistory[i].status === 'win') {
       tempStreak++
@@ -63,8 +63,8 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
     return stats
   }, { totalCascades: 0, maxCascades: 0, gamesWithCascades: 0 })
 
-  const averageCascades = cascadeStats.gamesWithCascades > 0 
-    ? cascadeStats.totalCascades / cascadeStats.gamesWithCascades 
+  const averageCascades = cascadeStats.gamesWithCascades > 0
+    ? cascadeStats.totalCascades / cascadeStats.gamesWithCascades
     : 0
 
   return (
@@ -81,8 +81,8 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
               <span className="text-sm font-medium">Win Rate</span>
               <span className="text-sm font-bold">{winRate.toFixed(1)}%</span>
             </div>
-            <Progress 
-              value={winRate} 
+            <Progress
+              value={winRate}
               maxValue={100}
               color={winRate >= 50 ? "success" : winRate >= 25 ? "warning" : "danger"}
               size="sm"
@@ -109,19 +109,19 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
               <span className="text-sm text-default-500">Total Wagered</span>
               <span className="text-sm font-medium">${totalWagered.toFixed(2)}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-default-500">Total Won</span>
               <span className="text-sm font-medium text-success">${totalWon.toFixed(2)}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-default-500">Net Profit</span>
               <span className={`text-sm font-medium ${netProfit >= 0 ? 'text-success' : 'text-danger'}`}>
                 ${netProfit >= 0 ? '+' : ''}{netProfit.toFixed(2)}
               </span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-default-500">Biggest Win</span>
               <span className="text-sm font-medium text-success">${biggestWin.toFixed(2)}</span>
@@ -136,12 +136,12 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
               <span className="text-sm text-default-500">Average Multiplier</span>
               <span className="text-sm font-medium">{averageMultiplier.toFixed(2)}x</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-default-500">Current Streak</span>
               <span className="text-sm font-medium">{currentWinStreak}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-sm text-default-500">Longest Streak</span>
               <span className="text-sm font-medium">{longestWinStreak}</span>
@@ -153,17 +153,17 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
           {/* Cascade Stats */}
           <div className="space-y-2">
             <h4 className="text-sm font-semibold">Cascade Statistics</h4>
-            
+
             <div className="flex justify-between">
               <span className="text-xs text-default-500">Max Cascades</span>
               <span className="text-xs font-medium">{cascadeStats.maxCascades}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-xs text-default-500">Average Cascades</span>
               <span className="text-xs font-medium">{averageCascades.toFixed(1)}</span>
             </div>
-            
+
             <div className="flex justify-between">
               <span className="text-xs text-default-500">Games w/ Cascades</span>
               <span className="text-xs font-medium">{cascadeStats.gamesWithCascades}</span>
@@ -198,16 +198,15 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
                     </Chip>
                   )}
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
                   {game.status === 'win' && (
                     <span className="text-xs text-default-500">
                       {game.multiplier.toFixed(2)}x
                     </span>
                   )}
-                  <span className={`text-sm font-medium ${
-                    game.payout > 0 ? 'text-success' : 'text-default-500'
-                  }`}>
+                  <span className={`text-sm font-medium ${game.payout > 0 ? 'text-success' : 'text-default-500'
+                    }`}>
                     {game.payout > 0 ? '+' : ''}${game.payout.toFixed(2)}
                   </span>
                 </div>
@@ -229,19 +228,19 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
                 <p className="text-default-500">Bet Amount</p>
                 <p className="font-medium">${currentGame.betAmount.toFixed(2)}</p>
               </div>
-              
+
               <div>
                 <p className="text-default-500">Current Win</p>
                 <p className={`font-medium ${currentGame.totalPayout > 0 ? 'text-success' : ''}`}>
                   ${currentGame.totalPayout.toFixed(2)}
                 </p>
               </div>
-              
+
               <div>
                 <p className="text-default-500">Cascades</p>
                 <p className="font-medium">{currentGame.currentCascadeLevel}</p>
               </div>
-              
+
               <div>
                 <p className="text-default-500">Multiplier</p>
                 <p className="font-medium">{currentGame.totalMultiplier.toFixed(2)}x</p>

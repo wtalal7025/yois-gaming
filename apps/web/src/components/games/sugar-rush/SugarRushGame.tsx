@@ -13,7 +13,7 @@ import type {
   SugarRushResult,
   SugarRushCell,
   SugarRushSymbol
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { SugarRushGrid } from './SugarRushGrid'
@@ -65,13 +65,13 @@ export function SugarRushGame({
    */
   const getRandomSymbol = useCallback((): SugarRushSymbol => {
     const symbols: SugarRushSymbol[] = [
-      'red-candy', 'orange-candy', 'yellow-candy', 'green-candy', 
+      'red-candy', 'orange-candy', 'yellow-candy', 'green-candy',
       'blue-candy', 'purple-candy', 'pink-candy', 'wild'
     ]
     const weights = [8, 12, 16, 20, 24, 28, 32, 4] // Higher number = more common
     const totalWeight = weights.reduce((sum, w) => sum + w, 0)
     const random = Math.random() * totalWeight
-    
+
     let currentWeight = 0
     for (let i = 0; i < symbols.length; i++) {
       currentWeight += weights[i] || 0
@@ -132,7 +132,7 @@ export function SugarRushGame({
       // Create initial game state
       const gameId = `sugar_rush_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const initialGrid = generateGrid()
-      
+
       const newGameState: SugarRushGameState = {
         gameId,
         playerId: user?.id || 'anonymous',
@@ -169,17 +169,17 @@ export function SugarRushGame({
   const processGameSpin = useCallback(async (gameState: SugarRushGameState) => {
     try {
       setGameStatus('evaluating')
-      
+
       // Find clusters in the grid
       const clusters = findClusters(gameState.grid)
-      
+
       if (clusters.length === 0) {
         // No wins - game complete
         setGameStatus('complete')
         gameState.gameStatus = 'complete'
         gameState.endTime = new Date()
         setGameState({ ...gameState })
-        
+
         const result: SugarRushResult = createGameResult(gameState, [], 0, 0)
         setGameHistory((prev: SugarRushResult[]) => [...prev, result])
         onGameResult?.(result)
@@ -188,7 +188,7 @@ export function SugarRushGame({
 
       // Process cascades
       await processCascades(gameState, clusters)
-      
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to process game')
       setGameStatus('complete')
@@ -201,10 +201,10 @@ export function SugarRushGame({
   const findClusters = (grid: SugarRushCell[]) => {
     const visited = new Set<number>()
     const clusters: { symbol: SugarRushSymbol, cells: number[], size: number, payout: number }[] = []
-    
+
     for (const cell of grid) {
       if (visited.has(cell.id) || cell.symbol === 'wild') continue
-      
+
       const cluster = findConnectedCluster(grid, cell, visited)
       if (cluster.length >= 5) { // Minimum cluster size
         const payout = calculateClusterPayout(cell.symbol, cluster.length, currentBet)
@@ -216,7 +216,7 @@ export function SugarRushGame({
         })
       }
     }
-    
+
     return clusters
   }
 
@@ -227,27 +227,27 @@ export function SugarRushGame({
     const cluster: number[] = []
     const queue: number[] = [startCell.id]
     visited.add(startCell.id)
-    
+
     while (queue.length > 0) {
       const cellId = queue.shift()!
       cluster.push(cellId)
-      
+
       // Check adjacent cells (up, down, left, right)
       const adjacentIds = getAdjacentCellIds(cellId)
-      
+
       for (const adjId of adjacentIds) {
         if (visited.has(adjId)) continue
-        
+
         const adjCell = grid.find(c => c.id === adjId)
         if (!adjCell) continue
-        
+
         if (adjCell.symbol === startCell.symbol || adjCell.symbol === 'wild') {
           visited.add(adjId)
           queue.push(adjId)
         }
       }
     }
-    
+
     return cluster
   }
 
@@ -258,12 +258,12 @@ export function SugarRushGame({
     const row = Math.floor(cellId / 7)
     const col = cellId % 7
     const adjacent: number[] = []
-    
+
     if (row > 0) adjacent.push((row - 1) * 7 + col)        // Up
     if (row < 6) adjacent.push((row + 1) * 7 + col)        // Down  
     if (col > 0) adjacent.push(row * 7 + (col - 1))        // Left
     if (col < 6) adjacent.push(row * 7 + (col + 1))        // Right
-    
+
     return adjacent
   }
 
@@ -275,7 +275,7 @@ export function SugarRushGame({
       'red-candy': 50, 'orange-candy': 25, 'yellow-candy': 15, 'green-candy': 10,
       'blue-candy': 8, 'purple-candy': 6, 'pink-candy': 4, 'wild': 100
     }
-    
+
     const baseValue = symbolValues[symbol] || 1
     const sizeMultiplier = getSizeMultiplier(size)
     return (baseValue * sizeMultiplier * betAmount) / 100
@@ -301,12 +301,12 @@ export function SugarRushGame({
     let cascadeLevel = 0
     let totalPayout = 0
     let allClusters = [...initialClusters]
-    
+
     while (initialClusters.length > 0 || cascadeLevel === 0) {
       cascadeLevel++
       setGameStatus('cascading')
       setCascadeAnimation(true)
-      
+
       // Mark matched symbols
       for (const cluster of initialClusters) {
         for (const cellId of cluster.cells) {
@@ -317,7 +317,7 @@ export function SugarRushGame({
           }
         }
       }
-      
+
       // Calculate cascade payout with multiplier
       const cascadeMultiplier = getCascadeMultiplier(cascadeLevel)
       let cascadePayout = 0
@@ -325,44 +325,44 @@ export function SugarRushGame({
         cascadePayout += cluster.payout * cascadeMultiplier
       }
       totalPayout += cascadePayout
-      
-      setGameState((prev: SugarRushGameState | null) => prev ? { 
-        ...prev, 
+
+      setGameState((prev: SugarRushGameState | null) => prev ? {
+        ...prev,
         grid: [...currentGrid],
         totalPayout,
         totalMultiplier: cascadeMultiplier,
         currentCascadeLevel: cascadeLevel
       } : null)
-      
+
       // Wait for animation
       await new Promise(resolve => setTimeout(resolve, gameConfig.turboMode ? 800 : 1500))
-      
+
       // Apply cascade (remove matched, drop remaining, add new)
       currentGrid = applyCascade(currentGrid)
-      
+
       setCascadeAnimation(false)
       setGameState((prev: SugarRushGameState | null) => prev ? { ...prev, grid: [...currentGrid] } : null)
-      
+
       // Wait for drop animation
       await new Promise(resolve => setTimeout(resolve, gameConfig.turboMode ? 300 : 800))
-      
+
       // Find new clusters
       initialClusters = findClusters(currentGrid)
       allClusters.push(...initialClusters)
-      
+
       if (cascadeLevel >= 10) break // Safety limit
     }
-    
+
     // Game complete - handle winnings through wallet store
     setGameStatus('complete')
-    
+
     if (totalPayout > 0) {
       await win(totalPayout, gameState.gameId)
     }
-    
+
     const finalGameState = { ...gameState, grid: currentGrid, totalPayout, gameStatus: 'complete' as const, endTime: new Date() }
     setGameState(finalGameState)
-    
+
     const result = createGameResult(finalGameState, allClusters, totalPayout, cascadeLevel)
     setGameHistory((prev: SugarRushResult[]) => [...prev, result])
     onGameResult?.(result)
@@ -381,12 +381,12 @@ export function SugarRushGame({
    */
   const applyCascade = (grid: SugarRushCell[]): SugarRushCell[] => {
     const newGrid = [...grid]
-    
+
     // Process each column
     for (let col = 0; col < 7; col++) {
       const columnCells = newGrid.filter(cell => cell.col === col).sort((a, b) => a.row - b.row)
       const survivingCells = columnCells.filter(cell => !cell.isMatched)
-      
+
       // Move surviving cells down
       for (let i = 0; i < survivingCells.length; i++) {
         const survivingCell = survivingCells[i]
@@ -399,7 +399,7 @@ export function SugarRushGame({
           survivingCell.isMatched = false
         }
       }
-      
+
       // Add new symbols at top
       const emptyPositions = 7 - survivingCells.length
       for (let i = 0; i < emptyPositions; i++) {
@@ -414,7 +414,7 @@ export function SugarRushGame({
           isMatched: false
         })
       }
-      
+
       // Update grid
       newGrid.forEach((cell, index) => {
         if (cell.col === col) {
@@ -425,7 +425,7 @@ export function SugarRushGame({
         }
       })
     }
-    
+
     return newGrid.sort((a, b) => a.id - b.id)
   }
 

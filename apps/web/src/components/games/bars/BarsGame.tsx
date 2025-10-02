@@ -7,15 +7,15 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import { Card, CardBody, CardHeader, Button, Spinner } from '@heroui/react'
-import type { 
-  BarsGameState, 
-  BarsConfig, 
+import type {
+  BarsGameState,
+  BarsConfig,
   BarsResult,
   BarsReel,
   BarsPayline,
   BarsPaylineWin,
-  BarsSymbol 
-} from '@stake-games/shared'
+  BarsSymbol
+} from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { SlotMachine } from './SlotMachine'
@@ -39,10 +39,10 @@ interface BarsGameProps {
 /**
  * Main Bars slot machine game component
  */
-export function BarsGame({ 
-  onGameResult, 
-  minBet = 0.01, 
-  maxBet = 100 
+export function BarsGame({
+  onGameResult,
+  minBet = 0.01,
+  maxBet = 100
 }: BarsGameProps) {
   // Wallet and auth integration
   const { bet, win, canAfford } = useWalletStore()
@@ -72,7 +72,7 @@ export function BarsGame({
   const initializeReels = (): BarsReel[] => {
     const reels: BarsReel[] = []
     const defaultSymbols: BarsSymbol[] = ['grape', 'plum', 'lemon', 'orange', 'cherry', 'bell', 'single-bar', 'double-bar', 'triple-bar']
-    
+
     for (let i = 0; i < 9; i++) {
       const symbolIndex = i % defaultSymbols.length
       const symbol = defaultSymbols[symbolIndex]!
@@ -86,7 +86,7 @@ export function BarsGame({
         paylineIds: getPaylineIdsForPosition(i)
       })
     }
-    
+
     return reels
   }
 
@@ -101,7 +101,7 @@ export function BarsGame({
       { id: 4, positions: [0, 4, 8] }, // Diagonal down
       { id: 5, positions: [6, 4, 2] }  // Diagonal up
     ]
-    
+
     return paylineConfigs
       .filter(config => config.positions.includes(position))
       .map(config => config.id)
@@ -118,7 +118,7 @@ export function BarsGame({
       { id: 4, name: 'Diagonal Down', positions: [0, 4, 8] },
       { id: 5, name: 'Diagonal Up', positions: [6, 4, 2] }
     ]
-    
+
     return paylineConfigs.slice(0, activeCount).map(config => ({
       ...config,
       positions: config.positions as [number, number, number],
@@ -162,7 +162,7 @@ export function BarsGame({
 
       const newGameState: BarsGameState = {
         gameId,
-        playerId: user?.id || 'anonymous', 
+        playerId: user?.id || 'anonymous',
         betPerLine: gameConfig.betPerLine,
         activePaylines: gameConfig.activePaylines,
         totalBet,
@@ -190,7 +190,7 @@ export function BarsGame({
       // Generate random reel results (in production this would come from server)
       const symbols: BarsSymbol[] = ['triple-bar', 'double-bar', 'single-bar', 'seven', 'bell', 'cherry', 'lemon', 'orange', 'plum', 'grape']
       const finalSymbols: BarsSymbol[] = []
-      
+
       for (let i = 0; i < 9; i++) {
         // Weighted random selection (simplified)
         const randomIndex = Math.floor(Math.random() * symbols.length)
@@ -228,13 +228,13 @@ export function BarsGame({
       }
 
       setGameState(finalGameState)
-      
+
       if (totalPayout > 0) {
         setGameStatus('displaying-wins')
-        
+
         // Handle winnings through wallet store
         await win(totalPayout, gameId)
-        
+
         // Show win animation, then finish
         setTimeout(() => {
           setGameStatus('finished')
@@ -270,7 +270,7 @@ export function BarsGame({
         paylineHits: winningPaylines.length,
         biggestWin: Math.max(...winningPaylines.map(w => w.totalPayout), 0)
       }
-      
+
       setGameHistory((prev: BarsResult[]) => [...prev, result])
       onGameResult?.(result)
 
@@ -297,16 +297,16 @@ export function BarsGame({
    */
   const checkForWins = (reels: BarsReel[], paylines: BarsPayline[]): BarsPaylineWin[] => {
     const wins: BarsPaylineWin[] = []
-    
+
     for (const payline of paylines) {
       const symbols = payline.positions.map(pos => reels[pos]?.symbol).filter(Boolean) as BarsSymbol[]
-      
+
       if (symbols.length === 3) {
         // Check for three matching symbols
         if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
           const symbol = symbols[0]!
           const basePayout = getSymbolPayout(symbol)
-          
+
           if (basePayout > 0) {
             wins.push({
               paylineId: payline.id,
@@ -333,7 +333,7 @@ export function BarsGame({
         }
       }
     }
-    
+
     return wins
   }
 
@@ -353,7 +353,7 @@ export function BarsGame({
       'plum': 12,
       'grape': 10
     }
-    
+
     return payouts[symbol] || 0
   }
 
@@ -362,11 +362,11 @@ export function BarsGame({
    */
   const getSymbolCombinations = (symbols: BarsSymbol[]): { [symbol: string]: number } => {
     const combinations: { [symbol: string]: number } = {}
-    
+
     symbols.forEach(symbol => {
       combinations[symbol] = (combinations[symbol] || 0) + 1
     })
-    
+
     return combinations
   }
 
@@ -456,10 +456,10 @@ export function BarsGame({
                     isDisabled={!canSpin || (isAuthenticated && !canAfford(totalBet))}
                     isLoading={isSpinning}
                   >
-                    {!isAuthenticated 
-                      ? 'Login to Play' 
-                      : isAutoSpin 
-                        ? `Auto Spin (${autoSpinCount})` 
+                    {!isAuthenticated
+                      ? 'Login to Play'
+                      : isAutoSpin
+                        ? `Auto Spin (${autoSpinCount})`
                         : 'Spin'
                     }
                   </Button>

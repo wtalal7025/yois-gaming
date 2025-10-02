@@ -7,7 +7,7 @@
 
 import React from 'react'
 import { Card, CardBody, CardHeader, Button, Slider, Switch, Chip } from '@heroui/react'
-import type { BarsConfig, BarsGameState } from '@stake-games/shared'
+import type { BarsConfig, BarsGameState } from '@yois-games/shared'
 
 /**
  * Props for BarsControls component
@@ -50,7 +50,7 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
 }) => {
   // Calculate max bet per line based on balance and paylines
   const maxBetPerLine = Math.min(
-    maxBet / config.activePaylines, 
+    maxBet / config.activePaylines,
     balance / config.activePaylines
   )
 
@@ -214,10 +214,10 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
             isDisabled={!canSpin || isAutoSpin}
             isLoading={isDisabled && !isAutoSpin}
           >
-            {isAutoSpin 
-              ? `Auto Spinning (${autoSpinCount})` 
-              : gameStatus === 'spinning' 
-                ? 'Spinning...' 
+            {isAutoSpin
+              ? `Auto Spinning (${autoSpinCount})`
+              : gameStatus === 'spinning'
+                ? 'Spinning...'
                 : 'SPIN'
             }
           </Button>

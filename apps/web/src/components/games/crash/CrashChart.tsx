@@ -6,7 +6,7 @@
 'use client'
 
 import React, { useRef, useEffect, useMemo } from 'react'
-import type { MultiplierPoint } from '@stake-games/shared'
+import type { MultiplierPoint } from '@yois-games/shared'
 
 interface CrashChartProps {
   multiplierCurve: MultiplierPoint[]
@@ -55,13 +55,13 @@ export function CrashChart({
     // Set canvas size to match display size
     const rect = canvas.getBoundingClientRect()
     const dpr = window.devicePixelRatio || 1
-    
+
     canvas.width = rect.width * dpr
     canvas.height = rect.height * dpr
-    
+
     ctx.scale(dpr, dpr)
     ctx.clearRect(0, 0, rect.width, rect.height)
-    
+
     return ctx
   }
 
@@ -91,7 +91,7 @@ export function CrashChart({
    */
   const drawGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     const { padding, gridColor, axisColor, textColor, minMultiplier, maxMultiplier } = config
-    
+
     ctx.strokeStyle = gridColor
     ctx.lineWidth = 1
     ctx.font = '12px Inter, system-ui, sans-serif'
@@ -100,12 +100,12 @@ export function CrashChart({
     // Vertical grid lines (time)
     for (let t = 0; t <= 30; t += 5) {
       const x = timeToX(t * 1000, width)
-      
+
       ctx.beginPath()
       ctx.moveTo(x, padding)
       ctx.lineTo(x, height - padding)
       ctx.stroke()
-      
+
       // Time labels
       if (t % 10 === 0) {
         ctx.fillText(`${t}s`, x - 10, height - 10)
@@ -117,13 +117,13 @@ export function CrashChart({
     multiplierSteps.forEach(mult => {
       if (mult >= minMultiplier && mult <= maxMultiplier) {
         const y = multiplierToY(mult, height)
-        
+
         ctx.strokeStyle = mult === 1 ? axisColor : gridColor
         ctx.beginPath()
         ctx.moveTo(padding, y)
         ctx.lineTo(width - padding, y)
         ctx.stroke()
-        
+
         // Multiplier labels
         ctx.fillText(`${mult}.00x`, 5, y + 4)
       }
@@ -132,13 +132,13 @@ export function CrashChart({
     // Draw axes
     ctx.strokeStyle = axisColor
     ctx.lineWidth = 2
-    
+
     // X-axis
     ctx.beginPath()
     ctx.moveTo(padding, height - padding)
     ctx.lineTo(width - padding, height - padding)
     ctx.stroke()
-    
+
     // Y-axis
     ctx.beginPath()
     ctx.moveTo(padding, padding)
@@ -153,7 +153,7 @@ export function CrashChart({
     if (multiplierCurve.length < 2) return
 
     const { curveColor, lineWidth } = config
-    
+
     ctx.strokeStyle = curveColor
     ctx.lineWidth = lineWidth
     ctx.lineCap = 'round'
@@ -161,7 +161,7 @@ export function CrashChart({
 
     // Create smooth curve using bezier curves
     ctx.beginPath()
-    
+
     let firstPoint = multiplierCurve[0]!
     ctx.moveTo(
       timeToX(firstPoint.time, width),
@@ -173,7 +173,7 @@ export function CrashChart({
       const point = multiplierCurve[i]!
       const x = timeToX(point.time, width)
       const y = multiplierToY(point.multiplier, height)
-      
+
       if (i === 1) {
         ctx.lineTo(x, y)
       } else {
@@ -181,7 +181,7 @@ export function CrashChart({
         const prevPoint = multiplierCurve[i - 1]!
         const prevX = timeToX(prevPoint.time, width)
         const prevY = multiplierToY(prevPoint.multiplier, height)
-        
+
         const controlX = (prevX + x) / 2
         ctx.quadraticCurveTo(controlX, prevY, x, y)
       }
@@ -206,7 +206,7 @@ export function CrashChart({
     if (!lastPoint) return
 
     const { crashColor, pointRadius, textColor } = config
-    
+
     const x = timeToX(lastPoint.time, width)
     const y = multiplierToY(crashPoint, height)
 
@@ -225,7 +225,7 @@ export function CrashChart({
     ctx.font = 'bold 16px Inter, system-ui, sans-serif'
     ctx.textAlign = 'center'
     ctx.fillText(`CRASHED @ ${crashPoint.toFixed(2)}x`, x, y - 20)
-    
+
     // Add pulsing effect
     const pulseRadius = pointRadius * (2 + Math.sin(Date.now() * 0.01) * 0.5)
     ctx.beginPath()
@@ -245,7 +245,7 @@ export function CrashChart({
     if (!cashOutPoint) return
 
     const { cashOutColor, pointRadius, textColor } = config
-    
+
     const x = timeToX(cashOutPoint.time, width)
     const y = multiplierToY(cashOutMultiplier, height)
 
@@ -276,7 +276,7 @@ export function CrashChart({
     if (!lastPoint) return
 
     const { curveColor, pointRadius } = config
-    
+
     const x = timeToX(lastPoint.time, width)
     const y = multiplierToY(currentMultiplier, height)
 
@@ -300,14 +300,14 @@ export function CrashChart({
     if (gameStatus !== 'waiting' && gameStatus !== 'betting-closed' && gameStatus !== 'idle') return
 
     const { textColor } = config
-    
+
     ctx.fillStyle = textColor
     ctx.font = 'bold 24px Inter, system-ui, sans-serif'
     ctx.textAlign = 'center'
-    
+
     const centerX = width / 2
     const centerY = height / 2
-    
+
     if (gameStatus === 'waiting') {
       ctx.fillText('Waiting for Next Round...', centerX, centerY)
     } else if (gameStatus === 'betting-closed') {
@@ -386,7 +386,7 @@ export function CrashChart({
           background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%)'
         }}
       />
-      
+
       {/* Overlay for current multiplier display */}
       {gameStatus === 'flying' && (
         <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm rounded-lg px-4 py-2 border border-emerald-500/30">

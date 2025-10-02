@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback } from 'react'
 import { Card, CardBody, CardHeader, Button, Input, Switch, Slider, Divider } from '@heroui/react'
-import type { CrashConfig, CrashGameState } from '@stake-games/shared'
+import type { CrashConfig, CrashGameState } from '@yois-games/shared'
 
 interface CrashControlsProps {
   config: CrashConfig
@@ -140,11 +140,11 @@ export function CrashControls({
     const updatedRounds = newConfig.numberOfRounds !== undefined ? newConfig.numberOfRounds : autoPlayRounds
     const updatedStopOnBigWin = newConfig.stopOnBigWin !== undefined ? newConfig.stopOnBigWin : stopOnBigWin
     const updatedStopOnBalance = newConfig.stopOnBalance !== undefined ? newConfig.stopOnBalance : stopOnBalance
-    
+
     setAutoPlayRounds(updatedRounds)
     setStopOnBigWin(updatedStopOnBigWin)
     setStopOnBalance(updatedStopOnBalance)
-    
+
     onConfigChange({
       autoPlay: {
         enabled: autoPlayEnabled,
@@ -396,12 +396,11 @@ export function CrashControls({
         <CardBody className="py-3">
           <div className="flex justify-between items-center text-sm">
             <span className="text-default-600">Game Status:</span>
-            <span className={`font-semibold capitalize ${
-              gameStatus === 'flying' ? 'text-success' :
-              gameStatus === 'crashed' ? 'text-danger' :
-              gameStatus === 'waiting' ? 'text-warning' :
-              'text-default-700'
-            }`}>
+            <span className={`font-semibold capitalize ${gameStatus === 'flying' ? 'text-success' :
+                gameStatus === 'crashed' ? 'text-danger' :
+                  gameStatus === 'waiting' ? 'text-warning' :
+                    'text-default-700'
+              }`}>
               {gameStatus === 'betting-closed' ? 'Starting...' : gameStatus}
             </span>
           </div>

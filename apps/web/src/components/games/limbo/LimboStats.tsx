@@ -6,10 +6,10 @@
 'use client'
 
 import React, { useMemo } from 'react'
-import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
+import {
+  Card,
+  CardBody,
+  CardHeader,
   Chip,
   Progress,
   Divider,
@@ -20,7 +20,7 @@ import {
   TableRow,
   TableCell
 } from '@heroui/react'
-import type { LimboStats } from '@stake-games/shared'
+import type { LimboStats } from '@yois-games/shared'
 
 /**
  * Game history entry interface for statistics
@@ -140,7 +140,7 @@ export function LimboStats({
     // Multiplier statistics
     const generatedMultipliers = gameHistory.map(game => game.generatedMultiplier)
     const targetMultipliers = gameHistory.map(game => game.targetMultiplier)
-    
+
     const highestGeneratedMultiplier = Math.max(...generatedMultipliers)
     const averageGenerated = generatedMultipliers.reduce((sum, m) => sum + m, 0) / generatedMultipliers.length
     const averageTarget = targetMultipliers.reduce((sum, m) => sum + m, 0) / targetMultipliers.length
@@ -150,9 +150,9 @@ export function LimboStats({
       counts[target] = (counts[target] || 0) + 1
       return counts
     }, {} as Record<number, number>)
-    
+
     const mostCommonTarget = parseFloat(Object.entries(targetCounts)
-      .sort(([,a], [,b]) => b - a)[0]?.[0] || '0')
+      .sort(([, a], [, b]) => b - a)[0]?.[0] || '0')
 
     // Success rates by target ranges
     const ranges = [
@@ -164,10 +164,10 @@ export function LimboStats({
     ]
 
     const successRatesByTarget = ranges.reduce((rates, range) => {
-      const gamesInRange = gameHistory.filter(game => 
+      const gamesInRange = gameHistory.filter(game =>
         game.targetMultiplier >= range.min && game.targetMultiplier <= range.max
       )
-      
+
       if (gamesInRange.length > 0) {
         const wins = gamesInRange.filter(game => game.isWin).length
         rates[range.label] = {
@@ -176,7 +176,7 @@ export function LimboStats({
           winRate: (wins / gamesInRange.length) * 100
         }
       }
-      
+
       return rates
     }, {} as Record<string, { attempts: number; wins: number; winRate: number }>)
 
@@ -273,9 +273,8 @@ export function LimboStats({
               <div className="text-sm text-default-500">Total Rounds</div>
             </div>
             <div className="text-center">
-              <div className={`text-2xl font-bold ${
-                statistics.winRate >= 50 ? 'text-success' : 'text-default-600'
-              }`}>
+              <div className={`text-2xl font-bold ${statistics.winRate >= 50 ? 'text-success' : 'text-default-600'
+                }`}>
                 {formatPercentage(statistics.winRate)}
               </div>
               <div className="text-sm text-default-500">Win Rate</div>
@@ -306,9 +305,8 @@ export function LimboStats({
           <Divider />
 
           <div className="text-center">
-            <div className={`text-xl font-bold ${
-              statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
-            }`}>
+            <div className={`text-xl font-bold ${statistics.netProfit >= 0 ? 'text-success' : 'text-danger'
+              }`}>
               {statistics.netProfit >= 0 ? '+' : ''}{formatCurrency(statistics.netProfit)}
             </div>
             <div className="text-sm text-default-500">Net Profit</div>
@@ -440,7 +438,7 @@ export function LimboStats({
               No games played yet
             </div>
           ) : (
-            <Table 
+            <Table
               aria-label="Recent game history"
               classNames={{
                 wrapper: "max-h-96 overflow-y-auto"
@@ -461,9 +459,8 @@ export function LimboStats({
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className={`font-medium ${
-                        game.isWin ? 'text-success' : 'text-default-600'
-                      }`}>
+                      <span className={`font-medium ${game.isWin ? 'text-success' : 'text-default-600'
+                        }`}>
                         {formatMultiplier(game.generatedMultiplier)}
                       </span>
                     </TableCell>
@@ -477,9 +474,8 @@ export function LimboStats({
                       </Chip>
                     </TableCell>
                     <TableCell>
-                      <span className={`font-medium ${
-                        game.profit >= 0 ? 'text-success' : 'text-danger'
-                      }`}>
+                      <span className={`font-medium ${game.profit >= 0 ? 'text-success' : 'text-danger'
+                        }`}>
                         {game.profit >= 0 ? '+' : ''}{formatCurrency(game.profit)}
                       </span>
                     </TableCell>

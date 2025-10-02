@@ -6,7 +6,7 @@
 'use client'
 
 import React from 'react'
-import type { BarsReel, BarsSymbol } from '@stake-games/shared'
+import type { BarsReel, BarsSymbol } from '@yois-games/shared'
 
 /**
  * Props for SlotMachine component
@@ -27,11 +27,11 @@ interface SymbolDisplayProps {
   animationDelay?: number
 }
 
-const SymbolDisplay: React.FC<SymbolDisplayProps> = ({ 
-  symbol, 
-  isWinning, 
-  isSpinning, 
-  animationDelay = 0 
+const SymbolDisplay: React.FC<SymbolDisplayProps> = ({
+  symbol,
+  isWinning,
+  isSpinning,
+  animationDelay = 0
 }) => {
   // Symbol to emoji mapping for visual representation
   const getSymbolEmoji = (sym: BarsSymbol): string => {
@@ -77,19 +77,19 @@ const SymbolDisplay: React.FC<SymbolDisplayProps> = ({
     select-none
   `
 
-  const stateClasses = isWinning 
-    ? 'bg-yellow-200 border-yellow-500 animate-pulse shadow-lg transform scale-105' 
+  const stateClasses = isWinning
+    ? 'bg-yellow-200 border-yellow-500 animate-pulse shadow-lg transform scale-105'
     : 'bg-white hover:bg-gray-50'
 
-  const spinClasses = isSpinning 
-    ? 'animate-spin blur-sm opacity-70' 
+  const spinClasses = isSpinning
+    ? 'animate-spin blur-sm opacity-70'
     : ''
 
   return (
-    <div 
+    <div
       className={`${baseClasses} ${stateClasses} ${spinClasses}`}
-      style={{ 
-        animationDelay: isSpinning ? `${animationDelay}ms` : '0ms' 
+      style={{
+        animationDelay: isSpinning ? `${animationDelay}ms` : '0ms'
       }}
       title={getSymbolName(symbol)}
       role="img"
@@ -103,15 +103,15 @@ const SymbolDisplay: React.FC<SymbolDisplayProps> = ({
 /**
  * Main SlotMachine component
  */
-export const SlotMachine: React.FC<SlotMachineProps> = ({ 
-  reels, 
-  isSpinning, 
-  turboMode 
+export const SlotMachine: React.FC<SlotMachineProps> = ({
+  reels,
+  isSpinning,
+  turboMode
 }) => {
   // Calculate animation delays for staggered reel stopping
   const getAnimationDelay = (reelIndex: number): number => {
     if (!isSpinning) return 0
-    
+
     const baseDelay = turboMode ? 100 : 200
     const col = reelIndex % 3
     return col * baseDelay
@@ -150,9 +150,9 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({
               >
                 {/* Spinning Overlay Effect */}
                 {isSpinning && (
-                  <div 
+                  <div
                     className="absolute inset-0 bg-gradient-to-b from-transparent via-white/20 to-transparent animate-pulse"
-                    style={{ 
+                    style={{
                       animationDelay: `${animationDelay}ms`,
                       animationDuration: turboMode ? '200ms' : '400ms'
                     }}
@@ -180,10 +180,9 @@ export const SlotMachine: React.FC<SlotMachineProps> = ({
 
         {/* Machine Status Indicator */}
         <div className="flex justify-center items-center mt-4 space-x-2">
-          <div 
-            className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-              isSpinning ? 'bg-red-500 animate-pulse' : 'bg-green-500'
-            }`}
+          <div
+            className={`w-3 h-3 rounded-full transition-colors duration-300 ${isSpinning ? 'bg-red-500 animate-pulse' : 'bg-green-500'
+              }`}
           />
           <span className="text-yellow-100 text-sm font-medium">
             {isSpinning ? (turboMode ? 'TURBO SPIN' : 'SPINNING') : 'READY'}

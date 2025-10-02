@@ -6,12 +6,12 @@
 'use client'
 
 import React, { useState, useCallback } from 'react'
-import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Button, 
-  Input, 
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Input,
   Switch,
   Select,
   SelectItem,
@@ -19,11 +19,11 @@ import {
   Chip,
   Progress
 } from '@heroui/react'
-import type { 
+import type {
   LimboAutoBettingConfig,
   AutoBettingBehavior,
-  GameStatus 
-} from '@stake-games/shared'
+  GameStatus
+} from '@yois-games/shared'
 
 /**
  * Props for LimboControls component
@@ -77,7 +77,7 @@ export function LimboControls({
    */
   const handleBetInputChange = useCallback((value: string) => {
     setBetInputValue(value)
-    
+
     const numValue = parseFloat(value)
     if (!isNaN(numValue) && numValue > 0) {
       onBetChange(Math.min(Math.max(numValue, minBet), maxBet))
@@ -185,8 +185,8 @@ export function LimboControls({
             isInvalid={!isBetValid}
             errorMessage={
               betAmount < minBet ? `Minimum bet is $${minBet}` :
-              betAmount > maxBet ? `Maximum bet is $${maxBet}` :
-              betAmount > balance ? 'Insufficient balance' : ''
+                betAmount > maxBet ? `Maximum bet is $${maxBet}` :
+                  betAmount > balance ? 'Insufficient balance' : ''
             }
             classNames={{
               input: "text-center font-semibold"
@@ -280,7 +280,7 @@ export function LimboControls({
                   {autoBetRemaining}
                 </Chip>
               </div>
-              
+
               <Progress
                 value={((autoBetSettings.numberOfBets - autoBetRemaining) / autoBetSettings.numberOfBets) * 100}
                 color="primary"
@@ -292,7 +292,7 @@ export function LimboControls({
                   maximumFractionDigits: 0
                 }}
               />
-              
+
               <Button
                 color="danger"
                 variant="bordered"
@@ -315,7 +315,7 @@ export function LimboControls({
                   <div className="font-semibold">{(autoBetSettings.speed / 1000).toFixed(1)}s</div>
                 </div>
               </div>
-              
+
               <Button
                 color="secondary"
                 onPress={onStartAutoBetting}
@@ -332,7 +332,7 @@ export function LimboControls({
           {showAutoBetConfig && (
             <div className="space-y-4 pt-4 border-t border-default-200">
               <div className="text-sm font-medium">Auto-Betting Settings</div>
-              
+
               {/* Number of Bets */}
               <Input
                 type="number"
@@ -408,7 +408,7 @@ export function LimboControls({
               {/* Stop Conditions */}
               <div className="space-y-2">
                 <div className="text-sm font-medium">Stop Conditions</div>
-                
+
                 <div className="flex items-center gap-2">
                   <Switch
                     size="sm"

@@ -6,20 +6,20 @@
 'use client'
 
 import React from 'react'
-import { 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Button, 
-  Slider, 
+import {
+  Card,
+  CardBody,
+  CardHeader,
+  Button,
+  Slider,
   Switch,
   Divider,
   Chip
 } from '@heroui/react'
-import type { 
-  SugarRushGameState, 
+import type {
+  SugarRushGameState,
   SugarRushConfig
-} from '@stake-games/shared'
+} from '@yois-games/shared'
 
 /**
  * Game status type for controls
@@ -64,7 +64,7 @@ export function SugarRushControls({
   onStartGame,
   onNewGame
 }: SugarRushControlsProps) {
-  
+
   const isGameActive = gameStatus !== 'idle' && gameStatus !== 'complete'
   const canPlaceBet = !isGameActive && balance >= betAmount && betAmount >= minBet && betAmount <= maxBet
 
@@ -106,7 +106,7 @@ export function SugarRushControls({
       <CardHeader>
         <h3 className="text-lg font-semibold">Game Controls</h3>
       </CardHeader>
-      
+
       <CardBody className="space-y-6">
         {/* Balance Display */}
         <div className="text-center">
@@ -122,7 +122,7 @@ export function SugarRushControls({
             <span className="text-sm font-medium">Bet Amount</span>
             <span className="text-lg font-bold">${betAmount.toFixed(2)}</span>
           </div>
-          
+
           <Slider
             size="sm"
             step={0.01}
@@ -188,7 +188,7 @@ export function SugarRushControls({
         {/* Game Configuration */}
         <div className="space-y-4">
           <h4 className="text-md font-medium">Game Settings</h4>
-          
+
           <div className="flex justify-between items-center">
             <span className="text-sm">Auto Spin</span>
             <Switch
@@ -246,15 +246,15 @@ export function SugarRushControls({
                   Play Again
                 </Button>
               )}
-              
+
               {isGameActive && (
                 <div className="text-center py-4">
                   <Chip
                     color={
                       gameStatus === 'spinning' ? 'primary' :
-                      gameStatus === 'evaluating' ? 'warning' :
-                      gameStatus === 'cascading' ? 'secondary' :
-                      'default'
+                        gameStatus === 'evaluating' ? 'warning' :
+                          gameStatus === 'cascading' ? 'secondary' :
+                            'default'
                     }
                     variant="flat"
                     size="lg"

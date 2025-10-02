@@ -7,14 +7,14 @@
 
 import React, { useState, useCallback, useEffect, useRef } from 'react'
 import { Card, CardBody, CardHeader, Button, Spinner } from '@heroui/react'
-import type { 
-  CrashGameState, 
-  CrashConfig, 
+import type {
+  CrashGameState,
+  CrashConfig,
   CrashResult,
   CrashAction,
   MultiplierPoint,
-  CrashPhase 
-} from '@stake-games/shared'
+  CrashPhase
+} from '@yois-games/shared'
 import { useWalletStore } from '../../../stores/wallet'
 import { useAuthStore } from '../../../stores/auth'
 import { CrashChart } from './CrashChart'
@@ -38,10 +38,10 @@ interface CrashGameProps {
 /**
  * Main Crash multiplier game component
  */
-export function CrashGame({ 
-  onGameResult, 
-  minBet = 0.01, 
-  maxBet = 1000 
+export function CrashGame({
+  onGameResult,
+  minBet = 0.01,
+  maxBet = 1000
 }: CrashGameProps) {
   // Wallet and auth integration
   const { bet, win, canAfford } = useWalletStore()
@@ -61,7 +61,7 @@ export function CrashGame({
   const [currentBet, setCurrentBet] = useState(1)
   const [gameHistory, setGameHistory] = useState<CrashResult[]>([])
   const [error, setError] = useState<string | null>(null)
-  
+
   // Real-time game state
   const [currentMultiplier, setCurrentMultiplier] = useState(1.00)
   const [multiplierCurve, setMultiplierCurve] = useState<MultiplierPoint[]>([])
@@ -70,7 +70,7 @@ export function CrashGame({
   const [countdown, setCountdown] = useState<number | null>(null)
   const [playerCashedOut, setPlayerCashedOut] = useState(false)
   const [cashOutMultiplier, setCashOutMultiplier] = useState<number | null>(null)
-  
+
   // Animation refs
   const animationRef = useRef<number | null>(null)
   const intervalRef = useRef<number | null>(null)
@@ -106,7 +106,7 @@ export function CrashGame({
       // Generate crash point using demo logic (in production, from server)
       const demoHash = Math.floor(Math.random() * Math.pow(2, 32))
       const demoCrashPoint = Math.max(1.00, Math.floor((Math.pow(2, 32) / (Math.pow(2, 32) - demoHash)) * (1 - gameConfig.houseEdge) * 100) / 100)
-      
+
       // Create initial game state
       const gameId = `crash_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
       const roundNumber = gameHistory.length + 1
@@ -169,7 +169,7 @@ export function CrashGame({
         clearInterval(countdownInterval)
         setCountdown(null)
         setGameStatus('betting-closed')
-        
+
         // Brief delay then start flying
         setTimeout(() => {
           startMultiplierGrowth()
@@ -189,14 +189,14 @@ export function CrashGame({
     setGameStatus('flying')
     const startTime = Date.now()
     setRoundStartTime(startTime)
-    
+
     const duration = calculateRoundDuration(crashPoint)
     const growthRate = Math.log(crashPoint) / duration
 
     const animate = () => {
       const now = Date.now()
       const elapsed = (now - startTime) / 1000
-      
+
       if (elapsed >= duration) {
         // Crash!
         setCurrentMultiplier(crashPoint)
@@ -208,19 +208,19 @@ export function CrashGame({
       // Calculate exponential multiplier growth
       const multiplier = Math.min(Math.exp(growthRate * elapsed), crashPoint)
       setCurrentMultiplier(Math.round(multiplier * 100) / 100)
-      
+
       // Update multiplier curve
       const point: MultiplierPoint = {
         time: Math.round(elapsed * 1000),
         multiplier: Math.round(multiplier * 100) / 100,
         elapsedSeconds: Math.round(elapsed * 10) / 10
       }
-      
+
       setMultiplierCurve((prev: MultiplierPoint[]) => [...prev, point])
 
       // Check auto-cashout
-      if (gameState?.autoCashoutEnabled && gameState.autoCashoutTarget && 
-          multiplier >= gameState.autoCashoutTarget && !playerCashedOut) {
+      if (gameState?.autoCashoutEnabled && gameState.autoCashoutTarget &&
+        multiplier >= gameState.autoCashoutTarget && !playerCashedOut) {
         handleCashOut()
         return
       }
@@ -238,7 +238,7 @@ export function CrashGame({
     const minDuration = 3 // 3 seconds minimum
     const maxDuration = 30 // 30 seconds maximum
     const scaleFactor = 8
-    
+
     const duration = minDuration + (Math.log(crashPoint) * scaleFactor)
     return Math.min(Math.max(duration, minDuration), maxDuration)
   }
@@ -252,21 +252,21 @@ export function CrashGame({
     try {
       const cashOutAt = currentMultiplier
       const payout = gameState.betAmount ? gameState.betAmount * cashOutAt : 0
-      
+
       setPlayerCashedOut(true)
       setCashOutMultiplier(cashOutAt)
-      
+
       // Handle winnings through wallet store
       if (payout > 0) {
         await win(payout, gameState.gameId)
       }
-      
+
       // Stop animation
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current)
         animationRef.current = null
       }
-      
+
       finishRound(true, cashOutAt)
 
     } catch (err) {
@@ -445,7 +445,7 @@ export function CrashGame({
                   gameStatus={gameStatus}
                 />
               </div>
-              
+
               {/* Action buttons */}
               <div className="flex justify-center gap-4 pt-4">
                 {!isGameActive ? (
@@ -457,8 +457,8 @@ export function CrashGame({
                     isDisabled={gameStatus === 'loading' || !isAuthenticated || (isAuthenticated && !canAfford(currentBet))}
                     isLoading={gameStatus === 'loading'}
                   >
-                    {!isAuthenticated 
-                      ? 'Login to Play' 
+                    {!isAuthenticated
+                      ? 'Login to Play'
                       : `Place Bet ($${currentBet.toFixed(2)})`
                     }
                   </Button>
@@ -470,9 +470,9 @@ export function CrashGame({
                     onPress={handleCashOut}
                     isDisabled={!canCashOut}
                   >
-                    {playerCashedOut 
+                    {playerCashedOut
                       ? `Cashed Out @ ${cashOutMultiplier?.toFixed(2)}x`
-                      : gameStatus === 'waiting' 
+                      : gameStatus === 'waiting'
                         ? 'Waiting for Round...'
                         : `Cash Out @ ${currentMultiplier.toFixed(2)}x`
                     }
