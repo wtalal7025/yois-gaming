@@ -212,7 +212,7 @@ const apiClient = AuthApiClient.getInstance()
 
 export const useAuthStore = create<AuthStore>()(
   persist(
-    (set, get) => ({
+    (set, get): AuthStore => ({
       // Initial state
       user: null,
       token: null,
@@ -346,11 +346,12 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       refreshAccessToken: async (): Promise<boolean> => {
-        const { refreshToken } = get()
-
-        if (!refreshToken) {
+        const state = get()
+        if (!state?.refreshToken) {
           return false
         }
+
+        const { refreshToken } = state
 
         try {
           const response = await apiClient.refreshToken()
@@ -408,7 +409,8 @@ export const useAuthStore = create<AuthStore>()(
             return true
           } else {
             // Session invalid, try to refresh token
-            return await get().refreshAccessToken()
+            const store = get()
+            return store ? await store.refreshAccessToken() : false
           }
         } catch (error) {
           console.error('Session validation error:', error)
@@ -427,11 +429,13 @@ export const useAuthStore = create<AuthStore>()(
 
         try {
           // Try to validate current session
-          const isValid = await get().validateSession()
+          const store = get()
+          const isValid = store ? await store.validateSession() : false
 
           if (!isValid) {
             // If validation fails, try refresh token
-            const refreshed = await get().refreshAccessToken()
+            const store = get()
+            const refreshed = store ? await store.refreshAccessToken() : false
 
             if (!refreshed) {
               // Both validation and refresh failed, clear auth state
@@ -476,7 +480,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       updateUser: (userData: Partial<User>) => {
-        const currentUser = get().user
+        const { user: currentUser } = get()
         if (currentUser) {
           set({
             user: { ...currentUser, ...userData }
@@ -485,7 +489,7 @@ export const useAuthStore = create<AuthStore>()(
       },
 
       updateBalance: (balance: number) => {
-        const currentUser = get().user
+        const { user: currentUser } = get()
         if (currentUser) {
           set({
             user: { ...currentUser, balance }
@@ -545,17 +549,28 @@ export const useAuthStore = create<AuthStore>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state: AuthStore) => ({
-        // Persist user, tokens, and session
-        user: state.user,
-        token: state.token,
-        refreshToken: state.refreshToken,
-        session: state.session,
-        isAuthenticated: state.isAuthenticated
-      }),
-      onRehydrateStorage: () => (state: AuthStore | null) => {
+      partialize: (state: AuthStore | null) => {
+        if (!state) {
+          return {
+            user: null,
+            token: null,
+            refreshToken: null,
+            session: null,
+            isAuthenticated: false
+          }
+        }
+        return {
+          // Persist user, tokens, and session
+          user: state.user,
+          token: state.token,
+          refreshToken: state.refreshToken,
+          session: state.session,
+          isAuthenticated: state.isAuthenticated
+        }
+      },
+      onRehydrateStorage: () => (state?: AuthStore | null, error?: unknown) => {
         // Set up API client reference after rehydration
-        if (state) {
+        if (state && !error) {
           apiClient.setStore(useAuthStore)
 
           // Check auth status on app load
@@ -612,7 +627,11 @@ export const useSessionManager = () => {
         const tokenParts = token.split('.')
         if (tokenParts.length !== 3) return
 
-        const payload = JSON.parse(atob(tokenParts[1]))
+        const encodedPayload = tokenParts[1]
+        if (!encodedPayload) {
+          return { exp: 0 }
+        }
+        const payload = JSON.parse(atob(encodedPayload))
         const expiryTime = payload.exp * 1000 // Convert to milliseconds
         const refreshTime = expiryTime - 5 * 60 * 1000 // Refresh 5 minutes before expiry
         const timeUntilRefresh = refreshTime - Date.now()
