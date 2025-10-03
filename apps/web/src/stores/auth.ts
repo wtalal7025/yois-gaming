@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { 
-  User, 
-  AuthState, 
-  LoginCredentials, 
+import type {
+  User,
+  AuthState,
+  LoginCredentials,
   RegisterData,
-  ApiResponse 
+  ApiResponse
 } from '../types'
 
 interface UserSession {
@@ -25,7 +25,7 @@ interface AuthStore extends AuthState {
   token: string | null
   refreshToken: string | null
   session: UserSession | null
-  
+
   // Actions
   login: (credentials: LoginCredentials) => Promise<void>
   register: (data: RegisterData) => Promise<void>
@@ -33,10 +33,12 @@ interface AuthStore extends AuthState {
   refreshAccessToken: () => Promise<boolean>
   validateSession: () => Promise<boolean>
   updateUser: (user: Partial<User>) => void
+  updateProfile: (data: any) => Promise<void>
+  changePassword: (data: { currentPassword: string; newPassword: string }) => Promise<void>
   updateBalance: (balance: number) => void
   clearError: () => void
   setLoading: (loading: boolean) => void
-  
+
   // Session management
   checkAuthStatus: () => Promise<void>
   getCurrentSession: () => Promise<UserSession | null>
@@ -73,14 +75,14 @@ class AuthApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${getApiBaseUrl()}${endpoint}`
-    
+
     // Add auth header if we have a token
     const token = this.store?.getState()?.token
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...options.headers as Record<string, string>
     }
-    
+
     if (token) {
       headers.Authorization = `Bearer ${token}`
     }
@@ -116,7 +118,7 @@ class AuthApiClient {
         console.error('❌ Failed to parse response JSON:', parseError)
         const textResponse = await response.text()
         console.log('📄 Raw response text:', textResponse)
-        
+
         return {
           success: false,
           error: `Invalid JSON response from server. Status: ${response.status}`,
@@ -223,13 +225,13 @@ export const useAuthStore = create<AuthStore>()(
       // Actions
       login: async (credentials: LoginCredentials) => {
         set({ isLoading: true, error: null })
-        
+
         try {
           const response = await apiClient.login(credentials)
-          
+
           if (response.success && response.data) {
             const { user, token, refreshToken, session } = response.data
-            
+
             set({
               user,
               token,
@@ -256,7 +258,7 @@ export const useAuthStore = create<AuthStore>()(
 
       register: async (data: RegisterData) => {
         set({ isLoading: true, error: null })
-        
+
         try {
           // Client-side validation
           if (data.password !== data.confirmPassword) {
@@ -292,10 +294,10 @@ export const useAuthStore = create<AuthStore>()(
           }
 
           const response = await apiClient.register(data)
-          
+
           if (response.success && response.data) {
             const { user, token, refreshToken, session } = response.data
-            
+
             set({
               user,
               token,
@@ -322,7 +324,7 @@ export const useAuthStore = create<AuthStore>()(
 
       logout: async () => {
         set({ isLoading: true })
-        
+
         try {
           // Call logout API to invalidate server-side session
           await apiClient.logout()
@@ -330,7 +332,7 @@ export const useAuthStore = create<AuthStore>()(
           console.error('Logout API error:', error)
           // Continue with client-side logout even if API call fails
         }
-        
+
         // Clear all authentication state
         set({
           user: null,
@@ -345,24 +347,24 @@ export const useAuthStore = create<AuthStore>()(
 
       refreshAccessToken: async (): Promise<boolean> => {
         const { refreshToken } = get()
-        
+
         if (!refreshToken) {
           return false
         }
 
         try {
           const response = await apiClient.refreshToken()
-          
+
           if (response.success && response.data) {
             const { token, refreshToken: newRefreshToken, user } = response.data
-            
+
             set({
               token,
               refreshToken: newRefreshToken,
               user,
               isAuthenticated: true
             })
-            
+
             return true
           } else {
             // Refresh failed, clear auth state
@@ -391,14 +393,14 @@ export const useAuthStore = create<AuthStore>()(
 
       validateSession: async (): Promise<boolean> => {
         const { token } = get()
-        
+
         if (!token) {
           return false
         }
 
         try {
           const response = await apiClient.validateSession()
-          
+
           if (response.success && response.data?.valid) {
             if (response.data.session) {
               set({ session: response.data.session })
@@ -416,21 +418,21 @@ export const useAuthStore = create<AuthStore>()(
 
       checkAuthStatus: async () => {
         const { token, refreshToken } = get()
-        
+
         if (!token && !refreshToken) {
           return
         }
 
         set({ isLoading: true })
-        
+
         try {
           // Try to validate current session
           const isValid = await get().validateSession()
-          
+
           if (!isValid) {
             // If validation fails, try refresh token
             const refreshed = await get().refreshAccessToken()
-            
+
             if (!refreshed) {
               // Both validation and refresh failed, clear auth state
               set({
@@ -459,17 +461,17 @@ export const useAuthStore = create<AuthStore>()(
       getCurrentSession: async (): Promise<UserSession | null> => {
         try {
           const response = await apiClient.getCurrentUser()
-          
+
           if (response.success && response.data) {
             const { user, session } = response.data
-            
+
             set({ user, session })
             return session
           }
         } catch (error) {
           console.error('Get current session error:', error)
         }
-        
+
         return null
       },
 
@@ -488,6 +490,48 @@ export const useAuthStore = create<AuthStore>()(
           set({
             user: { ...currentUser, balance }
           })
+        }
+      },
+
+      updateProfile: async (data: any) => {
+        set({ isLoading: true, error: null })
+
+        try {
+          // Reason: Placeholder implementation for profile updates
+          // TODO: Implement actual API call when backend endpoint is ready
+          const state = get()
+          const currentUser = state?.user
+          if (currentUser) {
+            set({
+              user: { ...currentUser, ...data },
+              isLoading: false
+            })
+          } else {
+            set({ isLoading: false })
+          }
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Profile update failed',
+            isLoading: false
+          })
+          throw error
+        }
+      },
+
+      changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+        set({ isLoading: true, error: null })
+
+        try {
+          // Reason: Placeholder implementation for password changes
+          // TODO: Implement actual API call when backend endpoint is ready
+          console.log('Password change requested:', { currentPassword: '***', newPassword: '***' })
+          set({ isLoading: false })
+        } catch (error) {
+          set({
+            error: error instanceof Error ? error.message : 'Password change failed',
+            isLoading: false
+          })
+          throw error
         }
       },
 
@@ -513,7 +557,7 @@ export const useAuthStore = create<AuthStore>()(
         // Set up API client reference after rehydration
         if (state) {
           apiClient.setStore(useAuthStore)
-          
+
           // Check auth status on app load
           state.checkAuthStatus()
         }
@@ -552,7 +596,7 @@ export const useAuthActions = () => {
 // Session management hook
 export const useSessionManager = () => {
   const { checkAuthStatus, validateSession, getCurrentSession } = useAuthStore()
-  
+
   return {
     checkAuthStatus,
     validateSession,
@@ -560,19 +604,19 @@ export const useSessionManager = () => {
     // Auto-refresh token before expiry
     setupTokenRefresh: () => {
       const { token, refreshAccessToken } = useAuthStore.getState()
-      
+
       if (!token) return
-      
+
       try {
         // Parse JWT to get expiry time
         const tokenParts = token.split('.')
         if (tokenParts.length !== 3) return
-        
+
         const payload = JSON.parse(atob(tokenParts[1]))
         const expiryTime = payload.exp * 1000 // Convert to milliseconds
         const refreshTime = expiryTime - 5 * 60 * 1000 // Refresh 5 minutes before expiry
         const timeUntilRefresh = refreshTime - Date.now()
-        
+
         if (timeUntilRefresh > 0) {
           setTimeout(() => {
             refreshAccessToken()
