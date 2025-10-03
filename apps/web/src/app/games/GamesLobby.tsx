@@ -54,6 +54,8 @@ export function GamesLobby() {
       const timer = setTimeout(() => setIsLoading(false), 300)
       return () => clearTimeout(timer)
     }
+    // Reason: TypeScript requires all code paths to return a value in useEffect
+    return () => { } // No-op cleanup function when searching is active
   }, [activeCategory, isSearching])
 
   // Handle category change
@@ -90,7 +92,7 @@ export function GamesLobby() {
         >
           {/* Header Section */}
           <div className="text-center space-y-4">
-            <motion.h1 
+            <motion.h1
               className="text-4xl md:text-5xl font-bold text-foreground font-orbitron bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -98,19 +100,19 @@ export function GamesLobby() {
             >
               Game Library
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               className="text-lg text-foreground-600 max-w-2xl mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
             >
-              Experience thrilling games with provably fair outcomes. 
+              Experience thrilling games with provably fair outcomes.
               Choose from skill-based challenges, classic slots, and innovative crash games.
             </motion.p>
 
             {/* Platform Stats */}
-            <motion.div 
+            <motion.div
               className="flex flex-wrap justify-center gap-6 text-sm"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -122,14 +124,14 @@ export function GamesLobby() {
                   <strong>{getTotalPlayerCount()}</strong> players online
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2 bg-secondary/10 rounded-full px-4 py-2">
                 <span className="text-xl">🏆</span>
                 <span className="text-foreground-700">
                   Biggest win: <strong>${getHighestRecentWin().toLocaleString()}</strong>
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-2 bg-success/10 rounded-full px-4 py-2">
                 <span className="text-xl">✨</span>
                 <span className="text-foreground-700">
