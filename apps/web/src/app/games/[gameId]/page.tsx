@@ -10,9 +10,9 @@ import { getGameInfo } from '../../../lib/gameRegistry'
 import type { GameType } from '@yois-games/shared'
 
 interface GamePageProps {
-  params: {
+  params: Promise<{
     gameId: string
-  }
+  }>
 }
 
 /**
@@ -32,7 +32,8 @@ export async function generateStaticParams() {
  * Reason: SEO optimization with game-specific titles and descriptions
  */
 export async function generateMetadata({ params }: GamePageProps): Promise<Metadata> {
-  const gameInfo = getGameInfo(params.gameId as GameType)
+  const resolvedParams = await params
+  const gameInfo = getGameInfo(resolvedParams.gameId as GameType)
 
   if (!gameInfo) {
     return {
@@ -78,13 +79,14 @@ export async function generateMetadata({ params }: GamePageProps): Promise<Metad
  * Dynamic game page component
  * Reason: Server component that validates game ID and handles metadata
  */
-export default function GamePage({ params }: GamePageProps) {
-  const gameInfo = getGameInfo(params.gameId as GameType)
+export default async function GamePage({ params }: GamePageProps) {
+  const resolvedParams = await params
+  const gameInfo = getGameInfo(resolvedParams.gameId as GameType)
 
   // Return 404 if game doesn't exist
   if (!gameInfo) {
     notFound()
   }
 
-  return <GamePageWrapper gameId={params.gameId as GameType} />
+  return <GamePageWrapper gameId={resolvedParams.gameId as GameType} />
 }
