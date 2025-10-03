@@ -3,7 +3,10 @@
  * Central configuration and metadata for all games in the platform
  */
 
-import type { GameType } from '@yois-games/shared'
+/**
+ * Game type definitions - locally defined to avoid import dependencies
+ */
+export type GameType = 'mines' | 'sugar-rush' | 'bars' | 'dragon-tower' | 'crash' | 'limbo'
 
 /**
  * Game category definitions
@@ -228,4 +231,16 @@ export function getTotalPlayerCount(): number {
  */
 export function getHighestRecentWin(): number {
   return Math.max(...Object.values(GAMES_INFO).map(game => game.lastBigWin || 0))
+}
+
+/**
+ * Game registry for sitemap and external usage
+ * Provides a Map-like interface for accessing games
+ */
+export const gameRegistry = {
+  values: () => Object.values(GAMES_INFO),
+  get: (gameId: GameType) => GAMES_INFO[gameId],
+  has: (gameId: GameType) => gameId in GAMES_INFO,
+  keys: () => Object.keys(GAMES_INFO) as GameType[],
+  entries: () => Object.entries(GAMES_INFO) as [GameType, GameInfo][]
 }

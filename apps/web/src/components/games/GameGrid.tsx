@@ -70,7 +70,7 @@ function EmptyState() {
         No games found
       </h3>
       <p className="text-foreground-600 max-w-sm">
-        Try adjusting your search or filter criteria to find the games you're looking for.
+        Try adjusting your search or filter criteria to find the games you&apos;re looking for.
       </p>
     </div>
   )
@@ -94,13 +94,13 @@ export function GameGrid({ games, className = '', isLoading = false }: GameGridP
   }
 
   const cardVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 20,
       scale: 0.95
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -141,8 +141,8 @@ export function GameGrid({ games, className = '', isLoading = false }: GameGridP
           variants={cardVariants}
           className="h-full"
         >
-          <GameCard 
-            game={game} 
+          <GameCard
+            game={game}
             priority={index < 4} // Prioritize first 4 images for loading
           />
         </motion.div>

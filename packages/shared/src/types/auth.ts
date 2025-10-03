@@ -17,6 +17,7 @@ export interface User {
   gamesPlayed: number
   isActive: boolean
   isVerified: boolean
+  roles: string[]
   lastLoginAt?: string
   createdAt: string
   updatedAt: string
@@ -170,6 +171,7 @@ export interface JWTPayload {
 export interface AuthState {
   user: User | null
   isAuthenticated: boolean
+  isInitialized: boolean
   isLoading: boolean
   error: string | null
   lastActivity?: string

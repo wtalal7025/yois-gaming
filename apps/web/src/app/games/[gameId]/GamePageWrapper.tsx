@@ -106,7 +106,7 @@ export function GamePageWrapper({ gameId }: GamePageWrapperProps) {
             <div>
               <h3 className="text-lg font-semibold text-foreground mb-2">Game Not Available</h3>
               <p className="text-sm text-foreground-600">
-                The game "{gameId}" is not available at the moment.
+                The game {'"'}{gameId}{'"'} is not available at the moment.
               </p>
             </div>
           </div>

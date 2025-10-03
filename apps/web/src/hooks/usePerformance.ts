@@ -36,18 +36,18 @@ export function usePerformance() {
     // Measure initial load time
     const measureLoadTime = () => {
       const loadTime = performance.now() - startTime.current
-      
+
       // Get memory usage if available
-      const memoryUsage = 'memory' in performance 
-        ? (performance as any).memory?.usedJSHeapSize || null 
+      const memoryUsage = 'memory' in performance
+        ? (performance as any).memory?.usedJSHeapSize || null
         : null
 
       // Get connection info
       const connection = (navigator as any).connection
       const connectionType = connection?.effectiveType || 'unknown'
-      const isSlowConnection = connection?.effectiveType === 'slow-2g' || 
-                              connection?.effectiveType === '2g' ||
-                              connection?.saveData === true
+      const isSlowConnection = connection?.effectiveType === 'slow-2g' ||
+        connection?.effectiveType === '2g' ||
+        connection?.saveData === true
 
       setMetrics(prev => ({
         ...prev,
@@ -65,7 +65,7 @@ export function usePerformance() {
       window.addEventListener('load', measureLoadTime)
       return () => window.removeEventListener('load', measureLoadTime)
     }
-  }, [])
+  }, []) // Reason: This effect should only run once on mount, dependencies are captured in closure
 
   // Measure interaction delay (First Input Delay approximation)
   useEffect(() => {
@@ -93,7 +93,7 @@ export function usePerformance() {
       document.removeEventListener('keydown', handleInteractionStart)
       document.removeEventListener('keyup', handleInteractionEnd)
     }
-  }, [])
+  }, []) // Reason: This effect should only run once on mount to set up event listeners
 
   return metrics
 }
@@ -181,7 +181,7 @@ export function useLazyLoad<T extends HTMLElement>(
     observer.observe(element)
 
     return () => observer.disconnect()
-  }, [hasLoaded, options])
+  }, [hasLoaded]) // Reason: Options object would cause infinite re-renders; it's passed as prop and should be stable
 
   return {
     elementRef,
@@ -240,7 +240,7 @@ export function useBundlePerformance() {
     // Monitor performance navigation entries
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries()
-      
+
       entries.forEach((entry) => {
         if (entry.name.includes('chunk') || entry.name.includes('.js')) {
           setBundleMetrics(prev => ({
@@ -275,7 +275,7 @@ export function useAdaptiveLoading() {
     // Get device memory if available
     const memory = (navigator as any).deviceMemory || 4
     const cores = navigator.hardwareConcurrency || 4
-    
+
     // Get connection speed
     const connection = (navigator as any).connection
     const connectionSpeed = connection?.effectiveType === '4g' ? 'fast' : 'slow'

@@ -149,7 +149,7 @@ export function MinesBoard({ gameState, onTileReveal, disabled = false }: MinesB
 
       {/* Instructions */}
       <div className="text-xs text-gray-500 text-center max-w-md">
-        <p>Left click to reveal tiles. Avoid the mines and cash out before it's too late!</p>
+        <p>Left click to reveal tiles. Avoid the mines and cash out before it&apos;s too late!</p>
       </div>
     </div>
   )

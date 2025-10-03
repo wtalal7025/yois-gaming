@@ -24,8 +24,8 @@ interface AuthGuardProps {
  * - Supports role-based access control
  * - Customizable fallback component
  */
-export function AuthGuard({ 
-  children, 
+export function AuthGuard({
+  children,
   fallback,
   requireAuth = true,
   redirectTo = '/games',
@@ -112,12 +112,12 @@ export function AuthGuard({
           >
             <div className="w-16 h-16 bg-danger/20 rounded-xl flex items-center justify-center mb-4 mx-auto">
               <svg className="w-8 h-8 text-danger" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
             </div>
             <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
             <p className="text-muted-foreground mb-4">
-              You don't have permission to access this page. Required roles: {roles.join(', ')}
+              You don&apos;t have permission to access this page. Required roles: {roles.join(', ')}
             </p>
             <button
               onClick={() => router.back()}

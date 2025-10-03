@@ -177,7 +177,7 @@ export function BarsGame({
         seed: `demo-seed-${Date.now()}`,
         nonce: Math.floor(Math.random() * 1000000),
         isAutoSpin,
-        autoSpinRemaining: isAutoSpin ? autoSpinCount - 1 : undefined
+        autoSpinRemaining: isAutoSpin ? autoSpinCount - 1 : 0
       }
 
       setGameState(newGameState)
@@ -290,7 +290,7 @@ export function BarsGame({
       setGameStatus('idle')
       setIsAutoSpin(false)
     }
-  }, [totalBet, minBet, maxBet, gameConfig, isAutoSpin, autoSpinCount, onGameResult, isAuthenticated, user?.id, canAfford, bet, win])
+  }, [totalBet, minBet, maxBet, gameConfig, isAutoSpin, autoSpinCount, onGameResult, isAuthenticated, user?.id, canAfford, bet, win]) // Reason: All dependencies included for handleSpin callback
 
   /**
    * Simple win detection logic
@@ -443,7 +443,7 @@ export function BarsGame({
                 <SlotMachine
                   reels={gameState?.reels || initializeReels()}
                   isSpinning={isSpinning}
-                  turboMode={gameConfig.turboMode}
+                  turboMode={gameConfig.turboMode ?? false}
                 />
 
                 {/* Spin Button */}

@@ -9,16 +9,16 @@ import { generateSitemapEntries, generateSitemapXML } from '../../utils/seo'
 export async function GET(request: NextRequest) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://cheats.gaming'
-    
+
     // Get all games from registry
     const games = Array.from(gameRegistry.values())
-    
+
     // Generate sitemap entries
     const entries = generateSitemapEntries(games, baseUrl)
-    
+
     // Generate XML content
     const xmlContent = generateSitemapXML(entries)
-    
+
     return new NextResponse(xmlContent, {
       headers: {
         'Content-Type': 'application/xml',

@@ -368,14 +368,14 @@ export function CrashChart({
         animationRef.current = null
       }
     }
-  }, [gameStatus, multiplierCurve, currentMultiplier, crashPoint, playerCashedOut, cashOutMultiplier])
+  }, [gameStatus, multiplierCurve, currentMultiplier, crashPoint, playerCashedOut, cashOutMultiplier, animate, render]) // Reason: Include render and animate functions in dependencies
 
   // Handle canvas resize
   useEffect(() => {
     const handleResize = () => render()
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [render]) // Reason: Include render function in dependencies for resize handler
 
   return (
     <div className="relative w-full h-full bg-slate-900/50 rounded-lg overflow-hidden border border-slate-700">

@@ -177,8 +177,8 @@ export function CrashGame({
       }
     }, 1000)
 
-    intervalRef.current = countdownInterval
-  }, [gameConfig.bettingWindow])
+    intervalRef.current = countdownInterval as unknown as number
+  }, [gameConfig.bettingWindow]) // Reason: Only include primitive dependencies to avoid circular dependencies
 
   /**
    * Start multiplier growth animation
@@ -229,7 +229,7 @@ export function CrashGame({
     }
 
     animate()
-  }, [crashPoint, gameState, playerCashedOut])
+  }, [crashPoint, gameState, playerCashedOut]) // Reason: Only include state dependencies to avoid circular dependencies; functions are stable
 
   /**
    * Calculate round duration based on crash point
@@ -272,7 +272,7 @@ export function CrashGame({
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to cash out')
     }
-  }, [gameState, gameStatus, currentMultiplier, playerCashedOut, win])
+  }, [gameState, gameStatus, currentMultiplier, playerCashedOut, win]) // Reason: Only include essential dependencies; other functions are stable
 
   /**
    * Finish the current round
@@ -339,7 +339,7 @@ export function CrashGame({
       setGameStatus('idle')
     }, 3000)
 
-  }, [gameState, crashPoint, gameConfig, multiplierCurve, onGameResult])
+  }, [gameState, crashPoint, gameConfig, multiplierCurve, onGameResult]) // Reason: Only include essential state dependencies
 
   /**
    * Start new game

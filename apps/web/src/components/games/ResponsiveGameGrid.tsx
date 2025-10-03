@@ -81,15 +81,15 @@ function ResponsiveEmptyState({ isMobile }: { isMobile: boolean }) {
         No games found
       </h3>
       <p className={`text-foreground-600 ${isMobile ? 'text-sm' : 'text-base'} max-w-sm`}>
-        Try adjusting your search or filter criteria to find the games you're looking for.
+        Try adjusting your search or filter criteria to find the games you&apos;re looking for.
       </p>
     </div>
   )
 }
 
-export function ResponsiveGameGrid({ 
-  games, 
-  className = '', 
+export function ResponsiveGameGrid({
+  games,
+  className = '',
   isLoading = false,
   variant = 'full'
 }: ResponsiveGameGridProps) {
@@ -98,11 +98,11 @@ export function ResponsiveGameGrid({
   // Get responsive grid classes
   const getGridClasses = () => {
     if (variant === 'compact') {
-      return isMobile 
+      return isMobile
         ? 'grid grid-cols-1 gap-3'
         : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
     }
-    
+
     return isMobile
       ? 'grid grid-cols-1 gap-4'
       : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
@@ -121,13 +121,13 @@ export function ResponsiveGameGrid({
   }
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: isMobile ? 10 : 20,
       scale: isMobile ? 1 : 0.95
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -170,13 +170,13 @@ export function ResponsiveGameGrid({
           className="h-full"
         >
           {isMobile ? (
-            <MobileGameCard 
-              game={game} 
+            <MobileGameCard
+              game={game}
               variant={variant === 'compact' ? 'compact' : 'full'}
             />
           ) : (
-            <GameCard 
-              game={game} 
+            <GameCard
+              game={game}
               priority={index < 4} // Prioritize first 4 images for loading
             />
           )}
@@ -189,13 +189,13 @@ export function ResponsiveGameGrid({
 /**
  * Compact responsive grid for smaller sections
  */
-export function CompactResponsiveGameGrid({ 
-  games, 
-  className = '', 
-  isLoading = false 
+export function CompactResponsiveGameGrid({
+  games,
+  className = '',
+  isLoading = false
 }: Omit<ResponsiveGameGridProps, 'variant'>) {
   return (
-    <ResponsiveGameGrid 
+    <ResponsiveGameGrid
       games={games}
       className={className}
       isLoading={isLoading}
