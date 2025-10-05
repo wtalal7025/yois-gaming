@@ -10,6 +10,7 @@ export interface User {
   firstName?: string
   lastName?: string
   passwordHash?: string // Only populated on backend for authentication
+  avatar?: string // Alias for avatarUrl for component compatibility
   avatarUrl?: string
   balance: number
   level: number
