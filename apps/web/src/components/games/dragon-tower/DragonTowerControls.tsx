@@ -170,7 +170,8 @@ export function DragonTowerControls({
     return Math.min(maxBet, balance)
   }, [maxBet, balance])
 
-  const isGameActive = gameStatus === 'playing' && gameState
+  // Reason: Convert to strict boolean type for TypeScript strict mode compatibility - HeroUI components expect boolean, not false | DragonTowerGameState | null
+  const isGameActive = !!(gameStatus === 'playing' && gameState)
   const canCashOut = isGameActive && gameState?.canCashOut
   const isLoading = gameStatus === 'loading'
 
@@ -194,7 +195,7 @@ export function DragonTowerControls({
               isDisabled={isGameActive}
             >
               {Object.entries(DIFFICULTY_INFO).map(([key, info]) => (
-                <SelectItem key={key} value={key}>
+                <SelectItem key={key}>
                   <div className="flex justify-between items-center w-full">
                     <div>
                       <div className="font-medium capitalize">{key}</div>
