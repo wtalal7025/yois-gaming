@@ -117,13 +117,15 @@ const PaylinePath: React.FC<PaylinePathProps> = ({ payline, isWinning }) => {
       return [col * 100 + 50, row * 100 + 50] // Center of each cell
     }
 
-    const [start, middle, end] = positions.map(getCoords)
+    // Reason: Type assertion needed for TypeScript strict mode - we know positions is [number, number, number] so map result has exactly 3 elements
+    const [start, middle, end] = positions.map(getCoords) as [[number, number], [number, number], [number, number]]
 
     return `M ${start[0]} ${start[1]} L ${middle[0]} ${middle[1]} L ${end[0]} ${end[1]}`
   }
 
   const color = getPaylineColor(payline.id)
-  const pathString = getPathString(payline.positions)
+  // Reason: Type assertion needed - BarsPayline.positions is number[] but getPathString expects [number, number, number] tuple
+  const pathString = getPathString(payline.positions as [number, number, number])
   const strokeWidth = isWinning ? 6 : 3
   const opacity = payline.isActive ? (isWinning ? 1 : 0.7) : 0.3
 
