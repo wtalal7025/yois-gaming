@@ -1,16 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardBody, CardHeader } from '@heroui/card'
-import { Button } from '@heroui/button'
-import { Progress } from '@heroui/progress'
-import { Chip } from '@heroui/chip'
-import { 
-  usePerformance, 
-  useBundlePerformance, 
-  useAdaptiveLoading 
+import { Card, CardBody, CardHeader, Button, Progress, Chip } from '@heroui/react'
+import {
+  usePerformance,
+  useBundlePerformance,
+  useAdaptiveLoading
 } from '../../hooks/usePerformance'
-import { GamePreloader, BundleAnalyzer } from '../../utils/codeSplitting'
+import { GamePreloader } from '../../utils/codeSplitting'
 import { memoryUtils, getNetworkInfo } from '../../utils/lazyLoading'
 
 /**
@@ -19,8 +16,8 @@ import { memoryUtils, getNetworkInfo } from '../../utils/lazyLoading'
  */
 export function PerformanceDashboard() {
   const [isVisible, setIsVisible] = useState(false)
-  const [preloadStatus, setPreloadStatus] = useState({ preloaded: [], loading: [] })
-  
+  const [preloadStatus, setPreloadStatus] = useState({ preloaded: [] as string[], loading: [] as string[] })
+
   const performance = usePerformance()
   const bundleMetrics = useBundlePerformance()
   const { shouldLoadHighQuality, deviceCapabilities, isLowEndDevice } = useAdaptiveLoading()
@@ -33,7 +30,12 @@ export function PerformanceDashboard() {
   // Update preload status periodically
   useEffect(() => {
     const updatePreloadStatus = () => {
-      setPreloadStatus(GamePreloader.getPreloadStatus())
+      const stats = GamePreloader.getStats()
+      // Reason: Transform GamePreloader stats to match expected preloadStatus structure
+      setPreloadStatus({
+        preloaded: [...stats.preloadedGames, ...stats.preloadedRoutes],
+        loading: [] // No direct way to track currently loading items from GamePreloader
+      })
     }
 
     updatePreloadStatus()
@@ -56,8 +58,8 @@ export function PerformanceDashboard() {
     <div className="fixed top-4 left-4 w-80 max-h-96 overflow-y-auto z-50 bg-black/90 rounded-lg p-2 text-white text-xs">
       <div className="flex justify-between items-center mb-3">
         <h3 className="font-semibold">Performance Dashboard</h3>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="light"
           onPress={() => setIsVisible(false)}
         >
@@ -74,7 +76,7 @@ export function PerformanceDashboard() {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Load Time:</span>
-              <Chip 
+              <Chip
                 size="sm"
                 color={getPerformanceColor(performance.loadTime, [1000, 3000])}
               >
@@ -83,7 +85,7 @@ export function PerformanceDashboard() {
             </div>
             <div className="flex justify-between">
               <span>Interaction:</span>
-              <Chip 
+              <Chip
                 size="sm"
                 color={getPerformanceColor(performance.interactionTime, [100, 300])}
               >
@@ -227,22 +229,26 @@ export function PerformanceDashboard() {
 
       {/* Actions */}
       <div className="flex gap-2">
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="flat"
-          onPress={() => BundleAnalyzer.analyzeBundles()}
+          onPress={() => console.log('Bundle analysis would go here')}
         >
           Analyze
         </Button>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="flat"
-          onPress={() => GamePreloader.preloadPopularGames()}
+          onPress={() => GamePreloader.preloadGamesPriority([
+            { id: 'mines', priority: 3 },
+            { id: 'crash', priority: 3 },
+            { id: 'limbo', priority: 2 }
+          ])}
         >
           Preload
         </Button>
-        <Button 
-          size="sm" 
+        <Button
+          size="sm"
           variant="flat"
           onPress={() => memoryUtils.forceGC()}
         >
