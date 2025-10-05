@@ -56,8 +56,8 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
 
   // Handle bet per line change
   const handleBetPerLineChange = (value: number | number[]) => {
-    const newBetPerLine = Array.isArray(value) ? (value[0] ?? config.betPerLine) : value
-    // Reason: TypeScript strict mode requires defined values - fallback to current betPerLine if array value is undefined
+    const newBetPerLine = Array.isArray(value) ? (value[0] ?? config.betPerLine ?? 1) : value
+    // Reason: TypeScript strict mode requires defined values - fallback to current betPerLine or default 1 if array value is undefined
     onConfigChange({ betPerLine: newBetPerLine })
   }
 
