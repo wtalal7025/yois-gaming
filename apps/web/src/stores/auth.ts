@@ -617,7 +617,7 @@ export const useSessionManager = () => {
     validateSession,
     getCurrentSession,
     // Auto-refresh token before expiry
-    setupTokenRefresh: () => {
+    setupTokenRefresh: (): void => {
       const { token, refreshAccessToken } = useAuthStore.getState()
 
       if (!token) return
@@ -629,7 +629,7 @@ export const useSessionManager = () => {
 
         const encodedPayload = tokenParts[1]
         if (!encodedPayload) {
-          return { exp: 0 }
+          return // Reason: Invalid token format, exit early
         }
         const payload = JSON.parse(atob(encodedPayload))
         const expiryTime = payload.exp * 1000 // Convert to milliseconds
