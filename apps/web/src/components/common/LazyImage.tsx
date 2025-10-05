@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
-import { Skeleton } from '@heroui/skeleton'
+import { Skeleton } from '@heroui/react'
 import { createIntersectionObserver, shouldLoadHighQuality } from '../../utils/lazyLoading'
 
 interface LazyImageProps {
@@ -84,7 +84,7 @@ export function LazyImage({
   }
 
   return (
-    <div 
+    <div
       ref={imgRef}
       className={`relative overflow-hidden ${className}`}
       style={{ width, height }}
@@ -92,7 +92,7 @@ export function LazyImage({
       {!isLoaded && !hasError && (
         <Skeleton className="absolute inset-0 rounded-lg" />
       )}
-      
+
       {isInView && !hasError && (
         <Image
           src={src}
@@ -103,15 +103,14 @@ export function LazyImage({
           sizes={sizes}
           priority={priority}
           placeholder={blurDataURL ? 'blur' : 'empty'}
-          blurDataURL={blurDataURL}
+          {...(blurDataURL && { blurDataURL })}
           onLoad={handleLoad}
           onError={handleError}
-          className={`transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          } ${className}`}
+          className={`transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'
+            } ${className}`}
         />
       )}
-      
+
       {hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-default-100 rounded-lg">
           <div className="text-center text-default-500">
@@ -135,21 +134,21 @@ interface GameThumbnailProps {
   priority?: boolean
 }
 
-export function GameThumbnail({ 
-  gameId, 
-  title, 
-  className = '', 
+export function GameThumbnail({
+  gameId,
+  title,
+  className = '',
   size = 'md',
-  priority = false 
+  priority = false
 }: GameThumbnailProps) {
   const dimensions = {
     sm: { width: 120, height: 80 },
     md: { width: 240, height: 160 },
     lg: { width: 360, height: 240 }
   }
-  
+
   const { width, height } = dimensions[size]
-  
+
   // Generate responsive sizes attribute
   const sizes = {
     sm: '(max-width: 768px) 120px, 120px',
