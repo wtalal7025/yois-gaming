@@ -1,10 +1,7 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
-import { Skeleton } from '@heroui/skeleton'
-import { Card, CardBody } from '@heroui/card'
-import { Button } from '@heroui/button'
-import { AlertCircle, Wifi, WifiOff } from 'lucide-react'
+import React, { Suspense, useState, useEffect } from 'react'
+import { Skeleton, Card, CardBody, Button } from '@heroui/react'
 import { GamePreloader, DynamicImports } from '../../utils/codeSplitting'
 import { useAdaptiveLoading, useComponentPerformance, useLazyLoad } from '../../hooks/usePerformance'
 import { LazyImage, GameThumbnail } from '../common/LazyImage'
@@ -31,7 +28,7 @@ export function OptimizedGameLoader({
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle')
   const [GameComponent, setGameComponent] = useState<any>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
-  
+
   const { shouldLoadHighQuality, isLowEndDevice } = useAdaptiveLoading()
   const { metrics, logPerformance } = useComponentPerformance(`GameLoader-${game.id}`)
   const { elementRef, isInView } = useLazyLoad<HTMLDivElement>()
@@ -52,22 +49,22 @@ export function OptimizedGameLoader({
 
   const loadGameComponent = async () => {
     setLoadState('loading')
-    
+
     try {
       const startTime = performance.now()
-      
+
       // Load game component dynamically
       const Component = await DynamicImports.gameComponent(game.id)
       const loadTime = performance.now() - startTime
-      
+
       setGameComponent(() => Component)
       setLoadState('loaded')
       onGameLoad?.(game.id)
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log(`${game.title} loaded in ${loadTime.toFixed(2)}ms`)
       }
-      
+
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load game'
       setLoadError(errorMessage)
@@ -102,8 +99,7 @@ export function OptimizedGameLoader({
             Loading {game.title}...
             {isLowEndDevice && (
               <span className="ml-2 text-warning-500">
-                <WifiOff className="inline w-4 h-4 mr-1" />
-                Optimizing for your device
+                ⚡ Optimizing for your device
               </span>
             )}
           </div>
@@ -118,7 +114,7 @@ export function OptimizedGameLoader({
   const renderErrorState = () => (
     <Card className="w-full max-w-4xl mx-auto border-danger">
       <CardBody className="p-6 text-center">
-        <AlertCircle className="w-16 h-16 text-danger mx-auto mb-4" />
+        <div className="w-16 h-16 text-danger mx-auto mb-4 flex items-center justify-center text-4xl">⚠️</div>
         <h3 className="text-lg font-semibold mb-2">Failed to Load Game</h3>
         <p className="text-default-500 mb-4">
           {loadError || 'Something went wrong while loading the game.'}
@@ -136,7 +132,7 @@ export function OptimizedGameLoader({
   )
 
   const renderIdleState = () => (
-    <div 
+    <div
       ref={elementRef}
       className="w-full max-w-4xl mx-auto"
       onMouseEnter={handlePreload}
@@ -156,7 +152,7 @@ export function OptimizedGameLoader({
               <p className="text-sm text-default-500">{game.description}</p>
             </div>
           </div>
-          
+
           <div className="flex justify-between items-center">
             <div className="flex space-x-2">
               <span className="text-xs bg-primary-100 text-primary-600 px-2 py-1 rounded">
@@ -166,20 +162,19 @@ export function OptimizedGameLoader({
                 RTP: {game.rtp}%
               </span>
             </div>
-            
-            <Button 
-              color="primary" 
+
+            <Button
+              color="primary"
               size="sm"
               onPress={loadGameComponent}
             >
               Play Now
             </Button>
           </div>
-          
+
           {!shouldLoadHighQuality && (
             <div className="mt-3 text-xs text-warning-600 flex items-center">
-              <WifiOff className="w-3 h-3 mr-1" />
-              Optimized loading for slower connection
+              ⚡ Optimized loading for slower connection
             </div>
           )}
         </CardBody>
@@ -198,9 +193,9 @@ export function OptimizedGameLoader({
             <GameComponent />
             {process.env.NODE_ENV === 'development' && (
               <div className="fixed bottom-4 right-4 bg-black/80 text-white text-xs p-2 rounded">
-                Performance: {metrics.mountTime.toFixed(1)}ms mount, 
+                Performance: {metrics.mountTime.toFixed(1)}ms mount,
                 {metrics.renderCount} renders
-                <button 
+                <button
                   className="ml-2 underline"
                   onClick={logPerformance}
                 >
@@ -218,10 +213,10 @@ export function OptimizedGameLoader({
 /**
  * Game loading skeleton for consistent loading states
  */
-export function GameLoadingSkeleton({ 
-  title, 
-  showOptimization = false 
-}: { 
+export function GameLoadingSkeleton({
+  title,
+  showOptimization = false
+}: {
   title?: string
   showOptimization?: boolean
 }) {
@@ -237,7 +232,7 @@ export function GameLoadingSkeleton({
               <Skeleton className="h-3 w-64" />
             </div>
           </div>
-          
+
           {/* Game area skeleton */}
           <div className="space-y-3">
             <Skeleton className="h-48 w-full rounded-lg" />
@@ -247,15 +242,14 @@ export function GameLoadingSkeleton({
               <Skeleton className="h-10 w-32" />
             </div>
           </div>
-          
+
           {/* Loading message */}
           <div className="flex justify-between items-center pt-4">
             <div className="text-sm text-default-500">
               {title ? `Loading ${title}...` : 'Loading game...'}
               {showOptimization && (
                 <span className="ml-2 text-warning-500">
-                  <Wifi className="inline w-4 h-4 mr-1" />
-                  Optimizing experience
+                  ⚡ Optimizing experience
                 </span>
               )}
             </div>
@@ -295,21 +289,21 @@ export class GameLoadingErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       const FallbackComponent = this.props.fallback
-      if (FallbackComponent) {
+      if (FallbackComponent && this.state.error) {
         return <FallbackComponent error={this.state.error} />
       }
-      
+
       return (
         <Card className="w-full max-w-4xl mx-auto border-danger">
           <CardBody className="p-6 text-center">
-            <AlertCircle className="w-16 h-16 text-danger mx-auto mb-4" />
+            <div className="w-16 h-16 text-danger mx-auto mb-4 flex items-center justify-center text-4xl">⚠️</div>
             <h3 className="text-lg font-semibold mb-2">Game Loading Error</h3>
             <p className="text-default-500 mb-4">
               Something went wrong while loading the game. Please try refreshing the page.
             </p>
-            <Button 
-              color="danger" 
-              variant="flat" 
+            <Button
+              color="danger"
+              variant="flat"
               onPress={() => window.location.reload()}
             >
               Refresh Page
