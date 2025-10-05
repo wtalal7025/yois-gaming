@@ -56,7 +56,8 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
 
   // Handle bet per line change
   const handleBetPerLineChange = (value: number | number[]) => {
-    const newBetPerLine = Array.isArray(value) ? value[0] : value
+    const newBetPerLine = Array.isArray(value) ? (value[0] ?? config.betPerLine) : value
+    // Reason: TypeScript strict mode requires defined values - fallback to current betPerLine if array value is undefined
     onConfigChange({ betPerLine: newBetPerLine })
   }
 
@@ -259,7 +260,7 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
               <span className="text-sm">Turbo Mode</span>
               <Switch
                 size="sm"
-                isSelected={config.turboMode}
+                isSelected={config.turboMode ?? false}
                 onValueChange={handleTurboModeChange}
                 isDisabled={isDisabled}
               />
@@ -268,7 +269,7 @@ export const BarsControls: React.FC<BarsControlsProps> = ({
               <span className="text-sm">Sound Effects</span>
               <Switch
                 size="sm"
-                isSelected={config.soundEnabled}
+                isSelected={config.soundEnabled ?? false}
                 onValueChange={handleSoundChange}
               />
             </div>
