@@ -31,10 +31,10 @@ interface UserProfileProps {
  * - Settings and edit profile buttons
  * - Responsive design with compact mode
  */
-export function UserProfile({ 
-  onEditProfile, 
+export function UserProfile({
+  onEditProfile,
   showEditButton = true,
-  compact = false 
+  compact = false
 }: UserProfileProps) {
   const { user, logout } = useAuthStore()
   const { addToast } = useUIStore()
@@ -79,7 +79,7 @@ export function UserProfile({
   }
 
   // Calculate user level based on experience points (mock calculation)
-  const totalXP = user.stats?.totalWagered || 0
+  const totalXP = user.totalWagered || 0
   const currentLevel = Math.floor(totalXP / 1000) + 1
   const levelProgress = ((totalXP % 1000) / 1000) * 100
 
@@ -91,7 +91,7 @@ export function UserProfile({
         className="flex items-center gap-3"
       >
         <Avatar
-          src={user.avatar}
+          src={user.avatar || user.avatarUrl || ''}
           name={user.username}
           size="sm"
           className="flex-shrink-0"
@@ -116,14 +116,14 @@ export function UserProfile({
           className="w-full"
         >
           <Avatar
-            src={user.avatar}
+            src={user.avatar || user.avatarUrl || ''}
             name={user.username}
             size="lg"
             className="w-20 h-20 mx-auto mb-3"
           />
           <h3 className="text-xl font-semibold">{user.username}</h3>
           <p className="text-sm text-muted-foreground">{user.email}</p>
-          
+
           {/* Account Level */}
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between">
@@ -132,9 +132,9 @@ export function UserProfile({
                 {totalXP.toLocaleString()} XP
               </span>
             </div>
-            <Progress 
-              value={levelProgress} 
-              color="primary" 
+            <Progress
+              value={levelProgress}
+              color="primary"
               size="sm"
               className="w-full"
             />
@@ -166,25 +166,25 @@ export function UserProfile({
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center">
               <p className="text-lg font-semibold text-primary">
-                {user.stats?.gamesPlayed || 0}
+                {user.gamesPlayed || 0}
               </p>
               <p className="text-xs text-muted-foreground">Games Played</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-semibold text-success">
-                {user.stats?.totalWins || 0}
+                {user.totalWins || 0}
               </p>
               <p className="text-xs text-muted-foreground">Total Wins</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-semibold text-primary">
-                ${(user.stats?.totalWagered || 0).toLocaleString()}
+                ${(user.totalWagered || 0).toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Total Wagered</p>
             </div>
             <div className="text-center">
               <p className="text-lg font-semibold text-success">
-                ${(user.stats?.totalWon || 0).toLocaleString()}
+                ${(user.totalWon || 0).toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground">Total Won</p>
             </div>
@@ -204,14 +204,14 @@ export function UserProfile({
               className="w-full"
               startContent={
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                  <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
                 </svg>
               }
             >
               Edit Profile
             </Button>
           )}
-          
+
           <Button
             variant="light"
             color="danger"
@@ -220,7 +220,7 @@ export function UserProfile({
             className="w-full"
             startContent={
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+                <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.59L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
               </svg>
             }
           >

@@ -17,6 +17,7 @@ export interface User {
   experiencePoints: number
   totalWagered: number
   totalWon: number
+  totalWins: number
   gamesPlayed: number
   isActive: boolean
   isVerified: boolean

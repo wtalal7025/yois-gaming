@@ -219,6 +219,7 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       session: null,
       isAuthenticated: false,
+      isInitialized: false,
       isLoading: false,
       error: null,
 
