@@ -7,6 +7,8 @@ export interface User {
   id: string
   username: string
   email: string
+  firstName?: string
+  lastName?: string
   passwordHash?: string // Only populated on backend for authentication
   avatarUrl?: string
   balance: number
