@@ -20,33 +20,32 @@ interface FavoriteButtonProps {
 
 // Heart icon components
 const HeartIcon = ({ filled = false }: { filled?: boolean }) => (
-  <svg 
-    className="w-5 h-5" 
-    fill={filled ? 'currentColor' : 'none'} 
-    stroke="currentColor" 
+  <svg
+    className="w-5 h-5"
+    fill={filled ? 'currentColor' : 'none'}
+    stroke="currentColor"
     viewBox="0 0 24 24"
     strokeWidth={filled ? 0 : 2}
   >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" 
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
     />
   </svg>
 )
 
-export function FavoriteButton({ 
-  gameId, 
-  variant = 'icon', 
-  size = 'md', 
-  className = '' 
+export function FavoriteButton({
+  gameId,
+  variant = 'icon',
+  size = 'md',
+  className = ''
 }: FavoriteButtonProps) {
   const { isFavoriteGame, toggleFavoriteGame } = useFavoriteGames()
   const isFavorite = isFavoriteGame(gameId)
 
-  const handleToggleFavorite = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
+  const handleToggleFavorite = () => {
+    // Reason: HeroUI Button onPress doesn't need event handling - simplified for compatibility
     toggleFavoriteGame(gameId)
   }
 
@@ -69,10 +68,10 @@ export function FavoriteButton({
         aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
       >
         <motion.div
-          animate={{ 
+          animate={{
             scale: isFavorite ? [1, 1.2, 1] : 1,
           }}
-          transition={{ 
+          transition={{
             duration: 0.3,
             times: [0, 0.5, 1]
           }}
