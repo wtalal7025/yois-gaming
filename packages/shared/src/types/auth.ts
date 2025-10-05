@@ -20,6 +20,7 @@ export interface User {
   gamesPlayed: number
   isActive: boolean
   isVerified: boolean
+  isEmailVerified?: boolean // Alias for isVerified for component compatibility
   roles: string[]
   lastLoginAt?: string
   createdAt: string

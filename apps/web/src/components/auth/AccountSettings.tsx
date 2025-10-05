@@ -122,13 +122,13 @@ export function AccountSettings({ onClose }: AccountSettingsProps) {
         currentPassword: data.currentPassword,
         newPassword: data.newPassword
       })
-      
+
       addToast({
         title: 'Password changed',
         message: 'Your password has been changed successfully',
         type: 'success'
       })
-      
+
       resetPassword()
     } catch (error) {
       addToast({
@@ -183,7 +183,7 @@ export function AccountSettings({ onClose }: AccountSettingsProps) {
               {/* Avatar Section */}
               <div className="text-center">
                 <Avatar
-                  src={user.avatar}
+                  src={user.avatar || user.avatarUrl || ''}
                   name={user.username}
                   size="lg"
                   className="w-20 h-20 mx-auto mb-4"
@@ -266,7 +266,7 @@ export function AccountSettings({ onClose }: AccountSettingsProps) {
               {/* Password Change Form */}
               <form onSubmit={handlePasswordSubmit(onPasswordSubmit)} className="space-y-4">
                 <h4 className="font-medium">Change Password</h4>
-                
+
                 <Input
                   {...registerPassword('currentPassword')}
                   label="Current Password"
@@ -344,7 +344,7 @@ export function AccountSettings({ onClose }: AccountSettingsProps) {
             <div className="space-y-6 py-4">
               <div className="space-y-4">
                 <h4 className="font-medium">Notifications</h4>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
@@ -380,7 +380,7 @@ export function AccountSettings({ onClose }: AccountSettingsProps) {
                 <Divider />
 
                 <h4 className="font-medium">Privacy</h4>
-                
+
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
