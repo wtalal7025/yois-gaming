@@ -47,7 +47,7 @@ export function TransactionHistory({
     transactions,
     transactionsPagination,
     fetchTransactions,
-    isLoadingTransactions,
+    isLoading,
     formatCurrency,
     error
   } = useWalletStore()
@@ -63,54 +63,39 @@ export function TransactionHistory({
   // Fetch transactions on mount and when filters change
   useEffect(() => {
     if (user) {
-      fetchTransactions({
-        limit,
-        type: filters.type as TransactionType || undefined,
-        status: filters.status as TransactionStatus || undefined,
-        gameId,
-        startDate: filters.startDate || undefined,
-        endDate: filters.endDate || undefined
-      })
+      fetchTransactions(1) // Simple pagination call
     }
-  }, [user, limit, gameId, filters, fetchTransactions])
+  }, [user, fetchTransactions])
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
   const handlePageChange = (page: number) => {
-    fetchTransactions({
-      page,
-      limit,
-      type: filters.type as TransactionType || undefined,
-      status: filters.status as TransactionStatus || undefined,
-      gameId,
-      startDate: filters.startDate || undefined,
-      endDate: filters.endDate || undefined
-    })
+    fetchTransactions(page)
   }
 
   const getTransactionIcon = (type: TransactionType) => {
     switch (type) {
-      case 'DEPOSIT':
+      case 'deposit':
         return (
           <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
         )
-      case 'WITHDRAW':
+      case 'withdrawal':
         return (
           <svg className="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 24 24">
             <path d="M19 13H5v-2h14v2z" />
           </svg>
         )
-      case 'BET':
+      case 'bet':
         return (
           <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
           </svg>
         )
-      case 'WIN':
+      case 'win':
         return (
           <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 24 24">
             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -127,13 +112,13 @@ export function TransactionHistory({
 
   const getStatusColor = (status: TransactionStatus) => {
     switch (status) {
-      case 'COMPLETED':
+      case 'completed':
         return 'success'
-      case 'PENDING':
+      case 'pending':
         return 'warning'
-      case 'FAILED':
+      case 'failed':
         return 'danger'
-      case 'CANCELLED':
+      case 'cancelled':
         return 'default'
       default:
         return 'default'
@@ -141,7 +126,7 @@ export function TransactionHistory({
   }
 
   const getAmountDisplay = (transaction: any) => {
-    const isPositive = transaction.type === 'DEPOSIT' || transaction.type === 'WIN'
+    const isPositive = transaction.type === 'deposit' || transaction.type === 'win'
     const sign = isPositive ? '+' : '-'
     const colorClass = isPositive ? 'text-success' : 'text-foreground'
 
@@ -179,7 +164,7 @@ export function TransactionHistory({
               <div>
                 <p className="text-sm font-medium capitalize">
                   {transaction.type.toLowerCase()}
-                  {transaction.gameId && ` - ${transaction.gameId}`}
+                  {transaction.gameType && ` - ${transaction.gameType}`}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(transaction.createdAt).toLocaleDateString()}
@@ -234,23 +219,23 @@ export function TransactionHistory({
               value={filters.type}
               onChange={(e) => handleFilterChange('type', e.target.value)}
             >
-              <SelectItem key="" value="">All Types</SelectItem>
-              <SelectItem key="DEPOSIT" value="DEPOSIT">Deposit</SelectItem>
-              <SelectItem key="WITHDRAW" value="WITHDRAW">Withdraw</SelectItem>
-              <SelectItem key="BET" value="BET">Bet</SelectItem>
-              <SelectItem key="WIN" value="WIN">Win</SelectItem>
+              <SelectItem key="">All Types</SelectItem>
+              <SelectItem key="deposit">Deposit</SelectItem>
+              <SelectItem key="withdrawal">Withdraw</SelectItem>
+              <SelectItem key="bet">Bet</SelectItem>
+              <SelectItem key="win">Win</SelectItem>
             </Select>
 
             <Select
               placeholder="Status"
-              value={filters.status}
-              onChange={(e) => handleFilterChange('status', e.target.value)}
+              selectedKeys={filters.status ? [filters.status] : []}
+              onSelectionChange={(keys) => handleFilterChange('status', Array.from(keys)[0] as string || '')}
             >
-              <SelectItem key="" value="">All Status</SelectItem>
-              <SelectItem key="COMPLETED" value="COMPLETED">Completed</SelectItem>
-              <SelectItem key="PENDING" value="PENDING">Pending</SelectItem>
-              <SelectItem key="FAILED" value="FAILED">Failed</SelectItem>
-              <SelectItem key="CANCELLED" value="CANCELLED">Cancelled</SelectItem>
+              <SelectItem key="">All Status</SelectItem>
+              <SelectItem key="completed">Completed</SelectItem>
+              <SelectItem key="pending">Pending</SelectItem>
+              <SelectItem key="failed">Failed</SelectItem>
+              <SelectItem key="cancelled">Cancelled</SelectItem>
             </Select>
 
             <Input
@@ -264,7 +249,7 @@ export function TransactionHistory({
       </CardHeader>
 
       <CardBody className="gap-0">
-        {isLoadingTransactions ? (
+        {isLoading ? (
           <div className="flex justify-center py-8">
             <Spinner size="lg" />
           </div>
@@ -298,9 +283,9 @@ export function TransactionHistory({
                       <p className="font-medium capitalize">
                         {transaction.type.toLowerCase()}
                       </p>
-                      {transaction.gameId && (
+                      {transaction.gameType && (
                         <Chip size="sm" variant="flat" color="primary">
-                          {transaction.gameId}
+                          {transaction.gameType}
                         </Chip>
                       )}
                     </div>

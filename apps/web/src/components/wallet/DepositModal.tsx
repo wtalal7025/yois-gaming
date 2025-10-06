@@ -22,7 +22,7 @@ import {
 } from '@heroui/react'
 import { useWalletStore } from '@/stores/wallet'
 import { useUIStore } from '@/stores/ui'
-import { PaymentMethod } from '@yois-games/shared'
+import { PaymentMethodType, Balance } from '@yois-games/shared'
 
 // Deposit form validation schema
 const depositSchema = z.object({
@@ -55,7 +55,7 @@ interface DepositModalProps {
 export function DepositModal({ isOpen, onClose }: DepositModalProps) {
   const { deposit, isDepositing, balance, formatCurrency } = useWalletStore()
   const { addToast } = useUIStore()
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('CREDIT_CARD')
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>('credit_card')
 
   const {
     register,
@@ -69,7 +69,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
     mode: 'onChange',
     defaultValues: {
       amount: 50,
-      paymentMethod: 'CREDIT_CARD'
+      paymentMethod: 'credit_card'
     }
   })
 
@@ -118,14 +118,11 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
 
   const onSubmit = async (data: DepositFormData) => {
     try {
-      await deposit({
-        amount: data.amount,
-        paymentMethod: data.paymentMethod as PaymentMethod,
-        metadata: {
-          bonusCode: data.bonusCode,
-          clientType: 'web'
-        }
-      })
+      const result = await deposit(data.amount, `Deposit via ${data.paymentMethod}${data.bonusCode ? ' with bonus code: ' + data.bonusCode : ''}`)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Deposit failed')
+      }
 
       addToast({
         title: 'Deposit successful!',
@@ -149,7 +146,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
   }
 
   const handleMethodSelect = (methodId: string) => {
-    setSelectedMethod(methodId as PaymentMethod)
+    setSelectedMethod(methodId as PaymentMethodType)
     setValue('paymentMethod', methodId, { shouldValidate: true })
   }
 
@@ -198,7 +195,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
             </div>
 
             <p className="text-muted-foreground">
-              Current balance: <span className="font-medium">{formatCurrency(balance)}</span>
+              Current balance: <span className="font-medium">{formatCurrency(balance?.current || balance?.amount || 0)}</span>
             </p>
           </motion.div>
         </ModalHeader>
@@ -253,8 +250,8 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
                     isPressable
                     isHoverable
                     className={`cursor-pointer transition-all ${selectedMethod === method.id
-                        ? 'border-2 border-success bg-success/5'
-                        : 'border border-border/50 hover:border-primary/50'
+                      ? 'border-2 border-success bg-success/5'
+                      : 'border border-border/50 hover:border-primary/50'
                       }`}
                     onPress={() => handleMethodSelect(method.id)}
                   >
@@ -352,7 +349,7 @@ export function DepositModal({ isOpen, onClose }: DepositModalProps) {
           </Button>
           <Button
             color="success"
-            onPress={handleSubmit(onSubmit)}
+            onPress={() => handleSubmit(onSubmit)()}
             isLoading={isDepositing}
             isDisabled={!isValid}
             className="flex-1"

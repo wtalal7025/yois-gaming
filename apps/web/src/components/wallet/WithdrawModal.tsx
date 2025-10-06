@@ -22,7 +22,7 @@ import {
 } from '@heroui/react'
 import { useWalletStore } from '@/stores/wallet'
 import { useUIStore } from '@/stores/ui'
-import { PaymentMethod } from '@yois-games/shared'
+import { PaymentMethodType, Balance } from '@yois-games/shared'
 
 // Withdrawal form validation schema
 const withdrawSchema = z.object({
@@ -56,7 +56,7 @@ interface WithdrawModalProps {
 export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   const { withdraw, isWithdrawing, balance, canAfford, formatCurrency } = useWalletStore()
   const { addToast } = useUIStore()
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('BANK_TRANSFER')
+  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodType>('bank_transfer')
 
   const {
     register,
@@ -69,7 +69,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
     resolver: zodResolver(withdrawSchema),
     mode: 'onChange',
     defaultValues: {
-      paymentMethod: 'BANK_TRANSFER'
+      paymentMethod: 'bank_transfer'
     }
   })
 
@@ -78,7 +78,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   // Mock withdrawal methods for demo
   const withdrawalMethods = [
     {
-      id: 'BANK_TRANSFER',
+      id: 'bank_transfer',
       name: 'Bank Transfer',
       description: 'Direct transfer to your bank account',
       icon: '🏦',
@@ -87,7 +87,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
       accountPlaceholder: 'Account number or IBAN'
     },
     {
-      id: 'CRYPTO',
+      id: 'crypto',
       name: 'Cryptocurrency',
       description: 'Bitcoin, Ethereum wallet address',
       icon: '₿',
@@ -96,7 +96,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
       accountPlaceholder: 'Wallet address'
     },
     {
-      id: 'E_WALLET',
+      id: 'e_wallet',
       name: 'E-Wallet',
       description: 'PayPal, Skrill, Neteller account',
       icon: '💰',
@@ -120,14 +120,11 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
     }
 
     try {
-      await withdraw({
-        amount: data.amount,
-        paymentMethod: data.paymentMethod as PaymentMethod,
-        metadata: {
-          accountDetails: data.accountDetails,
-          clientType: 'web'
-        }
-      })
+      const result = await withdraw(data.amount, `Withdrawal to ${data.paymentMethod} - ${data.accountDetails}`)
+
+      if (!result.success) {
+        throw new Error(result.error || 'Withdrawal failed')
+      }
 
       addToast({
         title: 'Withdrawal submitted!',
@@ -147,7 +144,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   }
 
   const handleMethodSelect = (methodId: string) => {
-    setSelectedMethod(methodId as PaymentMethod)
+    setSelectedMethod(methodId as PaymentMethodType)
     setValue('paymentMethod', methodId, { shouldValidate: true })
     setValue('accountDetails', '', { shouldValidate: false })
   }
@@ -159,7 +156,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
 
   // Calculate fees (mock)
   const calculateFees = (amount: number) => {
-    if (selectedMethod === 'E_WALLET') {
+    if (selectedMethod === 'e_wallet') {
       return Math.max(amount * 0.025, 2) // 2.5% with min $2
     }
     return 0
@@ -208,7 +205,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             </div>
 
             <p className="text-muted-foreground">
-              Available balance: <span className="font-medium text-success">{formatCurrency(balance)}</span>
+              Available balance: <span className="font-medium text-success">{formatCurrency(balance?.current || balance?.amount || 0)}</span>
             </p>
           </motion.div>
         </ModalHeader>
@@ -226,8 +223,8 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                     isPressable
                     isHoverable
                     className={`cursor-pointer transition-all ${selectedMethod === method.id
-                        ? 'border-2 border-warning bg-warning/5'
-                        : 'border border-border/50 hover:border-primary/50'
+                      ? 'border-2 border-warning bg-warning/5'
+                      : 'border border-border/50 hover:border-primary/50'
                       }`}
                     onPress={() => handleMethodSelect(method.id)}
                   >
@@ -372,7 +369,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
           </Button>
           <Button
             color="warning"
-            onPress={handleSubmit(onSubmit)}
+            onPress={() => handleSubmit(onSubmit)()}
             isLoading={isWithdrawing}
             isDisabled={!isValid || !canAfford(watchAmount || 0)}
             className="flex-1"
