@@ -53,6 +53,10 @@ export function WalletDashboard({
   const { isLoading, isDepositing, isWithdrawing } = useWalletLoading()
   const { addToast } = useUIStore()
 
+  // Compute derived balance values
+  const pendingBalance = balance?.pending || 0
+  const currentBalance = balance?.current || balance?.amount || 0
+
   const [activeTab, setActiveTab] = useState('overview')
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
@@ -92,13 +96,13 @@ export function WalletDashboard({
   // Calculate statistics from recent transactions
   const recentTransactions = transactions.slice(0, 10)
   const totalDeposited = recentTransactions
-    .filter(t => t.type === 'DEPOSIT' && t.status === 'COMPLETED')
+    .filter(t => t.type === 'deposit' && t.status === 'completed')
     .reduce((sum, t) => sum + t.amount, 0)
   const totalWagered = recentTransactions
-    .filter(t => t.type === 'BET')
+    .filter(t => t.type === 'bet')
     .reduce((sum, t) => sum + t.amount, 0)
   const totalWon = recentTransactions
-    .filter(t => t.type === 'WIN')
+    .filter(t => t.type === 'win')
     .reduce((sum, t) => sum + t.amount, 0)
 
   if (compact) {
@@ -295,13 +299,13 @@ export function WalletDashboard({
                     {recentTransactions.slice(0, 3).map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${transaction.type === 'DEPOSIT' ? 'bg-success' :
+                          <div className={`w-2 h-2 rounded-full ${transaction.type === 'deposit' ? 'bg-success' :
                             transaction.type === 'win' ? 'bg-success' : 'bg-primary'
                             }`} />
                           <div>
                             <p className="text-sm font-medium capitalize">
                               {transaction.type.toLowerCase()}
-                              {transaction.gameId && ` - ${transaction.gameId}`}
+                              {transaction.gameType && ` - ${transaction.gameType}`}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {new Date(transaction.createdAt).toLocaleDateString()}
