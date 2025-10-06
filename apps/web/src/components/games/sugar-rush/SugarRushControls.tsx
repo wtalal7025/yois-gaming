@@ -129,7 +129,7 @@ export function SugarRushControls({
             minValue={minBet}
             maxValue={Math.min(balance, maxBet)}
             value={betAmount}
-            onChange={(value) => onBetChange(Array.isArray(value) ? value[0] : value)}
+            onChange={(value) => onBetChange(Array.isArray(value) ? (value[0] ?? 0) : value)}
             isDisabled={isGameActive}
             className="w-full"
           />
