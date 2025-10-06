@@ -11,19 +11,19 @@ const nextConfig = {
       }
     }
   },
-  
+
   // Transpile packages from the monorepo
   transpilePackages: [
-    '@stake-games/frontend',
-    '@stake-games/shared',
-    '@stake-games/game-engine'
+    '@yois-games/frontend',
+    '@yois-games/shared',
+    '@yois-games/game-engine'
   ],
-  
+
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  
+
   // Images configuration
   images: {
     remotePatterns: [
@@ -41,12 +41,12 @@ const nextConfig = {
       },
     ],
   },
-  
+
   // TypeScript configuration
   typescript: {
     ignoreBuildErrors: false,
   },
-  
+
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: false,
