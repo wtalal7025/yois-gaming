@@ -370,9 +370,9 @@ export function LimboControls({
                   disabled={isAutoBetting}
                   size="sm"
                 >
-                  <SelectItem key="continue" value="continue">Continue</SelectItem>
-                  <SelectItem key="reset-base" value="reset-base">Reset to Base</SelectItem>
-                  <SelectItem key="increase" value="increase">Increase</SelectItem>
+                  <SelectItem key="continue">Continue</SelectItem>
+                  <SelectItem key="reset-base">Reset to Base</SelectItem>
+                  <SelectItem key="increase">Increase</SelectItem>
                 </Select>
 
                 <Select
@@ -385,9 +385,9 @@ export function LimboControls({
                   disabled={isAutoBetting}
                   size="sm"
                 >
-                  <SelectItem key="continue" value="continue">Continue</SelectItem>
-                  <SelectItem key="reset-base" value="reset-base">Reset to Base</SelectItem>
-                  <SelectItem key="increase" value="increase">Increase</SelectItem>
+                  <SelectItem key="continue">Continue</SelectItem>
+                  <SelectItem key="reset-base">Reset to Base</SelectItem>
+                  <SelectItem key="increase">Increase</SelectItem>
                 </Select>
               </div>
 
