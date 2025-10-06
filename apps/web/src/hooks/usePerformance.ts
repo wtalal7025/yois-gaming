@@ -61,6 +61,7 @@ export function usePerformance() {
     // Measure when DOM is ready
     if (document.readyState === 'complete') {
       measureLoadTime()
+      return undefined // Explicit return to match TypeScript strict mode requirements
     } else {
       window.addEventListener('load', measureLoadTime)
       return () => window.removeEventListener('load', measureLoadTime)
