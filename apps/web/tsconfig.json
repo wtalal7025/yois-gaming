@@ -3,8 +3,11 @@
   "compilerOptions": {
     "jsx": "preserve",
     "baseUrl": ".",
+    "tsBuildInfoFile": "./.next/.tsbuildinfo",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "plugins": [
       {

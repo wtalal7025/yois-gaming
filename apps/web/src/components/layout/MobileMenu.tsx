@@ -59,6 +59,13 @@ interface MobileMenuProps {
 export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
   const { user, logout } = useAuthStore()
   const { openModal } = useUIStore()
+  const { balance, isLoading: walletLoading } = useWalletStore()
+
+  // Format currency utility function
+  const formatCurrency = (balance: any): string => {
+    if (!balance || typeof balance.current !== 'number') return '$0.00'
+    return `$${balance.current.toFixed(2)}`
+  }
 
   // Main navigation items
   const navigationItems = [
