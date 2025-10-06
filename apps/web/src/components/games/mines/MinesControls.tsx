@@ -199,7 +199,7 @@ export function MinesControls({
           </button>
         )}
 
-        {gameState && gameState.canCashOut && gameStatus === 'playing' && (
+        {gameState && gameState.canCashOut && (gameStatus === 'playing' || gameStatus === 'loading') && (
           <button
             onClick={onCashOut}
             disabled={gameStatus === 'loading'}
