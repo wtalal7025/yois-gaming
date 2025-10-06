@@ -41,7 +41,7 @@ export function SugarRushStats({ gameHistory, currentBalance, currentGame }: Sug
   let tempStreak = 0
 
   for (let i = gameHistory.length - 1; i >= 0; i--) {
-    if (gameHistory[i].status === 'win') {
+    if (gameHistory[i]?.status === 'win') {
       tempStreak++
       if (i === gameHistory.length - 1) currentWinStreak = tempStreak
     } else {
