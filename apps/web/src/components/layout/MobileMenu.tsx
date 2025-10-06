@@ -168,7 +168,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   <CardBody className="p-4">
                     <div className="flex items-center space-x-3 mb-3">
                       <Avatar
-                        src={user.avatar || undefined}
+                        {...(user.avatar && { src: user.avatar })}
                         name={user.username}
                         size="sm"
                         className="shadow-md"
