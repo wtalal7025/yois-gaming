@@ -114,7 +114,7 @@ export function MultiplierInput({
    * Handle slider value change
    */
   const handleSliderChange = useCallback((sliderValue: number | number[]) => {
-    const newValue = Array.isArray(sliderValue) ? sliderValue[0] : sliderValue
+    const newValue = Array.isArray(sliderValue) ? (sliderValue[0] ?? 0) : sliderValue
     const rounded = Math.round(newValue * Math.pow(10, config.multiplierPrecision)) /
       Math.pow(10, config.multiplierPrecision)
 
@@ -242,7 +242,7 @@ export function MultiplierInput({
             maxValue={sliderMax}
             value={Math.min(value, sliderMax)}
             onChange={handleSliderChange}
-            disabled={disabled}
+            isDisabled={disabled}
             className="max-w-full"
             showSteps
             showTooltip
