@@ -9,14 +9,14 @@ import { Breadcrumbs, BreadcrumbItem } from '@heroui/react'
 // Home icon for the root breadcrumb
 const HomeIcon = () => (
   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
   </svg>
 )
 
 // Game icons for game-specific breadcrumbs
 const gameIcons: Record<string, string> = {
   'sugar-rush': '🍭',
-  'mines': '💣', 
+  'mines': '💣',
   'bars': '🎰',
   'dragon-tower': '🐉',
   'crash': '🚀',
@@ -26,7 +26,7 @@ const gameIcons: Record<string, string> = {
 // Route name mappings for better display names
 const routeNameMap: Record<string, string> = {
   'games': 'Games',
-  'leaderboards': 'Leaderboards', 
+  'leaderboards': 'Leaderboards',
   'profile': 'Profile',
   'wallet': 'Wallet',
   'settings': 'Settings',
@@ -51,7 +51,7 @@ interface BreadcrumbProps {
 
 export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps) {
   const pathname = usePathname()
-  
+
   // Don't show breadcrumbs on the home page
   if (pathname === '/') {
     return null
@@ -59,10 +59,10 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
 
   // Split path into segments and filter empty ones
   const pathSegments = pathname.split('/').filter(Boolean)
-  
+
   // Create breadcrumb items
   const breadcrumbItems = []
-  
+
   // Add home if requested
   if (showHome) {
     breadcrumbItems.push({
@@ -79,7 +79,7 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
     const isLast = index === pathSegments.length - 1
     const displayName = routeNameMap[segment] || segment.charAt(0).toUpperCase() + segment.slice(1)
     const gameIcon = gameIcons[segment]
-    
+
     breadcrumbItems.push({
       label: displayName,
       href,
@@ -94,13 +94,13 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
   }
 
   return (
-    <motion.div 
+    <motion.div
       className={`mb-6 ${className}`}
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Breadcrumbs 
+      <Breadcrumbs
         variant="solid"
         className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-lg px-4 py-2"
         itemClasses={{
@@ -110,7 +110,7 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
       >
         {breadcrumbItems.map((item, index) => {
           const Icon = item.icon
-          
+
           return (
             <BreadcrumbItem
               key={item.href}
@@ -121,20 +121,20 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
                 // Current page (not clickable)
                 <div className="flex items-center space-x-2">
                   {Icon && <Icon />}
-                  {item.gameIcon && (
-                    <span className="text-sm">{item.gameIcon}</span>
+                  {(item as any).gameIcon && (
+                    <span className="text-sm">{(item as any).gameIcon}</span>
                   )}
                   <span className="font-medium">{item.label}</span>
                 </div>
               ) : (
                 // Clickable breadcrumb
-                <Link 
+                <Link
                   href={item.href}
                   className="flex items-center space-x-2 hover:text-primary transition-colors"
                 >
                   {Icon && <Icon />}
-                  {item.gameIcon && (
-                    <span className="text-sm">{item.gameIcon}</span>
+                  {(item as any).gameIcon && (
+                    <span className="text-sm">{(item as any).gameIcon}</span>
                   )}
                   <span>{item.label}</span>
                 </Link>
@@ -148,9 +148,9 @@ export function Breadcrumb({ className = '', showHome = true }: BreadcrumbProps)
 }
 
 // Breadcrumb wrapper component for page layouts
-export function PageBreadcrumb({ 
+export function PageBreadcrumb({
   className,
-  showHome = true 
+  showHome = true
 }: BreadcrumbProps) {
   return (
     <div className={`container mx-auto px-6 ${className || ''}`}>
