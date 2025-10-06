@@ -22,7 +22,7 @@ import {
 } from '@heroui/react'
 import { useWalletStore } from '@/stores/wallet'
 import { useUIStore } from '@/stores/ui'
-import { PaymentMethod } from 'shared/types/wallet'
+import { PaymentMethod } from '@yois-games/shared'
 
 // Withdrawal form validation schema
 const withdrawSchema = z.object({
@@ -169,8 +169,8 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
   const netAmount = (watchAmount || 0) - fees
 
   return (
-    <Modal 
-      isOpen={isOpen} 
+    <Modal
+      isOpen={isOpen}
       onClose={handleClose}
       placement="center"
       size="xl"
@@ -189,24 +189,24 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             <div className="flex items-center justify-center mb-2">
               <div className="w-12 h-12 bg-gradient-to-br from-warning to-orange-500 rounded-xl flex items-center justify-center shadow-glow mr-3">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 13H5v-2h14v2z"/>
+                  <path d="M19 13H5v-2h14v2z" />
                 </svg>
               </div>
               <h2 className="text-2xl font-bold gradient-text">Withdraw Funds</h2>
             </div>
-            
+
             {/* Demo Warning */}
             <div className="bg-warning/10 border border-warning/20 rounded-lg p-3 mb-4">
               <div className="flex items-center gap-2">
                 <svg className="w-5 h-5 text-warning" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                  <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
                 </svg>
                 <p className="text-sm text-warning font-medium">
                   Demo Mode: No real money is processed
                 </p>
               </div>
             </div>
-            
+
             <p className="text-muted-foreground">
               Available balance: <span className="font-medium text-success">{formatCurrency(balance)}</span>
             </p>
@@ -218,18 +218,17 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             {/* Withdrawal Method Selection */}
             <div className="space-y-4">
               <h3 className="font-semibold">Withdrawal Method</h3>
-              
+
               <div className="grid grid-cols-1 gap-3">
                 {withdrawalMethods.map((method) => (
                   <Card
                     key={method.id}
                     isPressable
                     isHoverable
-                    className={`cursor-pointer transition-all ${
-                      selectedMethod === method.id 
-                        ? 'border-2 border-warning bg-warning/5' 
+                    className={`cursor-pointer transition-all ${selectedMethod === method.id
+                        ? 'border-2 border-warning bg-warning/5'
                         : 'border border-border/50 hover:border-primary/50'
-                    }`}
+                      }`}
                     onPress={() => handleMethodSelect(method.id)}
                   >
                     <CardBody className="p-4">
@@ -250,7 +249,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                         {selectedMethod === method.id && (
                           <div className="w-5 h-5 bg-warning rounded-full flex items-center justify-center ml-3">
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                              <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
                             </svg>
                           </div>
                         )}
@@ -266,7 +265,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             {/* Amount Input */}
             <div className="space-y-4">
               <h3 className="font-semibold">Withdrawal Amount</h3>
-              
+
               <Input
                 {...register('amount', { valueAsNumber: true })}
                 label="Amount to withdraw"
@@ -286,7 +285,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                 <div className="bg-danger/10 border border-danger/20 rounded-lg p-3">
                   <div className="flex items-center gap-2">
                     <svg className="w-5 h-5 text-danger" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                      <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" />
                     </svg>
                     <p className="text-sm text-danger font-medium">
                       Insufficient balance for this withdrawal
@@ -300,7 +299,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
             {selectedWithdrawalMethod && (
               <div className="space-y-4">
                 <h3 className="font-semibold">Account Details</h3>
-                
+
                 <Input
                   {...register('accountDetails')}
                   label={`${selectedWithdrawalMethod.name} Details`}
@@ -312,7 +311,7 @@ export function WithdrawModal({ isOpen, onClose }: WithdrawModalProps) {
                     <span className="text-2xl">{selectedWithdrawalMethod.icon}</span>
                   }
                 />
-                
+
                 <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
                   <p className="font-medium mb-1">Important:</p>
                   <ul className="space-y-1">
