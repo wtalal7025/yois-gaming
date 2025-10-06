@@ -36,24 +36,23 @@ interface WalletDashboardProps {
  * - Responsive design with compact mode
  * - Real-time balance updates
  */
-export function WalletDashboard({ 
+export function WalletDashboard({
   compact = false,
   showTransactions = true
 }: WalletDashboardProps) {
   const { user } = useAuthStore()
-  const { 
-    balance, 
-    pendingBalance,
+  const {
+    balance,
     transactions,
-    fetchBalance, 
+    fetchBalance,
     fetchTransactions,
     error,
-    clearError 
+    clearError
   } = useWalletStore()
   const formattedBalance = useFormattedBalance()
   const { isLoading, isDepositing, isWithdrawing } = useWalletLoading()
   const { addToast } = useUIStore()
-  
+
   const [activeTab, setActiveTab] = useState('overview')
   const [showDepositModal, setShowDepositModal] = useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false)
@@ -63,7 +62,7 @@ export function WalletDashboard({
     if (user) {
       fetchBalance()
       if (showTransactions) {
-        fetchTransactions({ limit: 5 }) // Recent transactions only
+        fetchTransactions(1) // Recent transactions only
       }
     }
   }, [user, fetchBalance, fetchTransactions, showTransactions])
@@ -112,7 +111,7 @@ export function WalletDashboard({
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-success/20 rounded-lg flex items-center justify-center">
             <svg className="w-4 h-4 text-success" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
             </svg>
           </div>
           <div>
@@ -120,12 +119,12 @@ export function WalletDashboard({
             <p className="text-xs text-muted-foreground">Available</p>
           </div>
         </div>
-        
+
         {pendingBalance > 0 && (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-warning/20 rounded-lg flex items-center justify-center">
               <svg className="w-4 h-4 text-warning" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
             </div>
             <div>
@@ -134,7 +133,7 @@ export function WalletDashboard({
             </div>
           </div>
         )}
-        
+
         <div className="flex gap-2 ml-auto">
           <Button
             size="sm"
@@ -150,14 +149,14 @@ export function WalletDashboard({
             variant="flat"
             onPress={() => setShowWithdrawModal(true)}
             isLoading={isWithdrawing}
-            isDisabled={balance <= 0}
+            isDisabled={currentBalance <= 0}
           >
             Withdraw
           </Button>
         </div>
-        
+
         {/* Modals */}
-        <DepositModal 
+        <DepositModal
           isOpen={showDepositModal}
           onClose={() => setShowDepositModal(false)}
         />
@@ -196,7 +195,7 @@ export function WalletDashboard({
                 {formattedBalance}
               </motion.div>
               <p className="text-muted-foreground mt-2">Available Balance</p>
-              
+
               {pendingBalance > 0 && (
                 <div className="mt-3">
                   <Chip size="sm" color="warning" variant="flat">
@@ -216,22 +215,22 @@ export function WalletDashboard({
                 isLoading={isDepositing}
                 startContent={
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                   </svg>
                 }
               >
                 Add Funds
               </Button>
-              
+
               <Button
                 size="lg"
                 variant="flat"
                 onPress={() => setShowWithdrawModal(true)}
                 isLoading={isWithdrawing}
-                isDisabled={balance <= 0}
+                isDisabled={currentBalance <= 0}
                 startContent={
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 13H5v-2h14v2z"/>
+                    <path d="M19 13H5v-2h14v2z" />
                   </svg>
                 }
               >
@@ -277,7 +276,7 @@ export function WalletDashboard({
             <Card>
               <CardBody className="space-y-4">
                 <h3 className="text-lg font-semibold">Account Overview</h3>
-                
+
                 {/* Account Level Progress */}
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
@@ -296,10 +295,9 @@ export function WalletDashboard({
                     {recentTransactions.slice(0, 3).map((transaction) => (
                       <div key={transaction.id} className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            transaction.type === 'DEPOSIT' ? 'bg-success' :
-                            transaction.type === 'WIN' ? 'bg-success' : 'bg-primary'
-                          }`} />
+                          <div className={`w-2 h-2 rounded-full ${transaction.type === 'DEPOSIT' ? 'bg-success' :
+                            transaction.type === 'win' ? 'bg-success' : 'bg-primary'
+                            }`} />
                           <div>
                             <p className="text-sm font-medium capitalize">
                               {transaction.type.toLowerCase()}
@@ -310,11 +308,10 @@ export function WalletDashboard({
                             </p>
                           </div>
                         </div>
-                        <p className={`font-medium ${
-                          transaction.type === 'DEPOSIT' || transaction.type === 'WIN'
-                            ? 'text-success' : 'text-foreground'
-                        }`}>
-                          {transaction.type === 'DEPOSIT' || transaction.type === 'WIN' ? '+' : '-'}
+                        <p className={`font-medium ${transaction.type === 'deposit' || transaction.type === 'win'
+                          ? 'text-success' : 'text-foreground'
+                          }`}>
+                          {transaction.type === 'deposit' || transaction.type === 'win' ? '+' : '-'}
                           ${transaction.amount.toFixed(2)}
                         </p>
                       </div>
@@ -332,7 +329,7 @@ export function WalletDashboard({
       )}
 
       {/* Modals */}
-      <DepositModal 
+      <DepositModal
         isOpen={showDepositModal}
         onClose={() => setShowDepositModal(false)}
       />
