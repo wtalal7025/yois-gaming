@@ -96,6 +96,7 @@ export function useHover(): boolean {
       mediaQuery.addListener(handleChange)
       return () => mediaQuery.removeListener(handleChange)
     }
+    return undefined
   }, [])
 
   return supportsHover
